@@ -97,3 +97,16 @@ export async function getAllBusinesses() {
   `;
   return rows;
 }
+
+export async function getAllLeadsWithBusiness() {
+  const rows = await sql`
+    SELECT 
+      l.*,
+      b.name as business_name,
+      b.twilio_from_number
+    FROM leads l
+    JOIN businesses b ON l.business_id = b.id
+    ORDER BY l.created_at DESC
+  `;
+  return rows;
+}

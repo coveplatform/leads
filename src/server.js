@@ -22,6 +22,7 @@ import {
   updateLead,
   createBusiness,
   getAllBusinesses,
+  getAllLeadsWithBusiness,
 } from "./db.js";
 import { normalizePhone } from "./phone.js";
 import { sendSms } from "./sms.js";
@@ -205,6 +206,20 @@ app.get("/api/admin/businesses", async (req, res) => {
     });
   } catch (error) {
     console.error("/api/admin/businesses GET error", error);
+    return res.status(500).json({ ok: false, error: "Internal server error" });
+  }
+});
+
+app.get("/api/admin/leads", async (req, res) => {
+  try {
+    const leads = await getAllLeadsWithBusiness();
+    return res.json({
+      ok: true,
+      leads,
+      count: leads.length,
+    });
+  } catch (error) {
+    console.error("/api/admin/leads GET error", error);
     return res.status(500).json({ ok: false, error: "Internal server error" });
   }
 });
