@@ -1,11 +1,21 @@
 const form = document.getElementById("inquiry-form");
 const statusEl = document.getElementById("form-status");
+const demoForm = document.getElementById("demo-form");
+const demoStatusEl = document.getElementById("demo-status");
 
 function setStatus(message, type = "") {
   statusEl.textContent = message;
   statusEl.classList.remove("is-success", "is-error");
   if (type) {
     statusEl.classList.add(type === "success" ? "is-success" : "is-error");
+  }
+}
+
+function setDemoStatus(message, type = "") {
+  demoStatusEl.textContent = message;
+  demoStatusEl.classList.remove("success", "error");
+  if (type) {
+    demoStatusEl.classList.add(type);
   }
 }
 
@@ -55,6 +65,49 @@ if (form) {
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = "Send enquiry";
+    }
+  });
+}
+
+if (demoForm) {
+  demoForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const submitBtn = document.getElementById("demo-btn");
+    const btnText = document.getElementById("demo-btn-text");
+    const phoneInput = document.getElementById("demo-phone");
+    const phone = phoneInput.value.trim();
+
+    if (!phone) {
+      setDemoStatus("Please enter your phone number.", "error");
+      return;
+    }
+
+    try {
+      submitBtn.disabled = true;
+      btnText.textContent = "Sending...";
+      setDemoStatus("Sending demo SMS...");
+
+      const response = await fetch("/api/demo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phone }),
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result?.error || "Could not send demo");
+      }
+
+      phoneInput.value = "";
+      setDemoStatus("✓ SMS sent! Check your phone and reply to the questions.", "success");
+    } catch (error) {
+      setDemoStatus(error.message || "Something went wrong. Please try again.", "error");
+    } finally {
+      submitBtn.disabled = false;
+      btnText.textContent = "Send me the demo";
     }
   });
 }

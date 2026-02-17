@@ -293,6 +293,123 @@ h3 { font-size: 1.125rem; font-weight: 700; }
 
 .stat__label { display: block; font-size: .88rem; color: var(--gray-500); margin-top: .25rem; }
 
+/* ─── LIVE DEMO ─── */
+
+.demo {
+  padding: 5rem 0;
+  background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.demo__inner {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.demo__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  background: linear-gradient(135deg, rgba(99,102,241,.1), rgba(6,182,212,.1));
+  border: 1px solid rgba(99,102,241,.2);
+  border-radius: var(--radius-full);
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--indigo);
+  margin-bottom: 1.5rem;
+}
+
+.demo__badge svg {
+  color: var(--indigo);
+}
+
+.demo h2 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 1rem;
+}
+
+.demo__subtitle {
+  font-size: 1.125rem;
+  color: var(--gray-600);
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+}
+
+.demo__form {
+  margin-bottom: 1.5rem;
+}
+
+.demo__input-group {
+  display: flex;
+  gap: .75rem;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.demo__input-group input {
+  flex: 1;
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  transition: all .2s;
+  font-family: inherit;
+}
+
+.demo__input-group input:focus {
+  outline: none;
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+}
+
+.demo__input-group button {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  white-space: nowrap;
+  padding: 1rem 1.75rem;
+}
+
+.demo__input-group button svg {
+  transition: transform .2s;
+}
+
+.demo__input-group button:hover svg {
+  transform: translateX(2px);
+}
+
+.demo__status {
+  margin-top: 1rem;
+  font-size: .95rem;
+  min-height: 1.5rem;
+}
+
+.demo__status.success {
+  color: var(--emerald);
+  font-weight: 500;
+}
+
+.demo__status.error {
+  color: var(--red);
+}
+
+.demo__note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  font-size: .85rem;
+  color: var(--gray-500);
+}
+
+.demo__note svg {
+  flex-shrink: 0;
+}
+
 /* ─── HOW IT WORKS ─── */
 
 .how { padding: 5rem 0; }
@@ -512,4 +629,6 @@ h3 { font-size: 1.125rem; font-weight: 700; }
   .stats__grid { grid-template-columns: 1fr; }
   .hero__ctas { flex-direction: column; }
   .hero__ctas .btn { width: 100%; }
+  .demo__input-group { flex-direction: column; }
+  .demo__input-group button { width: 100%; justify-content: center; }
 }

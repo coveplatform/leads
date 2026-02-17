@@ -193,6 +193,42 @@ app.get("/api/admin/businesses", async (req, res) => {
   }
 });
 
+app.post("/api/demo", async (req, res) => {
+  try {
+    const { phone } = req.body || {};
+
+    if (!phone) {
+      return res.status(400).json({ ok: false, error: "Phone number is required" });
+    }
+
+    const normalizedPhone = normalizePhone(phone, config.defaultCountryCode);
+    if (!normalizedPhone) {
+      return res.status(400).json({ ok: false, error: "Invalid phone format. Use +61... format." });
+    }
+
+    if (!config.twilio.accountSid || !config.twilio.authToken) {
+      return res.status(500).json({ ok: false, error: "SMS service not configured" });
+    }
+
+    const demoMessage = `Hi! This is a ChairFlow demo. You'll experience the exact SMS flow your leads would receive.\n\n${FLOW_STEPS[0].question}`;
+
+    await sendSms({
+      from: process.env.DEMO_TWILIO_NUMBER || config.twilio.accountSid,
+      to: normalizedPhone,
+      body: demoMessage,
+    });
+
+    return res.json({
+      ok: true,
+      message: "Demo SMS sent successfully",
+      phone: normalizedPhone,
+    });
+  } catch (error) {
+    console.error("/api/demo error", error);
+    return res.status(500).json({ ok: false, error: "Could not send demo SMS" });
+  }
+});
+
 app.post("/api/sms/inbound", async (req, res) => {
   try {
     const fromRaw = String(req.body?.From || "");
