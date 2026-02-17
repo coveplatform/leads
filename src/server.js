@@ -235,6 +235,27 @@ app.post("/api/demo", async (req, res) => {
       return res.status(500).json({ ok: false, error: "SMS service not configured" });
     }
 
+    const normalizedDemoNumber = normalizePhone(demoFromNumber, config.defaultCountryCode);
+    let demoBusiness = await getBusinessByTwilioNumber(normalizedDemoNumber);
+    
+    if (!demoBusiness) {
+      demoBusiness = await createBusiness({
+        name: "ChairFlow Demo",
+        twilioFromNumber: normalizedDemoNumber,
+        ownerNotifyPhone: normalizedDemoNumber,
+        ownerNotifyEmail: null,
+        bookingLink: null,
+      });
+    }
+
+    const lead = await createLead({
+      businessId: demoBusiness.id,
+      name: "Demo User",
+      phone: normalizedPhone,
+      email: null,
+      message: "Demo request from website",
+    });
+
     const demoMessage = `Hi! This is a ChairFlow demo. You'll experience the exact SMS flow your leads would receive.\n\n${FLOW_STEPS[0].question}`;
 
     await sendSms({
@@ -247,6 +268,7 @@ app.post("/api/demo", async (req, res) => {
       ok: true,
       message: "Demo SMS sent successfully",
       phone: normalizedPhone,
+      leadId: lead.id,
     });
   } catch (error) {
     console.error("/api/demo error", error);
