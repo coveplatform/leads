@@ -127,6 +127,22 @@ app.post("/api/website-inquiry", async (req, res) => {
   }
 });
 
+app.post("/api/admin/auth", async (req, res) => {
+  try {
+    const { password } = req.body || {};
+    const adminPassword = process.env.ADMIN_PASSWORD || "chairflow2024";
+
+    if (password === adminPassword) {
+      return res.json({ ok: true, message: "Authenticated" });
+    } else {
+      return res.status(401).json({ ok: false, error: "Invalid password" });
+    }
+  } catch (error) {
+    console.error("/api/admin/auth error", error);
+    return res.status(500).json({ ok: false, error: "Authentication error" });
+  }
+});
+
 app.post("/api/admin/businesses", async (req, res) => {
   try {
     const {

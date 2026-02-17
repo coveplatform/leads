@@ -37,10 +37,27 @@
       .tab { padding: 0.75rem 1rem; cursor: pointer; font-weight: 500; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; }
       .tab.active { color: #6366f1; border-bottom-color: #6366f1; }
       .hidden { display: none; }
+      
+      .auth-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+      .auth-modal { background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 400px; width: 90%; }
+      .auth-modal h2 { margin-bottom: 0.5rem; font-size: 1.5rem; }
+      .auth-modal p { color: #6b7280; margin-bottom: 1.5rem; font-size: 0.95rem; }
+      .auth-modal input { margin-bottom: 1rem; }
+      .auth-error { color: #ef4444; font-size: 0.875rem; margin-top: -0.5rem; margin-bottom: 1rem; }
     </style>
   </head>
   <body>
-    <div class="container">
+    <div id="auth-overlay" class="auth-overlay">
+      <div class="auth-modal">
+        <h2>🔒 Admin Access</h2>
+        <p>Enter the admin password to continue</p>
+        <input type="password" id="admin-password" placeholder="Password" autocomplete="current-password" />
+        <p id="auth-error" class="auth-error hidden"></p>
+        <button class="btn btn-primary" style="width: 100%;" onclick="checkPassword()">Unlock Dashboard</button>
+      </div>
+    </div>
+    
+    <div id="admin-content" class="container hidden">
       <h1>🔧 ChairFlow Admin</h1>
       <p class="subtitle">Manage customer businesses and view integration code</p>
 
@@ -224,6 +241,53 @@ document.getElementById('contact-form').addEventListener('submit', async (e) => 
         navigator.clipboard.writeText(text).then(() => {
           alert('Copied to clipboard!');
         });
+      }
+
+      async function checkPassword() {
+        const passwordInput = document.getElementById('admin-password');
+        const errorEl = document.getElementById('auth-error');
+        const password = passwordInput.value;
+
+        if (!password) {
+          errorEl.textContent = 'Please enter a password';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/admin/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.ok) {
+            sessionStorage.setItem('admin_authenticated', 'true');
+            document.getElementById('auth-overlay').classList.add('hidden');
+            document.getElementById('admin-content').classList.remove('hidden');
+          } else {
+            errorEl.textContent = 'Incorrect password';
+            errorEl.classList.remove('hidden');
+            passwordInput.value = '';
+            passwordInput.focus();
+          }
+        } catch (error) {
+          errorEl.textContent = 'Authentication error. Please try again.';
+          errorEl.classList.remove('hidden');
+        }
+      }
+
+      document.getElementById('admin-password').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          checkPassword();
+        }
+      });
+
+      if (sessionStorage.getItem('admin_authenticated') === 'true') {
+        document.getElementById('auth-overlay').classList.add('hidden');
+        document.getElementById('admin-content').classList.remove('hidden');
       }
     </script>
   </body>
