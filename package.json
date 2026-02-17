@@ -1,0 +1,20 @@
+{
+  "name": "quote-accelerator-mvp",
+  "version": "1.0.0",
+  "description": "Lead-to-SMS quote accelerator MVP for small businesses",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "twilio": "^5.10.4"
+  }
+}
