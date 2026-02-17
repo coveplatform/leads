@@ -24,15 +24,17 @@ import {
 import { normalizePhone } from "./phone.js";
 import { sendSms } from "./sms.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const publicDir = path.join(__dirname, "..", "public");
-
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(publicDir));
+
+if (!process.env.VERCEL) {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const publicDir = path.join(__dirname, "..", "public");
+  app.use(express.static(publicDir));
+}
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "quote-accelerator-mvp", timestamp: new Date().toISOString() });
@@ -280,12 +282,16 @@ app.post("/api/sms/inbound", async (req, res) => {
   }
 });
 
-app.use((req, res, next) => {
-  if (req.path.startsWith("/api/")) {
-    return next();
-  }
-  return res.sendFile(path.join(publicDir, "index.html"));
-});
+if (!process.env.VERCEL) {
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/api/")) {
+      return next();
+    }
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    return res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+  });
+}
 
 app.use((_req, res) => {
   res.status(404).json({ ok: false, error: "Not found" });
