@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChairFlow Admin - Manage Customers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: 'Inter', sans-serif; background: #f9fafb; color: #111827; line-height: 1.6; }
+      .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+      h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+      .subtitle { color: #6b7280; margin-bottom: 2rem; }
+      .card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+      .form-group { margin-bottom: 1.5rem; }
+      label { display: block; font-weight: 500; margin-bottom: 0.5rem; color: #374151; }
+      input, textarea { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; font-family: inherit; }
+      input:focus, textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+      .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+      .btn-primary { background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%); color: white; }
+      .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
+      .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+      .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+      .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+      .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+      .business-list { margin-top: 2rem; }
+      .business-item { background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e5e7eb; }
+      .business-item h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+      .business-item p { color: #6b7280; font-size: 0.875rem; margin-bottom: 0.25rem; }
+      .business-item .id { font-family: monospace; background: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; display: inline-block; margin-top: 0.5rem; }
+      .copy-btn { background: #6366f1; color: white; border: none; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-left: 0.5rem; }
+      .copy-btn:hover { background: #4f46e5; }
+      .code-block { background: #1f2937; color: #f9fafb; padding: 1rem; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 0.875rem; margin-top: 1rem; }
+      .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #e5e7eb; }
+      .tab { padding: 0.75rem 1rem; cursor: pointer; font-weight: 500; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+      .tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+      .hidden { display: none; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 ChairFlow Admin</h1>
+      <p class="subtitle">Manage customer businesses and view integration code</p>
+
+      <div class="tabs">
+        <div class="tab active" onclick="showTab('add')">Add Customer</div>
+        <div class="tab" onclick="showTab('list')">View Customers</div>
+      </div>
+
+      <!-- Add Customer Tab -->
+      <div id="tab-add" class="tab-content">
+        <div class="card">
+          <h2 style="margin-bottom: 1rem;">Add New Customer</h2>
+          <div id="alert-container"></div>
+          
+          <form id="add-business-form">
+            <div class="form-group">
+              <label for="name">Business Name *</label>
+              <input type="text" id="name" name="name" required placeholder="ABC Plumbing" />
+            </div>
+
+            <div class="form-group">
+              <label for="twilio_from_number">Twilio Phone Number *</label>
+              <input type="tel" id="twilio_from_number" name="twilio_from_number" required placeholder="+61400123456" />
+              <small style="color: #6b7280;">Must be in E.164 format (e.g., +61...)</small>
+            </div>
+
+            <div class="form-group">
+              <label for="owner_notify_phone">Owner's Phone (for SMS summaries) *</label>
+              <input type="tel" id="owner_notify_phone" name="owner_notify_phone" required placeholder="+61411222333" />
+            </div>
+
+            <div class="form-group">
+              <label for="owner_notify_email">Owner's Email (optional)</label>
+              <input type="email" id="owner_notify_email" name="owner_notify_email" placeholder="owner@abcplumbing.com" />
+            </div>
+
+            <div class="form-group">
+              <label for="booking_link">Booking Link (optional)</label>
+              <input type="url" id="booking_link" name="booking_link" placeholder="https://abcplumbing.com.au/book" />
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="submit-btn">Add Customer</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- View Customers Tab -->
+      <div id="tab-list" class="tab-content hidden">
+        <div class="card">
+          <h2 style="margin-bottom: 1rem;">Active Customers</h2>
+          <button onclick="loadBusinesses()" class="btn btn-primary" style="margin-bottom: 1rem;">Refresh List</button>
+          <div id="business-list" class="business-list">
+            <p style="color: #6b7280;">Click "Refresh List" to load customers...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        
+        event.target.classList.add('active');
+        document.getElementById(`tab-${tab}`).classList.remove('hidden');
+        
+        if (tab === 'list') {
+          loadBusinesses();
+        }
+      }
+
+      function showAlert(message, type = 'success') {
+        const container = document.getElementById('alert-container');
+        container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        setTimeout(() => container.innerHTML = '', 5000);
+      }
+
+      document.getElementById('add-business-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Adding...';
+        
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        
+        try {
+          const response = await fetch('/api/admin/businesses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          
+          const result = await response.json();
+          
+          if (response.ok) {
+            showAlert(`✅ Customer added! Business ID: ${result.business.id}`, 'success');
+            e.target.reset();
+            
+            // Show integration code
+            const integrationCode = generateIntegrationCode(result.business);
+            showAlert(`
+              <strong>Integration Code for ${result.business.name}:</strong>
+              <div class="code-block">${integrationCode}</div>
+              <button class="copy-btn" onclick="copyToClipboard(\`${integrationCode.replace(/`/g, '\\`')}\`)">Copy Code</button>
+            `, 'success');
+          } else {
+            showAlert(`❌ Error: ${result.error}`, 'error');
+          }
+        } catch (error) {
+          showAlert(`❌ Error: ${error.message}`, 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Add Customer';
+        }
+      });
+
+      async function loadBusinesses() {
+        const listDiv = document.getElementById('business-list');
+        listDiv.innerHTML = '<p style="color: #6b7280;">Loading...</p>';
+        
+        try {
+          const response = await fetch('/api/admin/businesses');
+          const result = await response.json();
+          
+          if (response.ok && result.businesses.length > 0) {
+            listDiv.innerHTML = result.businesses.map(b => `
+              <div class="business-item">
+                <h3>${b.name}</h3>
+                <p><strong>Twilio Number:</strong> ${b.twilio_from_number}</p>
+                <p><strong>Owner Phone:</strong> ${b.owner_notify_phone || 'Not set'}</p>
+                <p><strong>Booking Link:</strong> ${b.booking_link || 'Not set'}</p>
+                <p><strong>Created:</strong> ${new Date(b.created_at).toLocaleDateString()}</p>
+                <div class="id">
+                  <strong>ID:</strong> ${b.id}
+                  <button class="copy-btn" onclick="copyToClipboard('${b.id}')">Copy ID</button>
+                  <button class="copy-btn" onclick="showIntegrationCode('${b.id}', '${b.name.replace(/'/g, "\\'")}')">Show Integration Code</button>
+                </div>
+              </div>
+            `).join('');
+          } else {
+            listDiv.innerHTML = '<p style="color: #6b7280;">No customers found.</p>';
+          }
+        } catch (error) {
+          listDiv.innerHTML = `<p style="color: #ef4444;">Error loading customers: ${error.message}</p>`;
+        }
+      }
+
+      function generateIntegrationCode(business) {
+        return `<!-- Add this to ${business.name}'s website form -->
+<script>
+document.getElementById('contact-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  
+  await fetch('${window.location.origin}/api/lead', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      businessId: '${business.id}',
+      name: formData.get('name'),
+      phone: formData.get('phone'),
+      email: formData.get('email'),
+      message: formData.get('message')
+    })
+  });
+  
+  alert('Thanks! We will text you shortly.');
+});
+<\/script>`;
+      }
+
+      function showIntegrationCode(id, name) {
+        const code = generateIntegrationCode({ id, name });
+        alert('Integration code copied to clipboard!');
+        copyToClipboard(code);
+      }
+
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+          alert('Copied to clipboard!');
+        });
+      }
+    </script>
+  </body>
+</html>

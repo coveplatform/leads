@@ -73,3 +73,27 @@ export async function updateLead(leadId, fields) {
   `;
   return rows[0];
 }
+
+export async function createBusiness({
+  name,
+  twilioFromNumber,
+  ownerNotifyPhone,
+  ownerNotifyEmail,
+  bookingLink,
+}) {
+  const rows = await sql`
+    INSERT INTO businesses (name, twilio_from_number, owner_notify_phone, owner_notify_email, booking_link, is_active)
+    VALUES (${name}, ${twilioFromNumber}, ${ownerNotifyPhone || null}, ${ownerNotifyEmail || null}, ${bookingLink || null}, true)
+    RETURNING *
+  `;
+  return rows[0];
+}
+
+export async function getAllBusinesses() {
+  const rows = await sql`
+    SELECT * FROM businesses
+    WHERE is_active = true
+    ORDER BY created_at DESC
+  `;
+  return rows;
+}

@@ -20,6 +20,8 @@ import {
   getBusinessByTwilioNumber,
   getLatestActiveLeadByBusinessAndPhone,
   updateLead,
+  createBusiness,
+  getAllBusinesses,
 } from "./db.js";
 import { normalizePhone } from "./phone.js";
 import { sendSms } from "./sms.js";
@@ -121,6 +123,72 @@ app.post("/api/website-inquiry", async (req, res) => {
     });
   } catch (error) {
     console.error("/api/website-inquiry error", error);
+    return res.status(500).json({ ok: false, error: "Internal server error" });
+  }
+});
+
+app.post("/api/admin/businesses", async (req, res) => {
+  try {
+    const {
+      name,
+      twilio_from_number,
+      owner_notify_phone,
+      owner_notify_email,
+      booking_link,
+    } = req.body || {};
+
+    if (!name || !twilio_from_number || !owner_notify_phone) {
+      return res.status(400).json({
+        ok: false,
+        error: "name, twilio_from_number, and owner_notify_phone are required",
+      });
+    }
+
+    const normalizedTwilio = normalizePhone(twilio_from_number, config.defaultCountryCode);
+    const normalizedOwner = normalizePhone(owner_notify_phone, config.defaultCountryCode);
+
+    if (!normalizedTwilio || !normalizedOwner) {
+      return res.status(400).json({
+        ok: false,
+        error: "Invalid phone number format. Use E.164 format (e.g., +61...)",
+      });
+    }
+
+    const business = await createBusiness({
+      name,
+      twilioFromNumber: normalizedTwilio,
+      ownerNotifyPhone: normalizedOwner,
+      ownerNotifyEmail: owner_notify_email || null,
+      bookingLink: booking_link || null,
+    });
+
+    return res.status(201).json({
+      ok: true,
+      business,
+      message: "Business created successfully",
+    });
+  } catch (error) {
+    console.error("/api/admin/businesses POST error", error);
+    if (error.message?.includes("unique")) {
+      return res.status(409).json({
+        ok: false,
+        error: "This Twilio number is already in use",
+      });
+    }
+    return res.status(500).json({ ok: false, error: "Internal server error" });
+  }
+});
+
+app.get("/api/admin/businesses", async (req, res) => {
+  try {
+    const businesses = await getAllBusinesses();
+    return res.json({
+      ok: true,
+      businesses,
+      count: businesses.length,
+    });
+  } catch (error) {
+    console.error("/api/admin/businesses GET error", error);
     return res.status(500).json({ ok: false, error: "Internal server error" });
   }
 });
