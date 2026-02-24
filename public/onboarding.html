@@ -835,64 +835,65 @@
     }
 
     let _loadNumberAttempts = 0;
+    let _provisionAttempted = false;
+
+    function fillNumber(num) {
+      const numText = document.getElementById('cf-number-text');
+      if (numText) numText.textContent = num;
+      const localNum = num.startsWith('+61') ? '0' + num.slice(3) : num;
+      const intlNum  = num.startsWith('+')   ? '0011' + num.slice(1) : num;
+      const codes = {
+        'code-1': `**61*${num}*11*20#`,
+        'code-2': `**61*${num}#`,
+        'code-3': `*21*${num}#`,
+        'code-4': `**61*${intlNum}*11*20#`,
+      };
+      for (const [id, code] of Object.entries(codes)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = code;
+        const link = document.getElementById(id + '-link');
+        if (link) link.href = `tel:${encodeURIComponent(code)}`;
+      }
+      const cn = document.getElementById('carrier-number');
+      if (cn) cn.textContent = num;
+      const ln = document.getElementById('carrier-number-local');
+      if (ln) ln.textContent = localNum;
+      const ios = document.getElementById('ios-code');
+      const and = document.getElementById('android-number');
+      if (ios) ios.textContent = `**61*${num}#`;
+      if (and) and.textContent = num;
+    }
+
     async function loadNumber() {
       _loadNumberAttempts++;
       const numText = document.getElementById('cf-number-text');
       try {
         const data = await fetch('/api/auth/me').then(r => r.json());
         const num = data.business?.twilio_from_number;
-        if (num) {
-          numText.textContent = num;
-          // Convert +61XXXXXXXXX → 0XXXXXXXXX for carriers that don't accept +
-          const localNum = num.startsWith('+61') ? '0' + num.slice(3) : num;
-          // Strip leading + for 0011 format: +61412345678 → 001161412345678
-          const intlNum = num.startsWith('+') ? '0011' + num.slice(1) : num;
-          const codes = {
-            'code-1': `**61*${num}*11*20#`,
-            'code-2': `**61*${num}#`,
-            'code-3': `*21*${num}#`,
-            'code-4': `**61*${intlNum}*11*20#`,
-          };
-          for (const [id, code] of Object.entries(codes)) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = code;
-            const link = document.getElementById(id + '-link');
-            if (link) link.href = `tel:${encodeURIComponent(code)}`;
-          }
-          const cn = document.getElementById('carrier-number');
-          if (cn) cn.textContent = num;
-          const ln = document.getElementById('carrier-number-local');
-          if (ln) ln.textContent = localNum;
-          const ios = document.getElementById('ios-code');
-          const and = document.getElementById('android-number');
-          if (ios) ios.textContent = `**61*${num}#`;
-          if (and) and.textContent = num;
-          return; // done
-        }
+        if (num) { fillNumber(num); return; }
       } catch(e) { /* network error, retry */ }
 
-      // Still waiting — show progress and retry
-      if (_loadNumberAttempts < 20) {
-        if (numText) numText.textContent = `Setting up your number… (${_loadNumberAttempts * 3}s)`;
+      // After 3 polls (~9s) with no number, auto-trigger provision once
+      if (!_provisionAttempted && _loadNumberAttempts >= 3) {
+        _provisionAttempted = true;
+        if (numText) numText.textContent = 'Provisioning your number…';
+        try {
+          const r = await fetch('/api/auth/provision-number', { method: 'POST' }).then(r => r.json());
+          if (r.ok && r.number) { fillNumber(r.number); return; }
+        } catch(e) { /* fall through to retry loop */ }
+      }
+
+      if (_loadNumberAttempts < 15) {
+        const secs = _loadNumberAttempts * 3;
+        if (numText) numText.textContent = `Setting up your number… (${secs}s)`;
         setTimeout(loadNumber, 3000);
       } else {
-        // Took too long — offer manual provision
-        if (numText) numText.innerHTML = `Taking longer than expected — <a href="#" id="retry-provision" style="color:#2563EB">retry</a>`;
-        const retryLink = document.getElementById('retry-provision');
-        if (retryLink) retryLink.addEventListener('click', async (e) => {
+        if (numText) numText.innerHTML = `Could not provision automatically — <a href="#" id="retry-provision" style="color:#2563EB;font-weight:600">try again</a> or <a href="mailto:hello@coveplatform.com" style="color:#2563EB">contact support</a>.`;
+        document.getElementById('retry-provision')?.addEventListener('click', async (e) => {
           e.preventDefault();
-          if (numText) numText.textContent = 'Requesting number…';
-          try {
-            const r = await fetch('/api/auth/provision-number', { method: 'POST' }).then(r => r.json());
-            if (r.ok && r.number) {
-              _loadNumberAttempts = 0;
-              loadNumber();
-            } else {
-              if (numText) numText.textContent = r.error || 'Could not provision — contact support.';
-            }
-          } catch(e) {
-            if (numText) numText.textContent = 'Network error — please refresh.';
-          }
+          _loadNumberAttempts = 0; _provisionAttempted = false;
+          if (numText) numText.textContent = 'Retrying…';
+          loadNumber();
         });
       }
     }

@@ -466,14 +466,16 @@ app.post("/api/billing/checkout", requireAuth, async (req, res) => {
     // Dev mode: if Stripe not configured, auto-activate and provision number
     if (!isStripeConfigured()) {
       const business = await getBusinessByUserId(req.userId);
+      let hasNumber = business?.twilio_from_number;
       if (business) {
         await updateBusiness(business.id, { isActive: true });
-        if (!business.twilio_from_number) {
-          await provisionTwilioNumber(business.id);
+        if (!hasNumber) {
+          hasNumber = await provisionTwilioNumber(business.id);
         }
       }
       await updateUser(req.userId, { onboardingComplete: true, subscriptionStatus: "active" });
-      return res.json({ ok: true, url: `${config.baseUrl}/onboarding?step=complete` });
+      const dest = hasNumber ? `${config.baseUrl.trim()}/onboarding?step=complete` : `${config.baseUrl.trim()}/dashboard`;
+      return res.json({ ok: true, url: dest });
     }
 
     const user = await getUserById(req.userId);
