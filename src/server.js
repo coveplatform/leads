@@ -614,9 +614,10 @@ async function provisionTwilioNumber(businessId) {
 
   try {
     const client = twilio(config.twilio.accountSid, config.twilio.authToken);
-    const baseUrl = (config.baseUrl.startsWith("http://localhost") || config.baseUrl.startsWith("http://127"))
-      ? (process.env.PRODUCTION_URL || "https://leads-rho-six.vercel.app")
-      : config.baseUrl;
+    const rawBase = (config.baseUrl || "").trim();
+    const baseUrl = (rawBase.startsWith("http://localhost") || rawBase.startsWith("http://127"))
+      ? (process.env.PRODUCTION_URL || "https://leads-rho-six.vercel.app").trim()
+      : rawBase;
     const webhookUrl = `${baseUrl}/api/sms/inbound`;
 
     const addressSid = process.env.TWILIO_ADDRESS_SID || null;
