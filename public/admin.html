@@ -1,294 +1,904 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ChairFlow Admin - Manage Customers</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: 'Inter', sans-serif; background: #f9fafb; color: #111827; line-height: 1.6; }
-      .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-      h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
-      .subtitle { color: #6b7280; margin-bottom: 2rem; }
-      .card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem; }
-      .form-group { margin-bottom: 1.5rem; }
-      label { display: block; font-weight: 500; margin-bottom: 0.5rem; color: #374151; }
-      input, textarea { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; font-family: inherit; }
-      input:focus, textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
-      .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-      .btn-primary { background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%); color: white; }
-      .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
-      .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-      .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
-      .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
-      .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-      .business-list { margin-top: 2rem; }
-      .business-item { background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e5e7eb; }
-      .business-item h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
-      .business-item p { color: #6b7280; font-size: 0.875rem; margin-bottom: 0.25rem; }
-      .business-item .id { font-family: monospace; background: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; display: inline-block; margin-top: 0.5rem; }
-      .copy-btn { background: #6366f1; color: white; border: none; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-left: 0.5rem; }
-      .copy-btn:hover { background: #4f46e5; }
-      .code-block { background: #1f2937; color: #f9fafb; padding: 1rem; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 0.875rem; margin-top: 1rem; }
-      .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #e5e7eb; }
-      .tab { padding: 0.75rem 1rem; cursor: pointer; font-weight: 500; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-      .tab.active { color: #6366f1; border-bottom-color: #6366f1; }
-      .hidden { display: none; }
-      
-      .auth-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-      .auth-modal { background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 400px; width: 90%; }
-      .auth-modal h2 { margin-bottom: 0.5rem; font-size: 1.5rem; }
-      .auth-modal p { color: #6b7280; margin-bottom: 1.5rem; font-size: 0.95rem; }
-      .auth-modal input { margin-bottom: 1rem; }
-      .auth-error { color: #ef4444; font-size: 0.875rem; margin-top: -0.5rem; margin-bottom: 1rem; }
-    </style>
-  </head>
-  <body>
-    <div id="auth-overlay" class="auth-overlay">
-      <div class="auth-modal">
-        <h2>🔒 Admin Access</h2>
-        <p>Enter the admin password to continue</p>
-        <input type="password" id="admin-password" placeholder="Password" autocomplete="current-password" />
-        <p id="auth-error" class="auth-error hidden"></p>
-        <button class="btn btn-primary" style="width: 100%;" onclick="checkPassword()">Unlock Dashboard</button>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cove Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0f; color: #e5e7eb; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+    /* ─── Scrollbar ─── */
+    * { scrollbar-width: thin; scrollbar-color: #3f3f46 #0f0f13; }
+    *::-webkit-scrollbar { width: 8px; }
+    *::-webkit-scrollbar-track { background: #0f0f13; }
+    *::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+
+    /* ─── Layout ─── */
+    .topbar { background: #111116; border-bottom: 1px solid #1e1e24; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 40; }
+    .topbar__left { display: flex; align-items: center; gap: 1.5rem; }
+    .topbar__logo { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: #fff; font-weight: 700; font-size: 1.05rem; }
+    .topbar__logo svg { flex-shrink: 0; }
+    .topbar__right { display: flex; align-items: center; gap: .75rem; }
+
+    .main { max-width: 1280px; margin: 0 auto; padding: 2rem 2rem 4rem; }
+
+    /* ─── Tabs ─── */
+    .tabs { display: flex; gap: .25rem; background: #111116; border-radius: 10px; padding: 4px; border: 1px solid #1e1e24; margin-bottom: 2rem; width: fit-content; }
+    .tab { padding: .55rem 1.25rem; border-radius: 8px; cursor: pointer; font-size: .875rem; font-weight: 500; color: #71717a; border: none; background: none; font-family: inherit; transition: all .15s; display: flex; align-items: center; gap: .5rem; }
+    .tab:hover { color: #a1a1aa; }
+    .tab.active { background: #1e1e2e; color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+    .tab__count { background: #27272a; color: #a1a1aa; font-size: .7rem; font-weight: 600; padding: .1rem .5rem; border-radius: 10px; }
+    .tab.active .tab__count { background: rgba(99,102,241,.2); color: #818cf8; }
+    .hidden { display: none !important; }
+
+    /* ─── Stats ─── */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: #111116; border: 1px solid #1e1e24; border-radius: 12px; padding: 1.25rem 1.5rem; }
+    .stat-card__label { font-size: .75rem; font-weight: 500; color: #71717a; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .5rem; }
+    .stat-card__value { font-size: 1.75rem; font-weight: 800; letter-spacing: -.02em; background: linear-gradient(135deg, #6366f1, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-card__sub { font-size: .8rem; color: #52525b; margin-top: .25rem; }
+
+    /* ─── Buttons ─── */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .6rem 1.25rem; border-radius: 8px; font-family: inherit; font-size: .875rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all .15s; text-decoration: none; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn--primary { background: linear-gradient(135deg, #6366f1, #06b6d4); color: #fff; border: none; box-shadow: 0 2px 8px rgba(99,102,241,.3); }
+    .btn--primary:hover { box-shadow: 0 4px 16px rgba(99,102,241,.4); }
+    .btn--primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn--ghost { background: #1e1e24; color: #a1a1aa; border: 1px solid #27272a; }
+    .btn--ghost:hover { background: #27272a; color: #e5e7eb; }
+    .btn--sm { padding: .4rem .85rem; font-size: .8rem; }
+    .btn--danger { background: rgba(239,68,68,.1); color: #ef4444; border-color: rgba(239,68,68,.2); }
+    .btn--danger:hover { background: rgba(239,68,68,.2); }
+
+    /* ─── Cards ─── */
+    .card { background: #111116; border: 1px solid #1e1e24; border-radius: 14px; padding: 2rem; }
+    .card__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; }
+    .card__title { font-size: 1.1rem; font-weight: 700; color: #fff; }
+    .card__subtitle { font-size: .875rem; color: #71717a; margin-top: .25rem; }
+
+    /* ─── Form ─── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .form-grid--full { grid-column: 1 / -1; }
+    .field { display: flex; flex-direction: column; gap: .4rem; }
+    .field__label { font-size: .8rem; font-weight: 600; color: #a1a1aa; text-transform: uppercase; letter-spacing: .05em; }
+    .field__hint { font-size: .75rem; color: #52525b; margin-top: .15rem; }
+    .field input, .field select, .field textarea { width: 100%; padding: .7rem .85rem; background: #0a0a0f; border: 1px solid #27272a; border-radius: 8px; color: #e5e7eb; font-size: .9rem; font-family: inherit; transition: border-color .15s; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+    .field input::placeholder, .field textarea::placeholder { color: #3f3f46; }
+    .field select { cursor: pointer; }
+    .field textarea { resize: vertical; min-height: 80px; }
+
+    /* ─── Business Cards ─── */
+    .biz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1rem; }
+    .biz-card { background: #111116; border: 1px solid #1e1e24; border-radius: 14px; padding: 1.5rem; transition: all .2s; position: relative; overflow: hidden; }
+    .biz-card:hover { border-color: #3f3f46; }
+    .biz-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #6366f1, #06b6d4); opacity: 0; transition: opacity .2s; }
+    .biz-card:hover::before { opacity: 1; }
+    .biz-card__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+    .biz-card__name { font-size: 1.05rem; font-weight: 700; color: #fff; }
+    .biz-card__industry { display: inline-flex; align-items: center; gap: .35rem; font-size: .75rem; font-weight: 500; color: #818cf8; background: rgba(99,102,241,.1); padding: .2rem .65rem; border-radius: 20px; margin-top: .35rem; }
+    .biz-card__status { width: 8px; height: 8px; border-radius: 50%; background: #10b981; flex-shrink: 0; box-shadow: 0 0 6px rgba(16,185,129,.4); }
+    .biz-card__details { display: grid; gap: .5rem; margin-bottom: 1.25rem; }
+    .biz-card__row { display: flex; align-items: center; gap: .5rem; font-size: .825rem; color: #a1a1aa; }
+    .biz-card__row svg { flex-shrink: 0; color: #52525b; }
+    .biz-card__row span { color: #71717a; min-width: 70px; }
+    .biz-card__actions { display: flex; gap: .5rem; flex-wrap: wrap; padding-top: 1rem; border-top: 1px solid #1e1e24; }
+
+    /* ─── Leads Table ─── */
+    .leads-table { width: 100%; border-collapse: collapse; }
+    .leads-table th { text-align: left; font-size: .7rem; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: .08em; padding: .75rem 1rem; border-bottom: 1px solid #1e1e24; }
+    .leads-table td { padding: .85rem 1rem; border-bottom: 1px solid #1e1e24; font-size: .875rem; vertical-align: middle; }
+    .leads-table tr:hover td { background: rgba(99,102,241,.03); }
+    .leads-table__name { font-weight: 600; color: #fff; }
+    .leads-table__phone { color: #a1a1aa; font-family: 'SF Mono', monospace; font-size: .8rem; }
+    .leads-table__biz { color: #818cf8; font-size: .8rem; }
+    .badge-status { display: inline-flex; align-items: center; gap: .3rem; font-size: .7rem; font-weight: 600; padding: .2rem .6rem; border-radius: 20px; }
+    .badge-status--completed { background: rgba(16,185,129,.1); color: #10b981; }
+    .badge-status--in_progress { background: rgba(245,158,11,.1); color: #f59e0b; }
+    .badge-status--new { background: rgba(99,102,241,.1); color: #818cf8; }
+    .badge-status--stopped { background: rgba(239,68,68,.1); color: #ef4444; }
+    .leads-empty { text-align: center; padding: 3rem; color: #52525b; }
+    .leads-empty svg { margin-bottom: 1rem; opacity: .3; }
+
+    /* ─── Toast ─── */
+    .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: .5rem; }
+    .toast { padding: .85rem 1.25rem; border-radius: 10px; font-size: .875rem; font-weight: 500; display: flex; align-items: center; gap: .6rem; animation: slideIn .3s ease; min-width: 300px; box-shadow: 0 8px 30px rgba(0,0,0,.4); }
+    .toast--success { background: #111116; border: 1px solid rgba(16,185,129,.3); color: #10b981; }
+    .toast--error { background: #111116; border: 1px solid rgba(239,68,68,.3); color: #ef4444; }
+    .toast--info { background: #111116; border: 1px solid rgba(99,102,241,.3); color: #818cf8; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+
+    /* ─── Modal ─── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #111116; border: 1px solid #1e1e24; border-radius: 16px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 2rem; position: relative; }
+    .modal__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
+    .modal__title { font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .modal__subtitle { font-size: .85rem; color: #71717a; margin-top: .25rem; }
+    .modal__close { background: none; border: none; color: #52525b; cursor: pointer; padding: .25rem; border-radius: 6px; }
+    .modal__close:hover { color: #e5e7eb; background: #27272a; }
+    .modal__section { margin-bottom: 1.75rem; }
+    .modal__section-title { font-size: .8rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 1rem; padding-bottom: .5rem; border-bottom: 1px solid #1e1e24; display: flex; align-items: center; gap: .5rem; }
+    .modal__section-desc { font-size: .825rem; color: #52525b; margin-bottom: 1rem; line-height: 1.5; }
+    .modal__code { background: #0a0a0f; border: 1px solid #1e1e24; border-radius: 8px; padding: .75rem 1rem; font-size: .78rem; font-family: 'SF Mono', monospace; word-break: break-all; color: #a1a1aa; }
+    .modal__actions { display: flex; gap: .75rem; margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid #1e1e24; }
+
+    .check-row { display: flex; align-items: center; gap: .5rem; cursor: pointer; font-size: .875rem; color: #e5e7eb; }
+    .check-row input[type="checkbox"] { accent-color: #6366f1; width: 16px; height: 16px; cursor: pointer; }
+
+    /* ─── Notification Channels ─── */
+    .notif-channels { display: flex; flex-direction: column; gap: .65rem; }
+    .notif-ch { background: #0a0a0f; border: 1px solid #1e1e24; border-radius: 10px; padding: .85rem; transition: border-color .15s; }
+    .notif-ch.on { border-color: #3f3f46; }
+    .notif-ch__head { display: flex; align-items: center; justify-content: space-between; }
+    .notif-ch.on .notif-ch__head { margin-bottom: .65rem; }
+    .notif-ch__info { display: flex; align-items: center; gap: .5rem; }
+    .notif-ch__icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: .85rem; }
+    .notif-ch__icon--sms { background: rgba(99,102,241,.15); }
+    .notif-ch__icon--email { background: rgba(16,185,129,.15); }
+    .notif-ch__icon--webhook { background: rgba(245,158,11,.15); }
+    .notif-ch__name { font-size: .825rem; font-weight: 600; color: #e5e7eb; }
+    .notif-ch__desc { font-size: .65rem; color: #52525b; }
+    .notif-ch__body { display: none; }
+    .notif-ch.on .notif-ch__body { display: block; }
+    .ntoggle { width: 36px; height: 20px; border-radius: 99px; background: #27272a; border: none; cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0; }
+    .ntoggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #52525b; transition: all .2s; }
+    .ntoggle.on { background: #6366f1; }
+    .ntoggle.on::after { left: 18px; background: #fff; }
+    .notif-entry { display: flex; align-items: center; gap: .4rem; margin-bottom: .4rem; }
+    .notif-entry input { flex: 1; }
+    .notif-entry__rm { background: none; border: none; color: #52525b; cursor: pointer; font-size: .95rem; padding: 0 .2rem; }
+    .notif-entry__rm:hover { color: #ef4444; }
+    .notif-add { background: none; border: 1px dashed #27272a; color: #52525b; padding: .3rem .5rem; border-radius: 5px; font-size: .7rem; cursor: pointer; width: 100%; font-family: inherit; }
+    .notif-add:hover { border-color: #6366f1; color: #71717a; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .biz-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .topbar { padding: 0 1rem; }
+      .main { padding: 1.25rem 1rem 3rem; }
+      .stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Topbar ─── -->
+  <div class="topbar">
+    <div class="topbar__left">
+      <a href="/" class="topbar__logo">
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="url(#lg2)"/><path d="M18 8a7 7 0 1 0 0 12" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="18.5" cy="14" r="1.6" fill="#fff" opacity=".9"/><defs><linearGradient id="lg2" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs></svg>
+        Cove
+      </a>
+    </div>
+    <div class="topbar__right">
+      <a href="/flow-builder.html" class="btn btn--primary btn--sm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit SMS Questions
+      </a>
+      <a href="/" class="btn btn--ghost btn--sm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Site
+      </a>
+    </div>
+  </div>
+
+  <!-- ─── Main Content ─── -->
+  <div class="main">
+    <!-- Stats Row -->
+    <div class="stats" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-card__label">Businesses</div>
+        <div class="stat-card__value" id="stat-businesses">—</div>
+        <div class="stat-card__sub">Active right now</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__label">Leads Received</div>
+        <div class="stat-card__value" id="stat-leads">—</div>
+        <div class="stat-card__sub">People who enquired</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__label">Fully Qualified</div>
+        <div class="stat-card__value" id="stat-completed">—</div>
+        <div class="stat-card__sub">Answered all questions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__label">Success Rate</div>
+        <div class="stat-card__value" id="stat-conversion">—</div>
+        <div class="stat-card__sub">Leads fully qualified</div>
       </div>
     </div>
-    
-    <div id="admin-content" class="container hidden">
-      <h1>🔧 ChairFlow Admin</h1>
-      <p class="subtitle">Manage customer businesses and view integration code</p>
 
-      <div class="tabs">
-        <div class="tab active" onclick="showTab('add')">Add Customer</div>
-        <div class="tab" onclick="showTab('list')">View Customers</div>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('businesses', this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        My Businesses
+        <span class="tab__count" id="tab-count-biz">0</span>
+      </button>
+      <button class="tab" onclick="showTab('leads', this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Leads
+        <span class="tab__count" id="tab-count-leads">0</span>
+      </button>
+      <button class="tab" onclick="showTab('add', this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        + New Business
+      </button>
+    </div>
+
+    <!-- ─── Businesses Tab ─── -->
+    <div id="tab-businesses" class="tab-content">
+      <div id="business-list" class="biz-grid">
+        <div class="leads-empty"><p>Loading businesses...</p></div>
       </div>
+    </div>
 
-      <!-- Add Customer Tab -->
-      <div id="tab-add" class="tab-content">
-        <div class="card">
-          <h2 style="margin-bottom: 1rem;">Add New Customer</h2>
-          <div id="alert-container"></div>
-          
-          <form id="add-business-form">
-            <div class="form-group">
-              <label for="name">Business Name *</label>
-              <input type="text" id="name" name="name" required placeholder="ABC Plumbing" />
-            </div>
-
-            <div class="form-group">
-              <label for="twilio_from_number">Twilio Phone Number *</label>
-              <input type="tel" id="twilio_from_number" name="twilio_from_number" required placeholder="+61400123456" />
-              <small style="color: #6b7280;">Must be in E.164 format (e.g., +61...)</small>
-            </div>
-
-            <div class="form-group">
-              <label for="owner_notify_phone">Owner's Phone (for SMS summaries) *</label>
-              <input type="tel" id="owner_notify_phone" name="owner_notify_phone" required placeholder="+61411222333" />
-            </div>
-
-            <div class="form-group">
-              <label for="owner_notify_email">Owner's Email (optional)</label>
-              <input type="email" id="owner_notify_email" name="owner_notify_email" placeholder="owner@abcplumbing.com" />
-            </div>
-
-            <div class="form-group">
-              <label for="booking_link">Booking Link (optional)</label>
-              <input type="url" id="booking_link" name="booking_link" placeholder="https://abcplumbing.com.au/book" />
-            </div>
-
-            <button type="submit" class="btn btn-primary" id="submit-btn">Add Customer</button>
-          </form>
+    <!-- ─── Leads Tab ─── -->
+    <div id="tab-leads" class="tab-content hidden">
+      <div class="card">
+        <div class="card__header">
+          <div>
+            <div class="card__title">Your Leads</div>
+            <div class="card__subtitle">Everyone who's been through your SMS qualification</div>
+          </div>
+          <button class="btn btn--ghost btn--sm" onclick="loadLeads()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
         </div>
-      </div>
-
-      <!-- View Customers Tab -->
-      <div id="tab-list" class="tab-content hidden">
-        <div class="card">
-          <h2 style="margin-bottom: 1rem;">Active Customers</h2>
-          <button onclick="loadBusinesses()" class="btn btn-primary" style="margin-bottom: 1rem;">Refresh List</button>
-          <div id="business-list" class="business-list">
-            <p style="color: #6b7280;">Click "Refresh List" to load customers...</p>
+        <div id="leads-container">
+          <div class="leads-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <p>Loading leads...</p>
           </div>
         </div>
       </div>
     </div>
 
-    <script>
-      function showTab(tab) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-        
-        event.target.classList.add('active');
-        document.getElementById(`tab-${tab}`).classList.remove('hidden');
-        
-        if (tab === 'list') {
-          loadBusinesses();
-        }
-      }
+    <!-- ─── Add Business Tab ─── -->
+    <div id="tab-add" class="tab-content hidden">
+      <div class="card" style="max-width:720px;">
+        <div class="card__header">
+          <div>
+            <div class="card__title">Set Up a New Business</div>
+            <div class="card__subtitle">We'll automatically start qualifying leads via SMS for this business</div>
+          </div>
+        </div>
+        <form id="add-business-form">
+          <div class="form-grid">
+            <div class="field form-grid--full">
+              <label class="field__label">Business Name *</label>
+              <input type="text" id="name" name="name" required placeholder="e.g. Smith's Dental Clinic" />
+            </div>
+            <div class="field">
+              <label class="field__label">SMS Sending Number *</label>
+              <input type="tel" id="twilio_from_number" name="twilio_from_number" required placeholder="+61400123456" />
+              <span class="field__hint">The phone number texts will be sent from (your Twilio number)</span>
+            </div>
+            <div class="field">
+              <label class="field__label">Your Mobile Number *</label>
+              <input type="tel" id="owner_notify_phone" name="owner_notify_phone" required placeholder="+61411222333" />
+              <span class="field__hint">You'll get a text here whenever a lead is qualified</span>
+            </div>
+            <div class="field">
+              <label class="field__label">Your Email</label>
+              <input type="email" id="owner_notify_email" name="owner_notify_email" placeholder="you@yourbusiness.com" />
+              <span class="field__hint">Optional — we can also email you lead summaries</span>
+            </div>
+            <div class="field">
+              <label class="field__label">Online Booking Link</label>
+              <input type="url" id="booking_link" name="booking_link" placeholder="https://yourbusiness.com/book" />
+              <span class="field__hint">Optional — we'll include this in the final message to leads</span>
+            </div>
+            <div class="field form-grid--full">
+              <label class="field__label">What type of business?</label>
+              <select id="industry" name="industry">
+                <option value="dental">🦷 Dental</option>
+                <option value="plumbing">🔧 Plumbing</option>
+                <option value="electrical">⚡ Electrical</option>
+                <option value="hvac">❄️ HVAC / Air Conditioning</option>
+                <option value="legal">⚖️ Legal Services</option>
+                <option value="general">🏢 Other / General</option>
+              </select>
+              <span class="field__hint">This loads a ready-made set of SMS questions. You can customise them later.</span>
+            </div>
+          </div>
+          <div style="margin-top:1.75rem; display:flex; gap:.75rem;">
+            <button type="submit" class="btn btn--primary" id="submit-btn">Create Business</button>
+            <button type="reset" class="btn btn--ghost">Clear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
-      function showAlert(message, type = 'success') {
-        const container = document.getElementById('alert-container');
-        container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-        setTimeout(() => container.innerHTML = '', 5000);
-      }
+  <!-- ─── Settings Modal ─── -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal">
+      <div class="modal__header">
+        <div>
+          <div class="modal__title" id="settings-biz-name">Business Settings</div>
+          <div class="modal__subtitle">Control how and when you get notified about new leads</div>
+        </div>
+        <button class="modal__close" onclick="closeSettings()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <input type="hidden" id="settings-biz-id" />
 
-      document.getElementById('add-business-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const submitBtn = document.getElementById('submit-btn');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Adding...';
-        
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData.entries());
-        
-        try {
-          const response = await fetch('/api/admin/businesses', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-          });
-          
-          const result = await response.json();
-          
-          if (response.ok) {
-            showAlert(`✅ Customer added! Business ID: ${result.business.id}`, 'success');
-            e.target.reset();
-            
-            // Show integration code
-            const integrationCode = generateIntegrationCode(result.business);
-            showAlert(`
-              <strong>Integration Code for ${result.business.name}:</strong>
-              <div class="code-block">${integrationCode}</div>
-              <button class="copy-btn" onclick="copyToClipboard(\`${integrationCode.replace(/`/g, '\\`')}\`)">Copy Code</button>
-            `, 'success');
-          } else {
-            showAlert(`❌ Error: ${result.error}`, 'error');
-          }
-        } catch (error) {
-          showAlert(`❌ Error: ${error.message}`, 'error');
-        } finally {
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Add Customer';
-        }
-      });
-
-      async function loadBusinesses() {
-        const listDiv = document.getElementById('business-list');
-        listDiv.innerHTML = '<p style="color: #6b7280;">Loading...</p>';
-        
-        try {
-          const response = await fetch('/api/admin/businesses');
-          const result = await response.json();
-          
-          if (response.ok && result.businesses.length > 0) {
-            listDiv.innerHTML = result.businesses.map(b => `
-              <div class="business-item">
-                <h3>${b.name}</h3>
-                <p><strong>Twilio Number:</strong> ${b.twilio_from_number}</p>
-                <p><strong>Owner Phone:</strong> ${b.owner_notify_phone || 'Not set'}</p>
-                <p><strong>Booking Link:</strong> ${b.booking_link || 'Not set'}</p>
-                <p><strong>Created:</strong> ${new Date(b.created_at).toLocaleDateString()}</p>
-                <div class="id">
-                  <strong>ID:</strong> ${b.id}
-                  <button class="copy-btn" onclick="copyToClipboard('${b.id}')">Copy ID</button>
-                  <button class="copy-btn" onclick="showIntegrationCode('${b.id}', '${b.name.replace(/'/g, "\\'")}')">Show Integration Code</button>
-                </div>
+      <div class="modal__section">
+        <div class="modal__section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Where Should We Send Your Leads?
+        </div>
+        <div class="modal__section-desc">When someone finishes answering your SMS questions, we'll send you a summary with their details. Choose how you'd like to receive it:</div>
+        <div class="notif-channels">
+          <!-- SMS -->
+          <div class="notif-ch on" id="nc-sms">
+            <div class="notif-ch__head">
+              <div class="notif-ch__info">
+                <div class="notif-ch__icon notif-ch__icon--sms">💬</div>
+                <div><div class="notif-ch__name">Text Me</div><div class="notif-ch__desc">Get a text with the lead's details</div></div>
               </div>
-            `).join('');
-          } else {
-            listDiv.innerHTML = '<p style="color: #6b7280;">No customers found.</p>';
-          }
-        } catch (error) {
-          listDiv.innerHTML = `<p style="color: #ef4444;">Error loading customers: ${error.message}</p>`;
-        }
-      }
+              <button class="ntoggle on" id="nc-sms-toggle" onclick="toggleNC('sms')"></button>
+            </div>
+            <div class="notif-ch__body">
+              <div id="nc-sms-list"></div>
+              <button class="notif-add" onclick="addNCEntry('sms')">+ Add phone number</button>
+            </div>
+          </div>
+          <!-- Email -->
+          <div class="notif-ch" id="nc-email">
+            <div class="notif-ch__head">
+              <div class="notif-ch__info">
+                <div class="notif-ch__icon notif-ch__icon--email">📧</div>
+                <div><div class="notif-ch__name">Email Me</div><div class="notif-ch__desc">Get an email with the lead's details</div></div>
+              </div>
+              <button class="ntoggle" id="nc-email-toggle" onclick="toggleNC('email')"></button>
+            </div>
+            <div class="notif-ch__body">
+              <div id="nc-email-list"></div>
+              <button class="notif-add" onclick="addNCEntry('email')">+ Add email address</button>
+            </div>
+          </div>
+          <!-- Webhook -->
+          <div class="notif-ch" id="nc-webhook">
+            <div class="notif-ch__head">
+              <div class="notif-ch__info">
+                <div class="notif-ch__icon notif-ch__icon--webhook">🔗</div>
+                <div><div class="notif-ch__name">Send to My Software</div><div class="notif-ch__desc">Automatically push leads into your CRM, Zapier, etc.</div></div>
+              </div>
+              <button class="ntoggle" id="nc-webhook-toggle" onclick="toggleNC('webhook')"></button>
+            </div>
+            <div class="notif-ch__body">
+              <div id="nc-webhook-list"></div>
+              <button class="notif-add" onclick="addNCEntry('webhook')">+ Add connection URL</button>
+              <div style="font-size:.65rem;color:#3f3f46;margin-top:.15rem;">Paste the URL from Zapier, Make, or your CRM's incoming webhook settings.</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      function generateIntegrationCode(business) {
-        return `<!-- Add this to ${business.name}'s website form -->
+      <div class="modal__section">
+        <div class="modal__section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Business Hours
+        </div>
+        <div class="modal__section-desc">If someone enquires outside your hours, we'll let them know and follow up when you open.</div>
+        <label class="check-row" style="margin-bottom:1rem;">
+          <input type="checkbox" id="oh-enabled" /> Turn on business hours
+        </label>
+        <div class="form-grid">
+          <div class="field">
+            <label class="field__label">Opens at</label>
+            <select id="oh-open">
+              <option value="6">6:00 AM</option><option value="7">7:00 AM</option><option value="8" selected>8:00 AM</option><option value="9">9:00 AM</option><option value="10">10:00 AM</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field__label">Closes at</label>
+            <select id="oh-close">
+              <option value="16">4:00 PM</option><option value="17">5:00 PM</option><option value="18" selected>6:00 PM</option><option value="19">7:00 PM</option><option value="20">8:00 PM</option><option value="21">9:00 PM</option>
+            </select>
+          </div>
+          <div class="field form-grid--full">
+            <label class="field__label">Timezone</label>
+            <select id="oh-timezone">
+              <option value="Australia/Sydney">Australia/Sydney (AEST)</option>
+              <option value="Australia/Melbourne">Australia/Melbourne (AEST)</option>
+              <option value="Australia/Brisbane">Australia/Brisbane (AEST)</option>
+              <option value="Australia/Perth">Australia/Perth (AWST)</option>
+              <option value="Australia/Adelaide">Australia/Adelaide (ACST)</option>
+              <option value="Pacific/Auckland">New Zealand (NZST)</option>
+            </select>
+          </div>
+          <div class="field form-grid--full">
+            <label class="field__label">After-hours auto-reply</label>
+            <textarea id="oh-message" rows="2" placeholder="We're currently closed. We'll text you back when we open!"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal__section">
+        <div class="modal__section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Connect to Other Software
+        </div>
+        <div class="modal__section-desc">Automatically send qualified lead data to tools like Zapier, ServiceTitan, or Housecall Pro when someone finishes the SMS flow.</div>
+        <div class="form-grid">
+          <div class="field form-grid--full">
+            <label class="field__label">Connection URL</label>
+            <input type="url" id="int-webhook-url" placeholder="e.g. https://hooks.zapier.com/hooks/catch/..." />
+            <span class="field__hint">Paste the webhook URL from your other software</span>
+          </div>
+          <div class="field form-grid--full">
+            <label class="field__label">Secret Key (optional)</label>
+            <input type="text" id="int-webhook-secret" placeholder="Only needed if your software requires one" />
+            <span class="field__hint">A security password to verify the data is coming from Cove</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal__section">
+        <div class="modal__section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Auto Follow-Up
+        </div>
+        <div class="modal__section-desc">If a lead stops replying halfway through, we can automatically send them a gentle reminder.</div>
+        <div class="form-grid">
+          <div class="field">
+            <label class="field__label">Send reminder after</label>
+            <select id="int-nudge-mins">
+              <option value="0">Don't send reminders</option>
+              <option value="15">15 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="60">1 hour</option>
+              <option value="120">2 hours</option>
+              <option value="240">4 hours</option>
+              <option value="480">8 hours</option>
+              <option value="1440">24 hours</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field__label">Reminder message</label>
+            <input type="text" id="int-nudge-msg" placeholder="Hey! Just checking in — still need help?" />
+            <span class="field__hint">Leave blank for a default message</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal__section" style="margin-bottom:0;">
+        <div class="modal__section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+          Receive Leads From Other Platforms
+        </div>
+        <div class="modal__section-desc">If you use Podium, ServiceTitan, or other platforms, give them these URLs so new leads automatically start the SMS qualification flow.</div>
+        <div style="margin-bottom:.75rem;"><span class="field__label" style="margin-bottom:.25rem;display:block;">Podium URL</span><div class="modal__code" id="webhook-url-podium"></div></div>
+        <div><span class="field__label" style="margin-bottom:.25rem;display:block;">General-Purpose URL</span><div class="modal__code" id="webhook-url-generic"></div><span class="field__hint" style="display:block;margin-top:.25rem;">Works with Zapier, Make, or any tool that can send a POST request</span></div>
+      </div>
+
+      <div class="modal__actions">
+        <button class="btn btn--primary" onclick="saveSettings()" id="save-settings-btn" style="flex:1;">Save Changes</button>
+        <button class="btn btn--ghost" onclick="closeSettings()" style="flex:1;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Embed Code Modal ─── -->
+  <div class="modal-overlay" id="embed-modal">
+    <div class="modal" style="max-width:640px;">
+      <div class="modal__header">
+        <div>
+          <div class="modal__title">Website Integration Code</div>
+          <div class="modal__subtitle" id="embed-biz-name">Add this to your website to connect your contact form</div>
+        </div>
+        <button class="modal__close" onclick="closeEmbed()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <pre class="modal__code" id="embed-code" style="white-space:pre-wrap;max-height:300px;overflow-y:auto;"></pre>
+      <div class="modal__actions">
+        <button class="btn btn--primary" onclick="copyEmbedCode()" style="flex:1;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy to Clipboard
+        </button>
+        <button class="btn btn--ghost" onclick="closeEmbed()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // ─── Toast System ───
+    function toast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const icons = {
+        success: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+        error: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+        info: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+      };
+      const el = document.createElement('div');
+      el.className = `toast toast--${type}`;
+      el.innerHTML = `${icons[type] || icons.info} ${message}`;
+      container.appendChild(el);
+      setTimeout(() => { el.style.animation = 'slideOut .3s ease forwards'; setTimeout(() => el.remove(), 300); }, 4000);
+    }
+
+    // ─── Tab Navigation ───
+    function showTab(tab, btn) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      if (btn) btn.classList.add('active');
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+      if (tab === 'leads') loadLeads();
+    }
+
+    // ─── Load Stats ───
+    async function loadStats() {
+      try {
+        const [bizRes, leadsRes] = await Promise.all([
+          fetch('/api/admin/businesses'),
+          fetch('/api/admin/leads')
+        ]);
+        const bizData = await bizRes.json();
+        const leadsData = await leadsRes.json();
+        const businesses = bizData.businesses || [];
+        const leads = leadsData.leads || [];
+
+        document.getElementById('stat-businesses').textContent = businesses.length;
+        document.getElementById('stat-leads').textContent = leads.length;
+        document.getElementById('tab-count-biz').textContent = businesses.length;
+        document.getElementById('tab-count-leads').textContent = leads.length;
+
+        const completed = leads.filter(l => l.status === 'completed').length;
+        document.getElementById('stat-completed').textContent = completed;
+        document.getElementById('stat-conversion').textContent = leads.length > 0 ? Math.round((completed / leads.length) * 100) + '%' : '—';
+      } catch (e) { console.error('Stats error', e); }
+    }
+
+    // ─── Load Businesses ───
+    async function loadBusinesses() {
+      const container = document.getElementById('business-list');
+      try {
+        const res = await fetch('/api/admin/businesses');
+        const data = await res.json();
+        const businesses = data.businesses || [];
+
+        if (businesses.length === 0) {
+          container.innerHTML = `<div class="leads-empty" style="grid-column:1/-1;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <p style="margin-top:1rem;margin-bottom:.5rem;color:#71717a;font-weight:600;font-size:1.05rem;">Welcome! Let's set up your first business</p>
+            <p style="color:#52525b;font-size:.85rem;margin-bottom:1.25rem;max-width:400px;margin-left:auto;margin-right:auto;">Once you add a business, we'll start qualifying your leads via SMS automatically.</p>
+            <button class="btn btn--primary" onclick="showTab('add', document.querySelectorAll('.tab')[2])">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Set Up Your Business
+            </button>
+          </div>`;
+          return;
+        }
+
+        container.innerHTML = businesses.map(b => {
+          const esc = s => (s||'').replace(/'/g, "\\'");
+          const industryLabels = { dental: '🦷 Dental', plumbing: '🔧 Plumbing', electrical: '⚡ Electrical', hvac: '❄️ HVAC', legal: '⚖️ Legal', general: '🏢 General' };
+          const industryLabel = industryLabels[b.industry] || industryLabels.general;
+          const flowLabel = b.flow_config ? 'Custom questions' : 'Default questions';
+          const notifyPhone = b.owner_notify_phone || '';
+          const notifyLabel = notifyPhone ? `Texts go to ${notifyPhone}` : 'No notifications set up';
+          const dateLabel = b.created_at ? 'Added ' + new Date(b.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+          return `
+          <div class="biz-card">
+            <div class="biz-card__header">
+              <div>
+                <div class="biz-card__name">${b.name}</div>
+                <div class="biz-card__industry">${industryLabel} · ${flowLabel}</div>
+              </div>
+              <div class="biz-card__status" title="Active"></div>
+            </div>
+            <div class="biz-card__details">
+              <div class="biz-card__row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                ${notifyLabel}
+              </div>
+              <div class="biz-card__row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Sends from ${b.twilio_from_number}
+              </div>
+              ${dateLabel ? `<div class="biz-card__row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                ${dateLabel}
+              </div>` : ''}
+            </div>
+            <div class="biz-card__actions">
+              <button class="btn btn--primary btn--sm" onclick="openSettings('${b.id}', '${esc(b.name)}')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Notifications & Settings
+              </button>
+              <a href="/flow-builder.html" class="btn btn--ghost btn--sm">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Edit SMS Questions
+              </a>
+              <button class="btn btn--ghost btn--sm" onclick="showEmbed('${b.id}', '${esc(b.name)}')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                Website Code
+              </button>
+            </div>
+          </div>`;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = `<div class="leads-empty" style="grid-column:1/-1;"><p style="color:#ef4444;">Error loading businesses: ${e.message}</p></div>`;
+      }
+    }
+
+    // ─── Load Leads ───
+    async function loadLeads() {
+      const container = document.getElementById('leads-container');
+      try {
+        const res = await fetch('/api/admin/leads');
+        const data = await res.json();
+        const leads = data.leads || [];
+
+        if (leads.length === 0) {
+          container.innerHTML = `<div class="leads-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <p style="margin-top:1rem;color:#71717a;font-weight:500;">No leads yet</p>
+            <p style="color:#52525b;font-size:.85rem;max-width:400px;margin:.5rem auto 0;">Leads will appear here as soon as someone fills out your contact form or starts an SMS conversation. Try the live demo on the homepage to see it in action!</p>
+          </div>`;
+          return;
+        }
+
+        container.innerHTML = `<div style="overflow-x:auto;"><table class="leads-table">
+          <thead>
+            <tr>
+              <th>Lead</th>
+              <th>Business</th>
+              <th>Status</th>
+              <th>Step</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${leads.map(l => {
+              const statusMap = {
+                completed: 'completed', in_progress: 'in_progress', new: 'new', stopped: 'stopped'
+              };
+              const statusLabel = { completed: 'Completed', in_progress: 'In Progress', new: 'New', stopped: 'Stopped' };
+              const st = statusMap[l.status] || 'new';
+              return `<tr>
+                <td>
+                  <div class="leads-table__name">${l.first_name || 'Unknown'} ${l.last_name || ''}</div>
+                  <div class="leads-table__phone">${l.phone || '—'}</div>
+                </td>
+                <td><span class="leads-table__biz">${l.business_name || '—'}</span></td>
+                <td><span class="badge-status badge-status--${st}">${statusLabel[st] || st}</span></td>
+                <td style="color:#71717a;font-size:.8rem;">${l.current_step ?? '—'}</td>
+                <td style="color:#71717a;font-size:.8rem;">${l.created_at ? new Date(l.created_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '—'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table></div>`;
+      } catch (e) {
+        container.innerHTML = `<div class="leads-empty"><p style="color:#ef4444;">Error loading leads: ${e.message}</p></div>`;
+      }
+    }
+
+    // ─── Add Business Form ───
+    document.getElementById('add-business-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true; btn.textContent = 'Adding...';
+
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const res = await fetch('/api/admin/businesses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        const result = await res.json();
+        if (res.ok) {
+          toast(`Business "${result.business.name}" created successfully`, 'success');
+          e.target.reset();
+          loadBusinesses();
+          loadStats();
+        } else {
+          toast(result.error || 'Failed to add business', 'error');
+        }
+      } catch (err) {
+        toast('Network error: ' + err.message, 'error');
+      }
+      btn.disabled = false; btn.textContent = 'Create Business';
+    });
+
+    // ─── Embed Code ───
+    function generateIntegrationCode(business) {
+      return `<!-- Cove integration for ${business.name} -->
 <script>
 document.getElementById('contact-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const formData = new FormData(e.target);
-  
+  const fd = new FormData(e.target);
   await fetch('${window.location.origin}/api/lead', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       businessId: '${business.id}',
-      name: formData.get('name'),
-      phone: formData.get('phone'),
-      email: formData.get('email'),
-      message: formData.get('message')
+      name: fd.get('name'),
+      phone: fd.get('phone'),
+      email: fd.get('email'),
+      message: fd.get('message')
     })
   });
-  
   alert('Thanks! We will text you shortly.');
 });
 <\/script>`;
-      }
+    }
 
-      function showIntegrationCode(id, name) {
-        const code = generateIntegrationCode({ id, name });
-        alert('Integration code copied to clipboard!');
-        copyToClipboard(code);
-      }
+    function showEmbed(id, name) {
+      document.getElementById('embed-biz-name').textContent = `Integration code for ${name}`;
+      document.getElementById('embed-code').textContent = generateIntegrationCode({ id, name });
+      document.getElementById('embed-modal').classList.add('open');
+    }
+    function closeEmbed() { document.getElementById('embed-modal').classList.remove('open'); }
+    function copyEmbedCode() {
+      navigator.clipboard.writeText(document.getElementById('embed-code').textContent);
+      toast('Embed code copied to clipboard', 'success');
+    }
 
-      function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(() => {
-          alert('Copied to clipboard!');
-        });
-      }
+    function copyId(id) {
+      navigator.clipboard.writeText(id);
+      toast('Business ID copied', 'info');
+    }
 
-      async function checkPassword() {
-        const passwordInput = document.getElementById('admin-password');
-        const errorEl = document.getElementById('auth-error');
-        const password = passwordInput.value;
+    // ─── Notification Channel Helpers ───
+    function toggleNC(ch) {
+      const toggle = document.getElementById(`nc-${ch}-toggle`);
+      const card = document.getElementById(`nc-${ch}`);
+      toggle.classList.toggle('on');
+      card.classList.toggle('on');
+    }
 
-        if (!password) {
-          errorEl.textContent = 'Please enter a password';
-          errorEl.classList.remove('hidden');
-          return;
-        }
+    function addNCEntry(ch) {
+      const list = document.getElementById(`nc-${ch}-list`);
+      const ph = ch === 'sms' ? '0412 345 678' : ch === 'email' ? 'owner@example.com' : 'https://your-crm.com/webhook';
+      const type = ch === 'email' ? 'email' : 'text';
+      const div = document.createElement('div');
+      div.className = 'notif-entry';
+      div.innerHTML = `<input class="field" type="${type}" placeholder="${ph}" style="padding:.5rem .7rem;background:#111116;border:1px solid #27272a;border-radius:6px;color:#e5e7eb;font-size:.8rem;font-family:inherit;" /><button class="notif-entry__rm" onclick="this.parentElement.remove()">&times;</button>`;
+      list.appendChild(div);
+      div.querySelector('input').focus();
+    }
 
-        try {
-          const response = await fetch('/api/admin/auth', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password })
-          });
-
-          const result = await response.json();
-
-          if (response.ok && result.ok) {
-            sessionStorage.setItem('admin_authenticated', 'true');
-            document.getElementById('auth-overlay').classList.add('hidden');
-            document.getElementById('admin-content').classList.remove('hidden');
-          } else {
-            errorEl.textContent = 'Incorrect password';
-            errorEl.classList.remove('hidden');
-            passwordInput.value = '';
-            passwordInput.focus();
-          }
-        } catch (error) {
-          errorEl.textContent = 'Authentication error. Please try again.';
-          errorEl.classList.remove('hidden');
-        }
-      }
-
-      document.getElementById('admin-password').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          checkPassword();
-        }
+    function renderNCList(ch, values) {
+      const list = document.getElementById(`nc-${ch}-list`);
+      const ph = ch === 'sms' ? '0412 345 678' : ch === 'email' ? 'owner@example.com' : 'https://your-crm.com/webhook';
+      const type = ch === 'email' ? 'email' : 'text';
+      list.innerHTML = '';
+      (values || []).forEach(val => {
+        const div = document.createElement('div');
+        div.className = 'notif-entry';
+        div.innerHTML = `<input class="field" type="${type}" value="${val}" placeholder="${ph}" style="padding:.5rem .7rem;background:#111116;border:1px solid #27272a;border-radius:6px;color:#e5e7eb;font-size:.8rem;font-family:inherit;" /><button class="notif-entry__rm" onclick="this.parentElement.remove()">&times;</button>`;
+        list.appendChild(div);
       });
+    }
 
-      if (sessionStorage.getItem('admin_authenticated') === 'true') {
-        document.getElementById('auth-overlay').classList.add('hidden');
-        document.getElementById('admin-content').classList.remove('hidden');
-      }
-    </script>
-  </body>
+    function collectNC() {
+      const get = (id) => [...document.querySelectorAll(`#nc-${id}-list .notif-entry input`)].map(i => i.value.trim()).filter(Boolean);
+      return {
+        sms: { enabled: document.getElementById('nc-sms-toggle').classList.contains('on'), numbers: get('sms') },
+        email: { enabled: document.getElementById('nc-email-toggle').classList.contains('on'), addresses: get('email') },
+        webhook: { enabled: document.getElementById('nc-webhook-toggle').classList.contains('on'), urls: get('webhook') },
+      };
+    }
+
+    // ─── Settings Modal ───
+    async function openSettings(businessId, businessName) {
+      document.getElementById('settings-biz-id').value = businessId;
+      document.getElementById('settings-biz-name').textContent = `${businessName} — Settings`;
+      document.getElementById('webhook-url-podium').textContent = `${window.location.origin}/api/webhook/podium/${businessId}`;
+      document.getElementById('webhook-url-generic').textContent = `${window.location.origin}/api/webhook/generic/${businessId}`;
+
+      try {
+        const [intRes, flowRes] = await Promise.all([
+          fetch(`/api/admin/businesses/${businessId}/integrations`),
+          fetch(`/api/admin/businesses/${businessId}/flow`),
+        ]);
+        const data = await intRes.json();
+        const flowData = await flowRes.json();
+        if (data.ok) {
+          const oh = data.operating_hours || {};
+          document.getElementById('oh-enabled').checked = oh.enabled || false;
+          document.getElementById('oh-open').value = oh.open_hour ?? 8;
+          document.getElementById('oh-close').value = oh.close_hour ?? 18;
+          document.getElementById('oh-timezone').value = oh.timezone || 'Australia/Sydney';
+          document.getElementById('oh-message').value = oh.after_hours_message || '';
+          const int = data.integrations || {};
+          document.getElementById('int-webhook-url').value = int.completion_webhook_url || '';
+          document.getElementById('int-webhook-secret').value = int.webhook_secret || '';
+          document.getElementById('int-nudge-mins').value = int.nudge_after_minutes || 0;
+          document.getElementById('int-nudge-msg').value = int.nudge_message || '';
+
+          // Notification channels
+          const nc = int.notifications || {};
+          const smsEnabled = nc.sms?.enabled !== false;
+          const smsNums = nc.sms?.numbers || [];
+          const emailEnabled = !!nc.email?.enabled;
+          const emailAddrs = nc.email?.addresses || [];
+          const whEnabled = !!nc.webhook?.enabled;
+          const whUrls = nc.webhook?.urls || [];
+
+          // Pre-populate SMS with owner phone if empty
+          if (smsNums.length === 0 && flowData.owner_notify_phone) smsNums.push(flowData.owner_notify_phone);
+          if (emailAddrs.length === 0 && flowData.owner_notify_email) emailAddrs.push(flowData.owner_notify_email);
+
+          document.getElementById('nc-sms-toggle').classList.toggle('on', smsEnabled);
+          document.getElementById('nc-sms').classList.toggle('on', smsEnabled);
+          renderNCList('sms', smsNums);
+
+          document.getElementById('nc-email-toggle').classList.toggle('on', emailEnabled);
+          document.getElementById('nc-email').classList.toggle('on', emailEnabled);
+          renderNCList('email', emailAddrs);
+
+          document.getElementById('nc-webhook-toggle').classList.toggle('on', whEnabled);
+          document.getElementById('nc-webhook').classList.toggle('on', whEnabled);
+          renderNCList('webhook', whUrls);
+        }
+      } catch (e) { console.error('Load settings error', e); }
+
+      document.getElementById('settings-modal').classList.add('open');
+    }
+
+    function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+
+    async function saveSettings() {
+      const businessId = document.getElementById('settings-biz-id').value;
+      const btn = document.getElementById('save-settings-btn');
+      btn.disabled = true; btn.textContent = 'Saving...';
+
+      const notifications = collectNC();
+
+      const payload = {
+        operating_hours: {
+          enabled: document.getElementById('oh-enabled').checked,
+          open_hour: Number(document.getElementById('oh-open').value),
+          close_hour: Number(document.getElementById('oh-close').value),
+          timezone: document.getElementById('oh-timezone').value,
+          closed_days: [0, 6],
+          after_hours_message: document.getElementById('oh-message').value || null,
+        },
+        integrations: {
+          completion_webhook_url: document.getElementById('int-webhook-url').value || null,
+          webhook_secret: document.getElementById('int-webhook-secret').value || null,
+          nudge_after_minutes: Number(document.getElementById('int-nudge-mins').value) || 0,
+          nudge_message: document.getElementById('int-nudge-msg').value || null,
+          notifications,
+        },
+      };
+
+      try {
+        const res = await fetch(`/api/admin/businesses/${businessId}/integrations`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (data.ok) { toast('Settings saved', 'success'); closeSettings(); }
+        else { toast(data.error || 'Save failed', 'error'); }
+      } catch (e) { toast('Save error: ' + e.message, 'error'); }
+
+      btn.disabled = false; btn.textContent = 'Save Settings';
+    }
+
+    document.getElementById('settings-modal').addEventListener('click', function(e) { if (e.target === this) closeSettings(); });
+    document.getElementById('embed-modal').addEventListener('click', function(e) { if (e.target === this) closeEmbed(); });
+
+    // ─── Init ───
+    loadBusinesses();
+    loadStats();
+  </script>
+</body>
 </html>

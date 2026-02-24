@@ -1,0 +1,1340 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cove — Flow Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #0f0f13; color: #e5e7eb; min-height: 100vh; }
+
+    /* ─── Top Bar ─── */
+    .topbar { background: #111116; border-bottom: 1px solid #1e1e24; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; height: 57px; }
+    .topbar__left { display: flex; align-items: center; gap: 1rem; }
+    .topbar__logo { font-weight: 700; font-size: 1.05rem; color: #fff; display: flex; align-items: center; gap: .6rem; text-decoration: none; }
+    .topbar__sep { color: #27272a; }
+    .topbar__title { font-weight: 500; font-size: .875rem; color: #71717a; }
+    .topbar__right { display: flex; gap: .75rem; }
+    .btn { padding: .6rem 1.25rem; border: none; border-radius: 8px; font-size: .875rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .15s; display: inline-flex; align-items: center; gap: .5rem; }
+    .btn--ghost { background: transparent; color: #a1a1aa; border: 1px solid #3f3f46; }
+    .btn--ghost:hover { background: #27272a; color: #e5e7eb; }
+    .btn--primary { background: linear-gradient(135deg, #6366f1, #06b6d4); color: #fff; }
+    .btn--primary:hover { opacity: .9; transform: translateY(-1px); }
+    .btn--primary:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+    .btn--danger { background: #dc2626; color: #fff; }
+    .btn--sm { padding: .4rem .75rem; font-size: .8rem; }
+
+    /* ─── Layout ─── */
+    .layout { display: grid; grid-template-columns: 320px 1fr; height: calc(100vh - 57px); }
+
+    /* ─── Left Panel ─── */
+    .panel { background: #111116; border-right: 1px solid #1e1e24; overflow-y: auto; padding: 1.5rem; }
+    .panel__section { margin-bottom: 1.5rem; }
+    .panel__section:last-child { margin-bottom: 0; }
+    .panel__heading { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: #71717a; font-weight: 600; margin-bottom: .85rem; padding: 0 .25rem; }
+    .panel__desc { font-size: .8rem; color: #52525b; line-height: 1.55; margin-bottom: 1rem; padding: 0 .25rem; }
+
+    .industry-btn { width: 100%; padding: .65rem .85rem; background: transparent; border: 1px solid #1e1e24; border-radius: 8px; color: #e5e7eb; font-size: .85rem; font-weight: 500; cursor: pointer; text-align: left; margin-bottom: .4rem; transition: all .15s; font-family: inherit; display: flex; align-items: center; gap: .7rem; }
+    .industry-btn:hover { border-color: #3f3f46; background: #1e1e24; }
+    .industry-btn.active { border-color: #6366f1; background: rgba(99,102,241,.08); }
+    .industry-btn__icon { width: 32px; height: 32px; border-radius: 6px; background: #1e1e24; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .industry-btn.active .industry-btn__icon { background: rgba(99,102,241,.15); }
+    .industry-btn__info { flex: 1; min-width: 0; }
+    .industry-btn__name { font-weight: 600; font-size: .825rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .industry-btn__meta { font-size: .7rem; color: #52525b; }
+
+    .ai-section { background: #0a0a0f; border: 1px solid #1e1e24; border-radius: 10px; padding: 1.25rem; }
+    .ai-section__label { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: #71717a; font-weight: 600; margin-bottom: .75rem; display: flex; align-items: center; gap: .4rem; }
+    .ai-section__label svg { color: #6366f1; }
+    .ai-input { width: 100%; padding: .7rem .85rem; background: #111116; border: 1px solid #1e1e24; border-radius: 8px; color: #e5e7eb; font-size: .825rem; font-family: inherit; resize: vertical; min-height: 80px; line-height: 1.55; margin-bottom: .75rem; }
+    .ai-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
+    .ai-input::placeholder { color: #3f3f46; }
+
+    /* ─── Canvas (center) ─── */
+    .canvas { background: #0f0f13; background-image: radial-gradient(circle, #1f1f23 1px, transparent 1px); background-size: 24px 24px; overflow: hidden; position: relative; cursor: grab; }
+    .canvas.panning { cursor: grabbing; }
+    .canvas-viewport { transform-origin: 0 0; position: relative; width: 5000px; height: 5000px; }
+    .canvas-connectors { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; }
+    .canvas-connectors > * { pointer-events: none; }
+    .canvas__empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #52525b; text-align: center; }
+    .canvas__empty svg { margin-bottom: 1rem; opacity: .3; }
+    .canvas__empty p { font-size: .95rem; }
+
+    /* ─── Flow Nodes ─── */
+    .flow-intro { background: #1e1e2e; border: 1px solid #3f3f46; border-radius: 12px; padding: 1rem; position: absolute; width: 500px; }
+    .flow-intro.dragging { opacity: 0.8; z-index: 100; cursor: grabbing !important; }
+    .flow-intro:not(.dragging) { cursor: grab; }
+    .flow-intro textarea, .flow-intro input, .flow-intro button { cursor: auto; }
+    .flow-intro__label { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: #6366f1; font-weight: 700; margin-bottom: .6rem; display: flex; align-items: center; justify-content: space-between; }
+    .flow-intro__toggle { cursor: pointer; color: #71717a; font-size: .75rem; font-weight: 400; letter-spacing: 0; text-transform: none; }
+    .flow-intro__toggle:hover { color: #a1a1aa; }
+    .flow-intro textarea { width: 100%; background: #0f0f13; border: 1px solid #27272a; border-radius: 8px; color: #e5e7eb; padding: .7rem .8rem; font-size: .875rem; font-family: inherit; resize: vertical; min-height: 70px; line-height: 1.55; }
+    .flow-intro textarea:focus { outline: none; border-color: #6366f1; }
+
+    .connector-line { stroke: #3f3f46; stroke-width: 2; fill: none; stroke-dasharray: 5,5; }
+    .connector-line--temp { stroke: #6366f1; stroke-width: 2; stroke-dasharray: 4,4; opacity: .7; }
+    .connector-line--hover { stroke: #3f3f46; stroke-width: 12; fill: none; stroke-dasharray: none; opacity: 0; cursor: pointer; pointer-events: stroke !important; }
+    .connector-arrow { fill: #3f3f46; }
+    .connector-delete { cursor: pointer; pointer-events: all !important; }
+    .connector-delete circle { fill: #27272a; stroke: #52525b; stroke-width: 1; transition: all .15s; }
+    .connector-delete:hover circle { fill: #dc2626; stroke: #dc2626; }
+    .connector-delete text { fill: #71717a; font-size: 10px; font-family: inherit; font-weight: 700; pointer-events: none; }
+    .connector-delete:hover text { fill: #fff; }
+
+    /* ─── Connection Ports ─── */
+    .port { position: absolute; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #3f3f46; background: #18181b; cursor: crosshair; z-index: 10; transition: all .15s; left: 50%; transform: translateX(-50%); }
+    .port--out { bottom: -7px; }
+    .port--in { top: -7px; }
+    .port:hover, .port.active { border-color: #6366f1; background: #6366f1; box-shadow: 0 0 8px rgba(99,102,241,.5); }
+    .port.valid-target { border-color: #10b981; background: #10b981; box-shadow: 0 0 10px rgba(16,185,129,.5); animation: portPulse .8s ease infinite; }
+    @keyframes portPulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.3); } }
+    .canvas.connecting { cursor: crosshair !important; }
+    .canvas.connecting .port--in { border-color: #3f3f46; background: #27272a; }
+
+    .step-node { background: #18181b; border: 1px solid #3f3f46; border-radius: 12px; padding: 1.25rem; position: absolute; width: 500px; }
+    .step-node.dragging { opacity: 0.8; z-index: 100; cursor: grabbing !important; }
+    .step-node:not(.dragging) { cursor: grab; }
+    .step-node textarea, .step-node input, .step-node button, .step-node select { cursor: auto; }
+    .step-node:active { cursor: grabbing; }
+    .step-node.sortable-ghost { opacity: .3; }
+    .step-node.sortable-chosen { border-color: #6366f1; box-shadow: 0 0 20px rgba(99,102,241,.2); }
+    .step-node:hover { border-color: #52525b; }
+    .step-node.has-urgent { border-left: 3px solid #ef4444; }
+
+    .step-node__header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+    .step-node__num { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #06b6d4); color: #fff; font-size: .8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: grab; position: relative; }
+    .step-node__num::after { content: '⋮⋮'; position: absolute; font-size: .6rem; opacity: .6; letter-spacing: -1px; }
+    .step-node:active .step-node__num { cursor: grabbing; }
+    .step-node__key { flex: 1; }
+    .step-node__key input { width: 100%; background: transparent; border: none; color: #e5e7eb; font-size: .9rem; font-weight: 600; font-family: inherit; }
+    .step-node__key input:focus { outline: none; }
+    .step-node__key input::placeholder { color: #52525b; }
+    .step-node__actions { display: flex; gap: .25rem; }
+    .step-node__actions button { background: none; border: none; color: #71717a; cursor: pointer; padding: .25rem; border-radius: 4px; display: flex; }
+    .step-node__actions button:hover { color: #e5e7eb; background: #27272a; }
+    .step-node__actions button.danger:hover { color: #ef4444; }
+
+    .step-node__field { margin-bottom: .85rem; }
+    .step-node__field label { display: block; font-size: .7rem; color: #71717a; margin-bottom: .4rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+    .step-node__field textarea, .step-node__field input[type="text"] { width: 100%; background: #0f0f13; border: 1px solid #27272a; border-radius: 6px; color: #e5e7eb; padding: .7rem .8rem; font-size: .875rem; font-family: inherit; }
+    .step-node__field textarea { resize: vertical; min-height: 100px; line-height: 1.55; }
+    .step-node__field textarea:focus, .step-node__field input:focus { outline: none; border-color: #6366f1; }
+
+    .option-row { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; }
+    .option-row input { flex: 1; }
+    .option-row .val-input { width: 40px; text-align: center; flex: none; }
+    .option-row .urgent-toggle { width: 20px; height: 20px; border-radius: 4px; border: 1px solid #3f3f46; background: #0f0f13; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .option-row .urgent-toggle.active { background: #dc2626; border-color: #dc2626; }
+    .option-row .remove-opt { background: none; border: none; color: #52525b; cursor: pointer; font-size: 1rem; padding: 2px; }
+    .option-row .remove-opt:hover { color: #ef4444; }
+    .add-option-btn { background: none; border: 1px dashed #3f3f46; color: #71717a; padding: .4rem .6rem; border-radius: 6px; font-size: .8rem; cursor: pointer; width: 100%; font-family: inherit; }
+    .add-option-btn:hover { border-color: #6366f1; color: #a1a1aa; }
+
+    .add-step-btn { width: 100%; padding: .75rem; border: 2px dashed #3f3f46; border-radius: 12px; background: transparent; color: #71717a; font-size: .9rem; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: .5rem; transition: all .15s; margin-top: .5rem; }
+    .add-step-btn:hover { border-color: #6366f1; color: #a1a1aa; background: rgba(99,102,241,.05); }
+
+    .flow-completion { background: #1e1e2e; border: 1px solid #3f3f46; border-radius: 12px; padding: 1rem; position: absolute; width: 500px; }
+    .flow-completion.dragging { opacity: 0.8; z-index: 100; cursor: grabbing !important; }
+    .flow-completion:not(.dragging) { cursor: grab; }
+    .flow-completion textarea, .flow-completion input, .flow-completion button { cursor: auto; }
+    .flow-completion__label { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: #10b981; font-weight: 700; margin-bottom: .6rem; display: flex; align-items: center; justify-content: space-between; }
+    .flow-completion__toggle { cursor: pointer; color: #71717a; font-size: .75rem; font-weight: 400; letter-spacing: 0; text-transform: none; }
+    .flow-completion__toggle:hover { color: #a1a1aa; }
+    .flow-completion.collapsed .flow-completion__content { display: none; }
+    .flow-intro.collapsed .flow-intro__content { display: none; }
+
+    /* ─── Right Panel (Preview) ─── */
+    .preview-panel { background: #18181b; border-left: 1px solid #27272a; overflow-y: auto; padding: 1.5rem; position: fixed; top: 57px; right: 0; bottom: 0; width: 360px; transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1); z-index: 50; box-shadow: -8px 0 30px rgba(0,0,0,.4); }
+    .preview-panel.open { transform: translateX(0); }
+    .preview-panel__close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #71717a; cursor: pointer; padding: .25rem; border-radius: 4px; }
+    .preview-panel__close:hover { color: #e5e7eb; background: #27272a; }
+    .preview-backdrop { display: none; position: fixed; inset: 0; top: 57px; background: rgba(0,0,0,.3); z-index: 49; }
+    .preview-backdrop.open { display: block; }
+    .phone-preview { background: #0f0f13; border-radius: 24px; padding: 1rem; max-width: 300px; margin: 0 auto; border: 2px solid #27272a; }
+    .phone-preview__header { text-align: center; padding: .5rem 0 1rem; border-bottom: 1px solid #27272a; margin-bottom: 1rem; }
+    .phone-preview__header h4 { font-size: .85rem; color: #a1a1aa; }
+    .phone-preview__messages { min-height: 300px; }
+    .preview-msg { max-width: 85%; padding: .6rem .8rem; border-radius: 12px; margin-bottom: .5rem; font-size: .8rem; line-height: 1.5; white-space: pre-line; }
+    .preview-msg--biz { background: #27272a; color: #e5e7eb; border-bottom-left-radius: 4px; }
+    .preview-msg--user { background: #6366f1; color: #fff; margin-left: auto; border-bottom-right-radius: 4px; }
+    .preview-msg--alert { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; font-size: .75rem; display: flex; align-items: center; gap: .4rem; }
+    .preview-typing { color: #52525b; font-size: .75rem; padding: .4rem .8rem; }
+
+    /* ─── Notification Channels ─── */
+    .notif-channels { display: flex; flex-direction: column; gap: .75rem; }
+    .notif-channel { background: #111116; border: 1px solid #1e1e24; border-radius: 10px; padding: .85rem; transition: border-color .15s; }
+    .notif-channel.active { border-color: #3f3f46; }
+    .notif-channel__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; }
+    .notif-channel.active .notif-channel__head { margin-bottom: .65rem; }
+    .notif-channel__info { display: flex; align-items: center; gap: .5rem; }
+    .notif-channel__icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: .85rem; }
+    .notif-channel__icon--sms { background: rgba(99,102,241,.15); color: #818cf8; }
+    .notif-channel__icon--email { background: rgba(16,185,129,.15); color: #6ee7b7; }
+    .notif-channel__icon--webhook { background: rgba(245,158,11,.15); color: #fcd34d; }
+    .notif-channel__name { font-size: .8rem; font-weight: 600; color: #e5e7eb; }
+    .notif-channel__desc { font-size: .65rem; color: #52525b; }
+    .notif-toggle { width: 36px; height: 20px; border-radius: 99px; background: #27272a; border: none; cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0; }
+    .notif-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #52525b; transition: all .2s; }
+    .notif-toggle.on { background: #6366f1; }
+    .notif-toggle.on::after { left: 18px; background: #fff; }
+    .notif-channel__body { display: none; }
+    .notif-channel.active .notif-channel__body { display: block; }
+    .notif-channel__input { width: 100%; padding: .5rem .7rem; background: #09090b; border: 1px solid #1e1e24; border-radius: 6px; color: #e5e7eb; font-size: .8rem; font-family: inherit; margin-bottom: .4rem; }
+    .notif-channel__input:focus { outline: none; border-color: #6366f1; }
+    .notif-channel__input::placeholder { color: #3f3f46; }
+    .notif-add-btn { background: none; border: 1px dashed #27272a; color: #52525b; padding: .3rem .5rem; border-radius: 5px; font-size: .7rem; cursor: pointer; width: 100%; font-family: inherit; }
+    .notif-add-btn:hover { border-color: #6366f1; color: #71717a; }
+    .notif-entry { display: flex; align-items: center; gap: .4rem; margin-bottom: .4rem; }
+    .notif-entry input { flex: 1; }
+    .notif-entry__remove { background: none; border: none; color: #52525b; cursor: pointer; font-size: .9rem; padding: 0 .2rem; }
+    .notif-entry__remove:hover { color: #ef4444; }
+    .notif-hint { font-size: .65rem; color: #3f3f46; margin-top: .15rem; }
+    .notif-no-biz { font-size: .75rem; color: #3f3f46; text-align: center; padding: .75rem .5rem; line-height: 1.5; }
+
+    /* ─── Custom Scrollbars ─── */
+    * { scrollbar-width: thin; scrollbar-color: #3f3f46 #0f0f13; }
+    *::-webkit-scrollbar { width: 10px; height: 10px; }
+    *::-webkit-scrollbar-track { background: #0f0f13; }
+    *::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 5px; border: 2px solid #0f0f13; }
+    *::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+    /* ─── Toast ─── */
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: #10b981; color: #fff; padding: .75rem 1.25rem; border-radius: 8px; font-size: .9rem; font-weight: 600; z-index: 200; animation: slideUp .3s ease; }
+    .toast.error { background: #dc2626; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- How-to Guide Modal -->
+  <div id="guide-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:#18181b;border-radius:16px;max-width:700px;width:90%;max-height:85vh;overflow-y:auto;padding:2.5rem;position:relative;border:1px solid #3f3f46;">
+      <button onclick="toggleGuide()" style="position:absolute;top:1.5rem;right:1.5rem;background:none;border:none;color:#71717a;cursor:pointer;font-size:1.5rem;padding:.25rem;">&times;</button>
+      <h2 style="margin-bottom:.5rem;font-size:1.5rem;background:linear-gradient(135deg,#6366f1,#06b6d4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">How to Use the Flow Builder</h2>
+      <p style="color:#a1a1aa;margin-bottom:2rem;font-size:.95rem;">Build custom SMS qualification flows visually</p>
+      
+      <div style="margin-bottom:2rem;">
+        <h3 style="font-size:1.1rem;margin-bottom:.75rem;color:#e5e7eb;display:flex;align-items:center;gap:.5rem;"><span style="background:#6366f1;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;">1</span> Navigate the Canvas</h3>
+        <ul style="color:#a1a1aa;line-height:1.8;margin-left:2rem;">
+          <li><strong style="color:#e5e7eb;">Zoom:</strong> Scroll mouse wheel up/down</li>
+          <li><strong style="color:#e5e7eb;">Pan:</strong> Click empty space and drag</li>
+          <li><strong style="color:#e5e7eb;">Move panels:</strong> Click anywhere on a panel and drag</li>
+        </ul>
+      </div>
+      
+      <div style="margin-bottom:2rem;">
+        <h3 style="font-size:1.1rem;margin-bottom:.75rem;color:#e5e7eb;display:flex;align-items:center;gap:.5rem;"><span style="background:#6366f1;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;">2</span> Choose a Starting Point</h3>
+        <ul style="color:#a1a1aa;line-height:1.8;margin-left:2rem;">
+          <li><strong style="color:#e5e7eb;">Industry Templates:</strong> Click a template (Dental, Plumbing, etc.) to load pre-built flows</li>
+          <li><strong style="color:#e5e7eb;">AI Generate:</strong> Describe any business type and AI creates a custom flow</li>
+        </ul>
+      </div>
+      
+      <div style="margin-bottom:2rem;">
+        <h3 style="font-size:1.1rem;margin-bottom:.75rem;color:#e5e7eb;display:flex;align-items:center;gap:.5rem;"><span style="background:#6366f1;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;">3</span> Edit Your Flow</h3>
+        <ul style="color:#a1a1aa;line-height:1.8;margin-left:2rem;">
+          <li><strong style="color:#e5e7eb;">Questions:</strong> Edit text in each step panel</li>
+          <li><strong style="color:#e5e7eb;">Options:</strong> Add/remove answer choices (A, B, C, etc.)</li>
+          <li><strong style="color:#e5e7eb;">Urgent alerts:</strong> Click 🔴 next to options that need immediate owner notification</li>
+          <li><strong style="color:#e5e7eb;">Collapse panels:</strong> Click "Collapse" to minimize sections</li>
+        </ul>
+      </div>
+      
+      <div style="margin-bottom:2rem;">
+        <h3 style="font-size:1.1rem;margin-bottom:.75rem;color:#e5e7eb;display:flex;align-items:center;gap:.5rem;"><span style="background:#6366f1;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;">4</span> Preview & Save</h3>
+        <ul style="color:#a1a1aa;line-height:1.8;margin-left:2rem;">
+          <li><strong style="color:#e5e7eb;">Preview:</strong> Click purple "Preview" button to see SMS conversation</li>
+          <li><strong style="color:#e5e7eb;">Select business:</strong> Choose from dropdown (or stay in preview mode)</li>
+          <li><strong style="color:#e5e7eb;">Save:</strong> Click "Save to Business" to apply the flow</li>
+        </ul>
+      </div>
+      
+      <div style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);border-radius:8px;padding:1rem;">
+        <p style="color:#a1a1aa;font-size:.9rem;line-height:1.6;margin:0;"><strong style="color:#6366f1;">💡 Tip:</strong> Drag panels near the canvas edges to auto-scroll and create more space. The dotted lines show the flow order.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-content" style="display:none;">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar__left">
+        <a href="/admin.html" style="color:#71717a;text-decoration:none;font-size:.85rem;display:flex;align-items:center;gap:.35rem;margin-right:.5rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Admin
+        </a>
+        <a href="/" class="topbar__logo">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="url(#lg3)"/><path d="M18 8a7 7 0 1 0 0 12" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="18.5" cy="14" r="1.6" fill="#fff" opacity=".9"/><defs><linearGradient id="lg3" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs></svg>
+          Cove
+        </a>
+        <span class="topbar__sep">/</span>
+        <span class="topbar__title" id="builder-title">Flow Builder</span>
+      </div>
+      <div class="topbar__right">
+        <div id="business-selector-wrap" style="position:relative;">
+          <select id="business-select" class="btn btn--ghost" style="appearance:auto;padding-right:1.5rem;">
+            <option value="">Preview mode (no business)</option>
+          </select>
+        </div>
+        <button class="btn btn--ghost" onclick="resetToTemplate()">Reset</button>
+        <button class="btn" id="preview-toggle-btn" onclick="togglePreview()" style="background:#8b5cf6;color:#fff;border:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Preview
+        </button>
+        <button class="btn btn--primary" id="save-btn" onclick="saveFlow()" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          Save to Business
+        </button>
+        <button class="btn btn--ghost" onclick="toggleGuide()" style="background:#27272a;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          How to Use
+        </button>
+      </div>
+    </div>
+
+    <!-- No-business onboarding banner -->
+    <div id="onboarding-banner" style="display:none;background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(6,182,212,.08));border-bottom:1px solid rgba(99,102,241,.25);padding:.75rem 2rem;text-align:center;">
+      <p style="font-size:.9rem;color:#a1a1aa;">
+        You're in <strong style="color:#e5e7eb;">preview mode</strong> — explore templates and build flows freely.
+        To save a flow, <a href="/admin.html" style="color:#6366f1;text-decoration:underline;">create a business first</a>, then select it above.
+      </p>
+    </div>
+
+    <!-- Layout -->
+    <div class="layout">
+      <!-- Left: Templates + AI -->
+      <div class="panel">
+        <div class="panel__section">
+          <div class="panel__heading">Templates</div>
+          <div id="industry-list"></div>
+        </div>
+        <div class="panel__section">
+          <div class="panel__heading">AI Generator</div>
+          <div class="ai-section">
+            <div class="ai-section__label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              Describe your business
+            </div>
+            <textarea id="ai-prompt" class="ai-input" rows="3" placeholder="e.g. Roofing company in Sydney that does repairs and new installations"></textarea>
+            <button class="btn btn--primary btn--sm" style="width:100%;" id="ai-btn" onclick="generateWithAI()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              Generate Flow
+            </button>
+          </div>
+        </div>
+        <div class="panel__section" id="notif-section">
+          <div class="panel__heading">Notification Channels</div>
+          <div id="notif-panel">
+            <div class="notif-no-biz" id="notif-no-biz">Select a business to configure where lead notifications are sent.</div>
+            <div class="notif-channels" id="notif-channels" style="display:none;">
+              <!-- SMS -->
+              <div class="notif-channel active" id="notif-ch-sms">
+                <div class="notif-channel__head">
+                  <div class="notif-channel__info">
+                    <div class="notif-channel__icon notif-channel__icon--sms">💬</div>
+                    <div><div class="notif-channel__name">SMS</div><div class="notif-channel__desc">Text message alerts</div></div>
+                  </div>
+                  <button class="notif-toggle on" id="notif-sms-toggle" onclick="toggleNotifChannel('sms')"></button>
+                </div>
+                <div class="notif-channel__body">
+                  <div id="notif-sms-list"></div>
+                  <button class="notif-add-btn" onclick="addNotifEntry('sms')">+ Add phone number</button>
+                </div>
+              </div>
+              <!-- Email -->
+              <div class="notif-channel" id="notif-ch-email">
+                <div class="notif-channel__head">
+                  <div class="notif-channel__info">
+                    <div class="notif-channel__icon notif-channel__icon--email">📧</div>
+                    <div><div class="notif-channel__name">Email</div><div class="notif-channel__desc">Email summaries</div></div>
+                  </div>
+                  <button class="notif-toggle" id="notif-email-toggle" onclick="toggleNotifChannel('email')"></button>
+                </div>
+                <div class="notif-channel__body">
+                  <div id="notif-email-list"></div>
+                  <button class="notif-add-btn" onclick="addNotifEntry('email')">+ Add email address</button>
+                </div>
+              </div>
+              <!-- Webhook -->
+              <div class="notif-channel" id="notif-ch-webhook">
+                <div class="notif-channel__head">
+                  <div class="notif-channel__info">
+                    <div class="notif-channel__icon notif-channel__icon--webhook">🔗</div>
+                    <div><div class="notif-channel__name">Webhook</div><div class="notif-channel__desc">POST to your CRM / system</div></div>
+                  </div>
+                  <button class="notif-toggle" id="notif-webhook-toggle" onclick="toggleNotifChannel('webhook')"></button>
+                </div>
+                <div class="notif-channel__body">
+                  <div id="notif-webhook-list"></div>
+                  <button class="notif-add-btn" onclick="addNotifEntry('webhook')">+ Add webhook URL</button>
+                  <div class="notif-hint">We'll POST a JSON payload with lead data to this URL.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Canvas -->
+      <div class="canvas" id="canvas">
+        <div class="canvas-viewport" id="viewport">
+          <svg class="canvas-connectors" id="connectors"></svg>
+          <div id="flow-container" style="display:none;">
+            <!-- Intro -->
+            <div class="flow-intro" id="intro-section" data-node-id="intro">
+              <div class="port port--in" data-port-type="in" data-port-node="intro"></div>
+              <div class="flow-intro__label">
+                <span>💬 Intro Message</span>
+                <span class="flow-intro__toggle" onclick="toggleSection('intro-section')">Collapse ▲</span>
+              </div>
+              <div class="flow-intro__content">
+                <textarea id="intro-text" placeholder="Hi {firstName}, this is {businessName}..."></textarea>
+                <p style="font-size:.7rem;color:#52525b;margin-top:.3rem;">Use {firstName} and {businessName} as placeholders</p>
+              </div>
+              <div class="port port--out" data-port-type="out" data-port-node="intro"></div>
+            </div>
+
+            <!-- Steps (draggable) -->
+            <div id="steps-container"></div>
+
+            <!-- Completion -->
+            <div class="flow-completion" id="completion-section" data-node-id="completion">
+              <div class="port port--in" data-port-type="in" data-port-node="completion"></div>
+              <div class="flow-completion__label">
+                <span>✅ Completion Message</span>
+                <span class="flow-completion__toggle" onclick="toggleSection('completion-section')">Collapse ▲</span>
+              </div>
+              <div class="flow-completion__content">
+                <div class="step-node__field">
+                  <label>Standard</label>
+                  <textarea id="completion-text" placeholder="Thanks! {businessName} will contact you shortly."></textarea>
+                </div>
+                <div class="step-node__field" style="margin-bottom:0;">
+                  <label>With booking link</label>
+                  <textarea id="completion-booking-text" placeholder="Thanks! {businessName} will contact you shortly. Book here: {bookingLink}"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview backdrop -->
+      <div class="preview-backdrop" id="preview-backdrop" onclick="togglePreview()"></div>
+
+      <!-- Right: Preview (slides in) -->
+      <div class="preview-panel" id="preview-panel">
+        <button class="preview-panel__close" onclick="togglePreview()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <h3 style="font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:#71717a;font-weight:600;margin-bottom:.5rem;">SMS Preview</h3>
+        <p style="font-size:.75rem;color:#52525b;margin-bottom:1rem;">What the lead sees on their phone</p>
+        <div class="phone-preview">
+          <div class="phone-preview__header">
+            <h4 id="preview-biz-name">Your Business</h4>
+          </div>
+          <div class="phone-preview__messages" id="preview-messages">
+            <p style="color:#52525b;font-size:.8rem;text-align:center;margin-top:4rem;">Pick a template to see the preview</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentFlow = null;
+    let currentBusinessId = null;
+    let sortableInstance = null;
+
+    // ─── Canvas Pan/Zoom System ───
+    const canvasState = {
+      zoom: 1,
+      panX: 0,
+      panY: 0,
+      isPanning: false,
+      panStartX: 0,
+      panStartY: 0,
+      nodePositions: {},
+      draggingNode: null,
+      dragStartX: 0,
+      dragStartY: 0,
+      // Manual connections
+      connections: [],       // [{from: nodeId, to: nodeId}, ...]
+      isConnecting: false,
+      connectFrom: null,     // nodeId of source
+      connectMouseX: 0,
+      connectMouseY: 0,
+    };
+
+    function initCanvas() {
+      const canvas = document.getElementById('canvas');
+      const viewport = document.getElementById('viewport');
+
+      // Mouse wheel zoom
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        canvasState.zoom = Math.max(0.3, Math.min(3, canvasState.zoom * delta));
+        updateViewportTransform();
+      });
+
+      // Pan with middle mouse or click on canvas background
+      canvas.addEventListener('mousedown', (e) => {
+        if (e.button === 1 || (e.button === 0 && (e.target === canvas || e.target === viewport))) {
+          canvasState.isPanning = true;
+          canvasState.panStartX = e.clientX - canvasState.panX;
+          canvasState.panStartY = e.clientY - canvasState.panY;
+          canvas.classList.add('panning');
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      });
+
+      canvas.addEventListener('mousemove', (e) => {
+        if (canvasState.isPanning) {
+          canvasState.panX = e.clientX - canvasState.panStartX;
+          canvasState.panY = e.clientY - canvasState.panStartY;
+          updateViewportTransform();
+        }
+      });
+
+      canvas.addEventListener('mouseup', () => {
+        canvasState.isPanning = false;
+        canvas.classList.remove('panning');
+      });
+
+      canvas.addEventListener('mouseleave', () => {
+        canvasState.isPanning = false;
+        canvas.classList.remove('panning');
+      });
+    }
+
+    function updateViewportTransform() {
+      const viewport = document.getElementById('viewport');
+      viewport.style.transform = `translate(${canvasState.panX}px, ${canvasState.panY}px) scale(${canvasState.zoom})`;
+      updateConnectors();
+    }
+
+    // ─── Node Dragging System ───
+    function makeNodeDraggable(node, nodeId) {
+      if (!node) return;
+      
+      node.addEventListener('mousedown', (e) => {
+        // Don't drag if clicking on interactive elements
+        const target = e.target;
+        if (target.tagName === 'TEXTAREA' || 
+            target.tagName === 'INPUT' || 
+            target.tagName === 'BUTTON' ||
+            target.tagName === 'SELECT' ||
+            target.closest('.port') ||
+            target.closest('.urgent-toggle') ||
+            target.closest('.remove-opt') ||
+            target.closest('.flow-intro__toggle') ||
+            target.closest('.flow-completion__toggle')) {
+          return;
+        }
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        canvasState.draggingNode = nodeId;
+        canvasState.dragStartX = e.clientX;
+        canvasState.dragStartY = e.clientY;
+        
+        const pos = canvasState.nodePositions[nodeId] || { x: 0, y: 0 };
+        canvasState.dragNodeStartX = pos.x;
+        canvasState.dragNodeStartY = pos.y;
+        
+        node.classList.add('dragging');
+      });
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      if (canvasState.draggingNode) {
+        e.preventDefault();
+        
+        const dx = (e.clientX - canvasState.dragStartX) / canvasState.zoom;
+        const dy = (e.clientY - canvasState.dragStartY) / canvasState.zoom;
+        
+        const newX = canvasState.dragNodeStartX + dx;
+        const newY = canvasState.dragNodeStartY + dy;
+        
+        canvasState.nodePositions[canvasState.draggingNode] = { x: newX, y: newY };
+        updateNodePosition(canvasState.draggingNode);
+        updateConnectors();
+        
+        // Auto-pan when dragging near canvas edges
+        const canvas = document.getElementById('canvas');
+        const canvasRect = canvas.getBoundingClientRect();
+        const edgeThreshold = 50;
+        const panSpeed = 15;
+        
+        let autoPanX = 0;
+        let autoPanY = 0;
+        
+        if (e.clientX < canvasRect.left + edgeThreshold) {
+          autoPanX = panSpeed;
+        } else if (e.clientX > canvasRect.right - edgeThreshold) {
+          autoPanX = -panSpeed;
+        }
+        
+        if (e.clientY < canvasRect.top + edgeThreshold) {
+          autoPanY = panSpeed;
+        } else if (e.clientY > canvasRect.bottom - edgeThreshold) {
+          autoPanY = -panSpeed;
+        }
+        
+        if (autoPanX !== 0 || autoPanY !== 0) {
+          canvasState.panX += autoPanX;
+          canvasState.panY += autoPanY;
+          updateViewportTransform();
+        }
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (canvasState.draggingNode) {
+        const node = document.querySelector(`[data-node-id="${canvasState.draggingNode}"]`);
+        if (node) {
+          node.classList.remove('dragging');
+        }
+        canvasState.draggingNode = null;
+      }
+    });
+
+    function updateNodePosition(nodeId) {
+      const node = document.querySelector(`[data-node-id="${nodeId}"]`);
+      if (!node) return;
+      const pos = canvasState.nodePositions[nodeId] || { x: 0, y: 0 };
+      node.style.left = `${pos.x}px`;
+      node.style.top = `${pos.y}px`;
+    }
+
+    function initNodePositions() {
+      canvasState.nodePositions = {
+        intro: { x: 50, y: 50 },
+        completion: { x: 50, y: 800 }
+      };
+      
+      updateNodePosition('intro');
+      updateNodePosition('completion');
+      
+      makeNodeDraggable(document.getElementById('intro-section'), 'intro');
+      makeNodeDraggable(document.getElementById('completion-section'), 'completion');
+    }
+
+    // ─── Connection System ───
+    function initConnectionSystem() {
+      const canvas = document.getElementById('canvas');
+      const viewport = document.getElementById('viewport');
+
+      // Delegate: mousedown on output ports starts a connection
+      viewport.addEventListener('mousedown', (e) => {
+        const port = e.target.closest('.port--out');
+        if (!port) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        const fromNode = port.dataset.portNode;
+        canvasState.isConnecting = true;
+        canvasState.connectFrom = fromNode;
+        canvas.classList.add('connecting');
+        port.classList.add('active');
+
+        // Highlight all valid input ports
+        document.querySelectorAll('.port--in').forEach(p => {
+          if (p.dataset.portNode !== fromNode) p.classList.add('valid-target');
+        });
+      });
+
+      // Track mouse during connecting
+      document.addEventListener('mousemove', (e) => {
+        if (!canvasState.isConnecting) return;
+        // Convert screen coords to viewport coords
+        const rect = document.getElementById('canvas').getBoundingClientRect();
+        canvasState.connectMouseX = (e.clientX - rect.left - canvasState.panX) / canvasState.zoom;
+        canvasState.connectMouseY = (e.clientY - rect.top - canvasState.panY) / canvasState.zoom;
+        updateConnectors();
+      });
+
+      // Complete or cancel connection on mouseup
+      document.addEventListener('mouseup', (e) => {
+        if (!canvasState.isConnecting) return;
+
+        const port = e.target.closest('.port--in');
+        if (port && port.dataset.portNode !== canvasState.connectFrom) {
+          const toNode = port.dataset.portNode;
+          // Check for duplicate
+          const exists = canvasState.connections.some(c => c.from === canvasState.connectFrom && c.to === toNode);
+          if (!exists) {
+            canvasState.connections.push({ from: canvasState.connectFrom, to: toNode });
+          }
+        }
+
+        // Clean up
+        canvasState.isConnecting = false;
+        canvasState.connectFrom = null;
+        canvas.classList.remove('connecting');
+        document.querySelectorAll('.port.active, .port.valid-target').forEach(p => {
+          p.classList.remove('active', 'valid-target');
+        });
+        updateConnectors();
+      });
+    }
+
+    function addConnection(from, to) {
+      const exists = canvasState.connections.some(c => c.from === from && c.to === to);
+      if (!exists) canvasState.connections.push({ from, to });
+    }
+
+    function removeConnection(index) {
+      canvasState.connections.splice(index, 1);
+      updateConnectors();
+    }
+
+    function buildDefaultConnections() {
+      canvasState.connections = [];
+      const stepKeys = Object.keys(canvasState.nodePositions).filter(k => k.startsWith('step_')).sort();
+      const sequence = ['intro', ...stepKeys, 'completion'];
+      for (let i = 0; i < sequence.length - 1; i++) {
+        canvasState.connections.push({ from: sequence[i], to: sequence[i + 1] });
+      }
+    }
+
+    // ─── SVG Connectors ───
+    function updateConnectors() {
+      const svg = document.getElementById('connectors');
+      if (!svg) return;
+      
+      svg.innerHTML = '';
+
+      // Build bounding boxes
+      const boxes = {};
+      document.querySelectorAll('[data-node-id]').forEach(el => {
+        const id = el.dataset.nodeId;
+        const pos = canvasState.nodePositions[id];
+        if (pos) boxes[id] = { x: pos.x, y: pos.y, w: el.offsetWidth, h: el.offsetHeight };
+      });
+      
+      const GAP = 24;
+      const ARROW_H = 10;
+
+      // Draw each manual connection
+      canvasState.connections.forEach((conn, ci) => {
+        const fromBox = boxes[conn.from];
+        const toBox = boxes[conn.to];
+        if (!fromBox || !toBox) return;
+        
+        const fromCx = fromBox.x + fromBox.w / 2;
+        const fromBottom = fromBox.y + fromBox.h;
+        const exitY = fromBottom + GAP;
+        
+        const toCx = toBox.x + toBox.w / 2;
+        const entryY = toBox.y - GAP;
+        const arrowTipY = toBox.y;
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        let d;
+        
+        if (Math.abs(fromCx - toCx) < 5) {
+          d = `M ${fromCx} ${fromBottom} L ${fromCx} ${arrowTipY - ARROW_H}`;
+        } else {
+          const channelY = Math.max(exitY, Math.min(entryY, (exitY + entryY) / 2));
+          d = `M ${fromCx} ${fromBottom} L ${fromCx} ${channelY} L ${toCx} ${channelY} L ${toCx} ${arrowTipY - ARROW_H}`;
+        }
+        
+        path.setAttribute('d', d);
+        path.setAttribute('class', 'connector-line');
+        svg.appendChild(path);
+
+        // Invisible wider path for hover/click to delete
+        const hitPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        hitPath.setAttribute('d', d);
+        hitPath.setAttribute('class', 'connector-line--hover');
+        svg.appendChild(hitPath);
+        
+        // Arrow
+        const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        arrow.setAttribute('points', `${toCx},${arrowTipY} ${toCx-5},${arrowTipY - ARROW_H} ${toCx+5},${arrowTipY - ARROW_H}`);
+        arrow.setAttribute('class', 'connector-arrow');
+        svg.appendChild(arrow);
+
+        // Delete button at midpoint
+        const midX = (fromCx + toCx) / 2;
+        const midY = Math.abs(fromCx - toCx) < 5 ? (fromBottom + arrowTipY) / 2 : Math.max(exitY, Math.min(entryY, (exitY + entryY) / 2));
+        const del = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        del.setAttribute('class', 'connector-delete');
+        del.innerHTML = `<circle cx="${midX}" cy="${midY}" r="8"/><text x="${midX}" y="${midY + 3.5}" text-anchor="middle">×</text>`;
+        del.addEventListener('click', () => removeConnection(ci));
+        svg.appendChild(del);
+      });
+
+      // Draw temporary line while connecting
+      if (canvasState.isConnecting && canvasState.connectFrom) {
+        const fromBox = boxes[canvasState.connectFrom];
+        if (fromBox) {
+          const fromCx = fromBox.x + fromBox.w / 2;
+          const fromBottom = fromBox.y + fromBox.h;
+          const tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          tempLine.setAttribute('x1', fromCx);
+          tempLine.setAttribute('y1', fromBottom);
+          tempLine.setAttribute('x2', canvasState.connectMouseX);
+          tempLine.setAttribute('y2', canvasState.connectMouseY);
+          tempLine.setAttribute('class', 'connector-line--temp');
+          svg.appendChild(tempLine);
+        }
+      }
+    }
+
+    // ─── Initialize App ───
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('app-content').style.display = 'block';
+      initCanvas();
+      initConnectionSystem();
+      loadBusinesses();
+      loadIndustries();
+      loadIndustryTemplate('dental');
+    });
+
+    // ─── Guide Modal ───
+    function toggleGuide() {
+      const modal = document.getElementById('guide-modal');
+      const isOpen = modal.style.display === 'flex';
+      modal.style.display = isOpen ? 'none' : 'flex';
+    }
+
+    // ─── Load Data ───
+    let businessSelectBound = false;
+    async function loadBusinesses() {
+      try {
+        const res = await fetch('/api/admin/businesses');
+        const data = await res.json();
+        const businesses = data.businesses || [];
+        const sel = document.getElementById('business-select');
+        sel.innerHTML = '<option value="">Preview mode (no business)</option>';
+        businesses.forEach(b => {
+          const opt = document.createElement('option');
+          opt.value = b.id;
+          opt.textContent = b.name;
+          sel.appendChild(opt);
+        });
+        if (!businessSelectBound) {
+          businessSelectBound = true;
+          sel.addEventListener('change', () => {
+            currentBusinessId = sel.value || null;
+            document.getElementById('save-btn').disabled = !currentBusinessId;
+            if (sel.value) loadBusinessFlow(sel.value);
+            else {
+              document.getElementById('save-btn').querySelector('span')?.remove();
+              document.getElementById('onboarding-banner').style.display = businesses.length === 0 ? 'block' : 'none';
+              renderNotifPanel();
+            }
+          });
+        }
+        if (businesses.length === 0) {
+          document.getElementById('onboarding-banner').style.display = 'block';
+        } else {
+          document.getElementById('onboarding-banner').style.display = 'none';
+        }
+      } catch(e) { console.error('Load businesses error', e); }
+    }
+
+    async function loadIndustries() {
+      try {
+        const res = await fetch('/api/admin/industries');
+        const data = await res.json();
+        const container = document.getElementById('industry-list');
+        const icons = { dental: '🦷', plumbing: '🔧', electrical: '⚡', hvac: '❄️', legal: '⚖️', general: '🏢' };
+        container.innerHTML = '';
+        (data.industries || []).forEach(ind => {
+          const btn = document.createElement('button');
+          btn.className = 'industry-btn';
+          btn.dataset.id = ind.id;
+          btn.innerHTML = `<div class="industry-btn__icon">${icons[ind.id] || '📋'}</div><div class="industry-btn__info"><div class="industry-btn__name">${ind.name}</div><div class="industry-btn__meta">${ind.stepCount} questions</div></div>`;
+          btn.addEventListener('click', () => loadIndustryTemplate(ind.id));
+          container.appendChild(btn);
+        });
+      } catch(e) { console.error('Load industries error', e); }
+    }
+
+    async function loadBusinessFlow(businessId) {
+      try {
+        currentBusinessId = businessId;
+        const [flowRes, intRes] = await Promise.all([
+          fetch(`/api/admin/businesses/${businessId}/flow`),
+          fetch(`/api/admin/businesses/${businessId}/integrations`),
+        ]);
+        const data = await flowRes.json();
+        if (data.ok) {
+          currentFlow = data.flow_config;
+          renderFlow();
+          document.getElementById('save-btn').disabled = false;
+          const sel = document.getElementById('business-select');
+          const bizName = sel.selectedOptions[0]?.textContent || 'Business';
+          document.getElementById('builder-title').textContent = `Flow Builder — ${bizName}`;
+          highlightIndustry(data.industry);
+        }
+        const intData = await intRes.json();
+        if (intData.ok) {
+          loadNotifConfig({
+            integrations: intData.integrations || {},
+            owner_notify_phone: data.owner_notify_phone || '',
+            owner_notify_email: data.owner_notify_email || '',
+          });
+        } else {
+          renderNotifPanel();
+        }
+      } catch(e) { console.error('Load flow error', e); }
+    }
+
+    async function loadIndustryTemplate(industryId) {
+      try {
+        const res = await fetch(`/api/admin/industries/${industryId}/template`);
+        const data = await res.json();
+        if (data.ok) {
+          currentFlow = data.template;
+          renderFlow();
+          highlightIndustry(industryId);
+          document.getElementById('save-btn').disabled = !currentBusinessId;
+        }
+      } catch(e) { console.error('Load template error', e); }
+    }
+
+    function highlightIndustry(id) {
+      document.querySelectorAll('.industry-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+    }
+
+    // ─── Render Flow ───
+    function renderFlow() {
+      if (!currentFlow) return;
+      document.getElementById('flow-container').style.display = 'block';
+      document.getElementById('intro-text').value = currentFlow.intro || '';
+      document.getElementById('completion-text').value = currentFlow.completion || '';
+      document.getElementById('completion-booking-text').value = currentFlow.completion_with_booking || '';
+      renderSteps();
+      initNodePositions();
+      buildDefaultConnections();
+      updatePreview();
+      updateConnectors();
+    }
+
+    function renderSteps() {
+      const container = document.getElementById('steps-container');
+      container.innerHTML = '';
+      (currentFlow.steps || []).forEach((step, i) => {
+        const node = createStepNode(step, i);
+        container.appendChild(node);
+        
+        const nodeId = `step_${i}`;
+        if (!canvasState.nodePositions[nodeId]) {
+          canvasState.nodePositions[nodeId] = { x: 50, y: 300 + (i * 250) };
+        }
+        updateNodePosition(nodeId);
+        makeNodeDraggable(node, nodeId);
+      });
+    }
+
+    function createStepNode(step, index) {
+      const div = document.createElement('div');
+      div.className = 'step-node' + (step.urgent_values?.length ? ' has-urgent' : '');
+      div.dataset.index = index;
+      div.dataset.nodeId = `step_${index}`;
+
+      div.innerHTML = `
+        <div class="port port--in" data-port-type="in" data-port-node="step_${index}"></div>
+        <div class="step-node__header">
+          <div class="step-node__num">${index + 1}</div>
+          <div class="step-node__key"><input type="text" value="${step.key || ''}" placeholder="step_key" data-field="key" /></div>
+          <div class="step-node__actions">
+            <button title="Duplicate" onclick="duplicateStep(${index})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+            <button class="danger" title="Delete" onclick="removeStep(${index})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+          </div>
+        </div>
+        <div class="step-node__field">
+          <label>Question (SMS text)</label>
+          <textarea data-field="question" placeholder="Your question text...">${step.question || ''}</textarea>
+        </div>
+        <div class="step-node__field">
+          <label>Invalid reply message</label>
+          <input type="text" data-field="invalid_text" value="${step.invalid_text || ''}" placeholder="Please reply A, B or C." />
+        </div>
+        <div class="step-node__field">
+          <label>Options <span style="color:#52525b;font-weight:400;">(value → label, 🔴 = triggers urgent alert)</span></label>
+          <div class="options-list" data-step="${index}">
+            ${(step.options || []).map((opt, oi) => `
+              <div class="option-row">
+                <input type="text" class="val-input" value="${opt.value}" placeholder="A" data-oi="${oi}" data-ofield="value" style="background:#0f0f13;border:1px solid #27272a;border-radius:6px;color:#e5e7eb;padding:.4rem;font-family:inherit;font-size:.85rem;" />
+                <input type="text" value="${opt.label}" placeholder="Option label" data-oi="${oi}" data-ofield="label" style="background:#0f0f13;border:1px solid #27272a;border-radius:6px;color:#e5e7eb;padding:.4rem .6rem;font-family:inherit;font-size:.85rem;" />
+                <div class="urgent-toggle ${(step.urgent_values || []).includes(opt.value) ? 'active' : ''}" title="Toggle urgent" onclick="toggleUrgent(${index}, ${oi})">🔴</div>
+                <button class="remove-opt" onclick="removeOption(${index}, ${oi})">×</button>
+              </div>
+            `).join('')}
+          </div>
+          <button class="add-option-btn" onclick="addOption(${index})">+ Add option</button>
+        </div>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#71717a;cursor:pointer;">
+          <input type="checkbox" ${step.free_text ? 'checked' : ''} onchange="toggleFreeText(${index}, this.checked)" /> Allow free-text reply (skip option validation)
+        </label>
+        <div class="port port--out" data-port-type="out" data-port-node="step_${index}"></div>
+      `;
+
+      div.querySelectorAll('[data-field]').forEach(el => {
+        el.addEventListener('input', () => syncStepField(index, el.dataset.field, el.value));
+      });
+      div.querySelectorAll('[data-ofield]').forEach(el => {
+        el.addEventListener('input', () => syncOptionField(index, Number(el.dataset.oi), el.dataset.ofield, el.value));
+      });
+
+      return div;
+    }
+
+
+    // ─── Step Mutations ───
+    function syncStepField(index, field, value) {
+      if (!currentFlow?.steps[index]) return;
+      currentFlow.steps[index][field] = value;
+      if (field === 'key') currentFlow.steps[index].id = value;
+      updatePreview();
+    }
+
+    function syncOptionField(index, optIndex, field, value) {
+      if (!currentFlow?.steps[index]?.options[optIndex]) return;
+      const oldVal = currentFlow.steps[index].options[optIndex].value;
+      currentFlow.steps[index].options[optIndex][field] = value;
+      if (field === 'value') {
+        const urgIdx = (currentFlow.steps[index].urgent_values || []).indexOf(oldVal);
+        if (urgIdx !== -1) currentFlow.steps[index].urgent_values[urgIdx] = value;
+      }
+      updatePreview();
+    }
+
+    function addStep() {
+      if (!currentFlow) {
+        currentFlow = { intro: '', completion: '', completion_with_booking: '', steps: [] };
+        document.getElementById('flow-container').style.display = 'block';
+      }
+      const idx = currentFlow.steps.length;
+      currentFlow.steps.push({
+        id: `step_${idx + 1}`,
+        key: `step_${idx + 1}`,
+        question: '',
+        invalid_text: '',
+        options: [{ value: 'A', label: '' }, { value: 'B', label: '' }],
+        urgent_values: [],
+        free_text: false,
+      });
+      renderSteps();
+      updatePreview();
+    }
+
+    function removeStep(index) {
+      currentFlow.steps.splice(index, 1);
+      renderSteps();
+      updatePreview();
+    }
+
+    function duplicateStep(index) {
+      const copy = JSON.parse(JSON.stringify(currentFlow.steps[index]));
+      copy.key = copy.key + '_copy';
+      copy.id = copy.key;
+      currentFlow.steps.splice(index + 1, 0, copy);
+      renderSteps();
+      updatePreview();
+    }
+
+    function addOption(stepIndex) {
+      const letters = 'ABCDEFGHIJ';
+      const nextVal = letters[currentFlow.steps[stepIndex].options.length] || String(currentFlow.steps[stepIndex].options.length + 1);
+      currentFlow.steps[stepIndex].options.push({ value: nextVal, label: '' });
+      renderSteps();
+    }
+
+    function removeOption(stepIndex, optIndex) {
+      const val = currentFlow.steps[stepIndex].options[optIndex].value;
+      currentFlow.steps[stepIndex].options.splice(optIndex, 1);
+      currentFlow.steps[stepIndex].urgent_values = (currentFlow.steps[stepIndex].urgent_values || []).filter(v => v !== val);
+      renderSteps();
+      updatePreview();
+    }
+
+    function toggleUrgent(stepIndex, optIndex) {
+      const val = currentFlow.steps[stepIndex].options[optIndex].value;
+      const urgents = currentFlow.steps[stepIndex].urgent_values || [];
+      const idx = urgents.indexOf(val);
+      if (idx === -1) urgents.push(val);
+      else urgents.splice(idx, 1);
+      currentFlow.steps[stepIndex].urgent_values = urgents;
+      renderSteps();
+      updatePreview();
+    }
+
+    function toggleFreeText(stepIndex, checked) {
+      currentFlow.steps[stepIndex].free_text = checked;
+      updatePreview();
+    }
+
+    // ─── Notification Channels ───
+    let notifConfig = { sms: { enabled: true, numbers: [] }, email: { enabled: false, addresses: [] }, webhook: { enabled: false, urls: [] } };
+
+    function toggleNotifChannel(channel) {
+      const toggle = document.getElementById(`notif-${channel}-toggle`);
+      const card = document.getElementById(`notif-ch-${channel}`);
+      const isOn = toggle.classList.contains('on');
+      toggle.classList.toggle('on');
+      card.classList.toggle('active');
+      if (channel === 'sms') notifConfig.sms.enabled = !isOn;
+      else if (channel === 'email') notifConfig.email.enabled = !isOn;
+      else if (channel === 'webhook') notifConfig.webhook.enabled = !isOn;
+    }
+
+    function addNotifEntry(channel) {
+      const list = document.getElementById(`notif-${channel}-list`);
+      const placeholder = channel === 'sms' ? '0412 345 678' : channel === 'email' ? 'owner@example.com' : 'https://your-crm.com/webhook';
+      const div = document.createElement('div');
+      div.className = 'notif-entry';
+      div.innerHTML = `<input class="notif-channel__input" type="${channel === 'email' ? 'email' : 'text'}" placeholder="${placeholder}" style="margin-bottom:0;" /><button class="notif-entry__remove" onclick="this.parentElement.remove()">×</button>`;
+      list.appendChild(div);
+      div.querySelector('input').focus();
+    }
+
+    function loadNotifConfig(business) {
+      const integrations = business.integrations || {};
+      const nc = integrations.notifications || {};
+      notifConfig = {
+        sms: { enabled: nc.sms?.enabled !== false, numbers: nc.sms?.numbers || [] },
+        email: { enabled: !!nc.email?.enabled, addresses: nc.email?.addresses || [] },
+        webhook: { enabled: !!nc.webhook?.enabled, urls: nc.webhook?.urls || [] },
+      };
+
+      // Add owner phone as default SMS if no numbers configured
+      if (notifConfig.sms.numbers.length === 0 && business.owner_notify_phone) {
+        notifConfig.sms.numbers.push(business.owner_notify_phone);
+      }
+      if (notifConfig.email.addresses.length === 0 && business.owner_notify_email) {
+        notifConfig.email.addresses.push(business.owner_notify_email);
+      }
+
+      renderNotifPanel();
+    }
+
+    function renderNotifPanel() {
+      document.getElementById('notif-no-biz').style.display = currentBusinessId ? 'none' : 'block';
+      document.getElementById('notif-channels').style.display = currentBusinessId ? 'flex' : 'none';
+      if (!currentBusinessId) return;
+
+      // SMS toggle
+      const smsToggle = document.getElementById('notif-sms-toggle');
+      smsToggle.classList.toggle('on', notifConfig.sms.enabled);
+      document.getElementById('notif-ch-sms').classList.toggle('active', notifConfig.sms.enabled);
+      const smsList = document.getElementById('notif-sms-list');
+      smsList.innerHTML = '';
+      notifConfig.sms.numbers.forEach(num => {
+        const div = document.createElement('div');
+        div.className = 'notif-entry';
+        div.innerHTML = `<input class="notif-channel__input" type="text" value="${num}" placeholder="0412 345 678" style="margin-bottom:0;" /><button class="notif-entry__remove" onclick="this.parentElement.remove()">×</button>`;
+        smsList.appendChild(div);
+      });
+
+      // Email toggle
+      const emailToggle = document.getElementById('notif-email-toggle');
+      emailToggle.classList.toggle('on', notifConfig.email.enabled);
+      document.getElementById('notif-ch-email').classList.toggle('active', notifConfig.email.enabled);
+      const emailList = document.getElementById('notif-email-list');
+      emailList.innerHTML = '';
+      notifConfig.email.addresses.forEach(addr => {
+        const div = document.createElement('div');
+        div.className = 'notif-entry';
+        div.innerHTML = `<input class="notif-channel__input" type="email" value="${addr}" placeholder="owner@example.com" style="margin-bottom:0;" /><button class="notif-entry__remove" onclick="this.parentElement.remove()">×</button>`;
+        emailList.appendChild(div);
+      });
+
+      // Webhook toggle
+      const webhookToggle = document.getElementById('notif-webhook-toggle');
+      webhookToggle.classList.toggle('on', notifConfig.webhook.enabled);
+      document.getElementById('notif-ch-webhook').classList.toggle('active', notifConfig.webhook.enabled);
+      const webhookList = document.getElementById('notif-webhook-list');
+      webhookList.innerHTML = '';
+      notifConfig.webhook.urls.forEach(url => {
+        const div = document.createElement('div');
+        div.className = 'notif-entry';
+        div.innerHTML = `<input class="notif-channel__input" type="text" value="${url}" placeholder="https://your-crm.com/webhook" style="margin-bottom:0;" /><button class="notif-entry__remove" onclick="this.parentElement.remove()">×</button>`;
+        webhookList.appendChild(div);
+      });
+    }
+
+    function collectNotifConfig() {
+      const smsInputs = document.querySelectorAll('#notif-sms-list .notif-entry input');
+      const emailInputs = document.querySelectorAll('#notif-email-list .notif-entry input');
+      const webhookInputs = document.querySelectorAll('#notif-webhook-list .notif-entry input');
+      return {
+        sms: {
+          enabled: document.getElementById('notif-sms-toggle').classList.contains('on'),
+          numbers: [...smsInputs].map(i => i.value.trim()).filter(Boolean),
+        },
+        email: {
+          enabled: document.getElementById('notif-email-toggle').classList.contains('on'),
+          addresses: [...emailInputs].map(i => i.value.trim()).filter(Boolean),
+        },
+        webhook: {
+          enabled: document.getElementById('notif-webhook-toggle').classList.contains('on'),
+          urls: [...webhookInputs].map(i => i.value.trim()).filter(Boolean),
+        },
+      };
+    }
+
+    // ─── Preview ───
+    function updatePreview() {
+      if (!currentFlow) return;
+      const container = document.getElementById('preview-messages');
+      const selText = document.getElementById('business-select').selectedOptions[0]?.textContent || '';
+      const bizName = (selText && !selText.includes('Preview mode')) ? selText : (currentFlow.name || 'Your Business');
+      document.getElementById('preview-biz-name').textContent = bizName;
+
+      let html = '';
+      const intro = (currentFlow.intro || 'Hi there, quick questions to help you faster.')
+        .replace(/{firstName}/g, 'Sarah')
+        .replace(/{businessName}/g, bizName);
+
+      const firstQ = currentFlow.steps[0]?.question || '';
+      html += `<div class="preview-msg preview-msg--biz">${intro}\n\n${firstQ}</div>`;
+
+      for (let i = 0; i < currentFlow.steps.length; i++) {
+        const step = currentFlow.steps[i];
+        const answer = step.options[0]?.value || '...';
+        const answerLabel = step.options[0]?.label || '';
+        html += `<div class="preview-msg preview-msg--user">${answer}</div>`;
+
+        if ((step.urgent_values || []).includes(answer)) {
+          html += `<div class="preview-msg preview-msg--alert">⚡ Urgent alert sent to owner</div>`;
+        }
+
+        if (i < currentFlow.steps.length - 1) {
+          html += `<div class="preview-msg preview-msg--biz">${currentFlow.steps[i + 1].question || '...'}</div>`;
+        }
+      }
+
+      const completion = (currentFlow.completion || 'Thanks! We will be in touch.')
+        .replace(/{businessName}/g, bizName)
+        .replace(/{firstName}/g, 'Sarah');
+      html += `<div class="preview-msg preview-msg--biz">${completion}</div>`;
+
+      container.innerHTML = html;
+    }
+
+    // ─── Sync intro/completion fields ───
+    document.addEventListener('input', (e) => {
+      if (!currentFlow) return;
+      if (e.target.id === 'intro-text') { currentFlow.intro = e.target.value; updatePreview(); }
+      if (e.target.id === 'completion-text') { currentFlow.completion = e.target.value; updatePreview(); }
+      if (e.target.id === 'completion-booking-text') { currentFlow.completion_with_booking = e.target.value; updatePreview(); }
+    });
+
+    // ─── Save ───
+    async function saveFlow() {
+      if (!currentBusinessId || !currentFlow) return;
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      try {
+        // Save flow config
+        const flowRes = await fetch(`/api/admin/businesses/${currentBusinessId}/flow`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ flow_config: currentFlow }),
+        });
+        const flowData = await flowRes.json();
+
+        // Save notification config
+        const notifications = collectNotifConfig();
+        await fetch(`/api/admin/businesses/${currentBusinessId}/integrations`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ integrations: { notifications } }),
+        });
+
+        if (flowData.ok) showToast('Flow & notifications saved!');
+        else showToast(flowData.error || 'Save failed', true);
+      } catch(e) {
+        showToast('Save error', true);
+      }
+      btn.disabled = false;
+      btn.textContent = 'Save Flow';
+    }
+
+    function resetToTemplate() {
+      const active = document.querySelector('.industry-btn.active');
+      if (active) loadIndustryTemplate(active.dataset.id);
+      else if (currentFlow) { currentFlow = null; document.getElementById('flow-container').style.display = 'none'; }
+    }
+
+    // ─── AI Generation ───
+    async function generateWithAI() {
+      const prompt = document.getElementById('ai-prompt').value.trim();
+      if (!prompt) return;
+      const btn = document.getElementById('ai-btn');
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+      try {
+        const res = await fetch('/api/admin/ai/generate-flow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ industry: prompt, business_name: '', context: prompt }),
+        });
+        const data = await res.json();
+        if (data.ok && data.flow) {
+          currentFlow = data.flow;
+          renderFlow();
+          showToast('AI flow generated!');
+          document.getElementById('save-btn').disabled = !currentBusinessId;
+        } else {
+          showToast(data.error || 'AI generation failed', true);
+        }
+      } catch(e) {
+        showToast('AI error: ' + e.message, true);
+      }
+      btn.disabled = false;
+      btn.textContent = 'Generate Flow';
+    }
+
+    // ─── Section Toggle (Collapse) ───
+    function toggleSection(sectionId) {
+      const section = document.getElementById(sectionId);
+      const isCollapsed = section.classList.contains('collapsed');
+      section.classList.toggle('collapsed');
+      
+      const toggle = section.querySelector('.flow-intro__toggle, .flow-completion__toggle');
+      if (toggle) {
+        toggle.textContent = isCollapsed ? 'Collapse ▲' : 'Expand ▼';
+      }
+    }
+
+    // ─── Preview Toggle ───
+    function togglePreview() {
+      const panel = document.getElementById('preview-panel');
+      const backdrop = document.getElementById('preview-backdrop');
+      const isOpen = panel.classList.contains('open');
+      panel.classList.toggle('open');
+      backdrop.classList.toggle('open');
+      if (!isOpen) updatePreview();
+    }
+
+    // ─── Toast ───
+    function showToast(msg, isError) {
+      const t = document.createElement('div');
+      t.className = 'toast' + (isError ? ' error' : '');
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  </script>
+</body>
+</html>

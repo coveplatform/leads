@@ -3,304 +3,531 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ChairFlow — Instant Lead Response for Service Businesses</title>
-    <meta name="description" content="ChairFlow helps service businesses respond to website enquiries in seconds, qualify leads via SMS, and close more jobs." />
+    <title>Cove — Never lose a lead while you're working</title>
+    <meta name="description" content="Cove texts missed calls and form leads back in 10 seconds, qualifies them via SMS, and sends you a ready-to-call summary — before they find someone else." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
 
-    <!-- ─── NAV ─── -->
+    <!-- NAV -->
     <header class="nav">
       <div class="container nav__inner">
         <a href="/" class="nav__logo">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect width="28" height="28" rx="7" fill="url(#lg)"/><path d="M8 14.5c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="14.5" cy="14.5" r="2" fill="#fff"/><defs><linearGradient id="lg" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs></svg>
-          <span>ChairFlow</span>
+          <svg class="nav__mark" width="30" height="30" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect width="28" height="28" rx="7" fill="url(#cove-g)"/><path d="M18 9.5a5.5 5.5 0 1 0 0 9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/><defs><linearGradient id="cove-g" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs></svg>
+          <span>cove</span>
         </a>
         <nav class="nav__links">
           <a href="#how">How it works</a>
+          <a href="#features">Features</a>
           <a href="#pricing">Pricing</a>
-          <a href="#contact" class="btn btn--sm">Get a demo</a>
+          <a href="#faq">FAQ</a>
+          <a href="#demo" class="btn btn--sm btn--ghost">Try demo</a>
+          <a href="/login" class="btn btn--sm btn--primary">Get started</a>
         </nav>
+        <button class="nav__burger" aria-label="Menu" id="nav-burger">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </header>
 
-    <!-- ─── HERO (dark) ─── -->
+    <!-- HERO -->
     <section class="hero">
+      <div class="hero__bg-grid"></div>
       <div class="hero__glow"></div>
       <div class="container hero__grid">
         <div class="hero__copy">
-          <span class="badge">For service businesses losing leads</span>
-          <h1>Stop replying<br/>15 hours late.</h1>
-          <p class="hero__sub">
-            ChairFlow responds to website enquiries in <strong>10 seconds</strong>, qualifies
-            leads via SMS, and sends your team an action-ready summary &mdash; so you
-            close more jobs, not more admin.
-          </p>
+          <div class="hero__eyebrow">
+            <span class="eyebrow-dot"></span>
+            <span>Missed call text-back &middot; SMS qualification &middot; Instant lead summaries</span>
+          </div>
+          <h1>Stop losing jobs<br/><em>while you&rsquo;re working.</em></h1>
+          <p class="hero__sub">Every missed call is a job going to your competitor. Cove texts back in <strong>10 seconds</strong>, qualifies them for you, and sends a ready-to-call summary.</p>
+          <div class="hero__proof-row">
+            <div class="hero__proof-item"><strong>10s</strong><span>text-back</span></div>
+            <div class="hero__proof-divider"></div>
+            <div class="hero__proof-item"><strong>24/7</strong><span>always on</span></div>
+            <div class="hero__proof-divider"></div>
+            <div class="hero__proof-item"><strong>30 day</strong><span>money-back</span></div>
+          </div>
           <div class="hero__ctas">
-            <a href="#contact" class="btn btn--primary btn--lg">Get your free audit</a>
-            <a href="#how" class="btn btn--outline btn--lg">See the workflow</a>
+            <a href="/login" class="btn btn--primary btn--lg hero__cta-main">
+              Get started &mdash; $49/mo
+            </a>
+            <a href="#contact" class="btn btn--ghost-light btn--lg">Have us set it up &darr;</a>
           </div>
         </div>
-
-        <div class="phone-mock">
-          <div class="phone-mock__header">
-            <div class="phone-mock__status-bar">
-              <span>9:41</span>
-              <span class="phone-mock__icons">
-                <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="4" width="3" height="8" rx="1" opacity=".3"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity=".5"/><rect x="9" y="0" width="3" height="12" rx="1" opacity=".8"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg>
-              </span>
-            </div>
-            <div class="phone-mock__contact">
-              <div class="phone-mock__avatar">AB</div>
-              <div class="phone-mock__name">ABC Plumbing</div>
-            </div>
-          </div>
-          <div class="phone-mock__screen">
-            <div class="sms sms--time">Today 9:41 AM</div>
-
-            <div class="sms sms--out">
-              <div class="sms__bubble">
-                Hi Sam! Thanks for your enquiry with <strong>ABC Plumbing</strong>.
-                <br/><br/>3 quick Qs so we can get back to you faster:
-                <br/><br/>Is this <strong>urgent</strong> or can it wait a few days?
-                <br/>Reply <strong>A</strong>) Urgent &nbsp; <strong>B</strong>) Not urgent
+        <div class="hero__phone-col">
+          <div class="hero__phone-wrap">
+            <div class="iphone iphone--hero">
+              <div class="iphone__statusbar">
+                <span>9:41</span>
+                <div class="iphone__statusbar-icons">
+                  <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><rect y="3.5" width="3" height="7.5" rx=".8" opacity=".3"/><rect x="4.3" y="1.5" width="3" height="9.5" rx=".8" opacity=".55"/><rect x="8.6" y="0" width="3" height="11" rx=".8" opacity=".8"/><rect x="12.9" y="0" width="3" height="11" rx=".8"/></svg>
+                  <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="#fff" stroke-width="1.2"><path d="M1.5 7.5C3.5 3 6.5 1 7.5 1s4 2 6 6.5" opacity=".3"/><path d="M3.5 7C5 4 6.5 2.5 7.5 2.5S10 4 11.5 7" opacity=".6"/><path d="M5.5 7C6.2 5 7 4 7.5 4s1.3 1 2 3"/><circle cx="7.5" cy="8.5" r="1.2" fill="#fff" stroke="none"/></svg>
+                  <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x=".5" y=".5" width="20" height="10" rx="2.5" stroke="#fff" stroke-opacity=".35"/><rect x="21.5" y="3" width="1.5" height="5" rx=".75" fill="#fff" opacity=".4"/><rect x="1.5" y="1.5" width="15" height="8" rx="1.5" fill="#fff"/></svg>
+                </div>
               </div>
-              <span class="sms__meta">9:41 AM</span>
-            </div>
-
-            <div class="sms sms--in">
-              <div class="sms__bubble">A</div>
-              <span class="sms__meta">9:41 AM</span>
-            </div>
-
-            <div class="sms sms--out">
-              <div class="sms__bubble">
-                Got it. What type of job?
-                <br/><strong>1</strong>) Blocked drain &nbsp; <strong>2</strong>) Leak
-                <br/><strong>3</strong>) Hot water &nbsp; <strong>4</strong>) General
+              <div class="iphone__island"></div>
+              <div class="iphone__header">
+                <div class="iphone__back"><svg width="10" height="17" viewBox="0 0 10 17" fill="none" stroke="#0a84ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1L2 8.5 9 16"/></svg></div>
+                <div class="iphone__contact">
+                  <div class="iphone__avatar" id="hero-avatar">BP</div>
+                  <div class="iphone__contact-info">
+                    <div class="iphone__name" id="hero-biz-name">Bay Plumbing</div>
+                    <div class="iphone__sub">SMS</div>
+                  </div>
+                </div>
+                <div class="iphone__actions">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
               </div>
-              <span class="sms__meta">9:41 AM</span>
-            </div>
-
-            <div class="sms sms--in">
-              <div class="sms__bubble">2</div>
-              <span class="sms__meta">9:42 AM</span>
-            </div>
-
-            <div class="sms sms--out">
-              <div class="sms__bubble">
-                Thanks Sam &mdash; we're flagging this as urgent and someone will call you shortly.
+              <div class="iphone__screen" id="hero-messages">
+                <div class="iphone__time">Today 9:41 AM</div>
+                <div class="hero-typing" id="hero-typing"><div class="hero-typing__dots"><div class="hero-typing__dot"></div><div class="hero-typing__dot"></div><div class="hero-typing__dot"></div></div></div>
               </div>
-              <span class="sms__meta">9:42 AM</span>
+              <div class="iphone__inputbar">
+                <div class="iphone__inputbar-plus"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+                <div class="iphone__inputbar-field">Text Message</div>
+                <div class="iphone__inputbar-send"><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></div>
+              </div>
             </div>
-
-            <div class="sms sms--alert">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-              Urgent alert sent to owner
+            <div class="hero__notif" id="hero-notif" style="opacity:0;transform:translateY(12px);">
+              <div class="hero__notif-label">&#11015; Sent to your phone instantly</div>
+              <div class="hero__notif-card">
+                <div class="hero__notif-top">
+                  <svg class="hero__notif-icon" width="18" height="18" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="url(#nlg)"/><path d="M18 8a7 7 0 1 0 0 12" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><defs><linearGradient id="nlg" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs></svg>
+                  <span class="hero__notif-app">Cove</span>
+                  <span class="hero__notif-time">now</span>
+                </div>
+                <div class="hero__notif-title" id="notif-title">&#128680; New Urgent Lead</div>
+                <div class="hero__notif-body" id="notif-body">Sam Thompson &mdash; Leaking pipe<br>Urgency: Emergency &middot; Call back ASAP</div>
+              </div>
+              <div class="hero__notif-via">Delivered via SMS + Email &middot; No app needed</div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ─── LIVE DEMO ─── -->
-    <section class="demo">
+    <!-- LOGO BANNER -->
+    <section class="logo-banner">
+      <p class="logo-banner__label">Works with your existing website</p>
+      <div class="logo-banner__track">
+        <div class="logo-banner__scroll">
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10 10-4.49 10-10S17.51 2 12 2zm-1.03 17.74L4.54 7.87c.88-.41 1.84-.67 2.86-.76l.29.01c.56 0 .49.68.49.68L5.82 16s1.97 5.39 2.32 6.35c-2.28-.48-4.22-1.86-5.52-3.72l3.35-9.7zm9.92-7.37c0 1.14-.42 2.48-.99 4.34l-1.3 4.34-4.74-14.09c.79-.04 1.5-.12 1.5-.12.66-.08.58-.96-.08-.93 0 0-1.99.16-3.28.16-1.2 0-3.22-.16-3.22-.16-.67-.04-.75.89-.08.93 0 0 .67.08 1.38.12l2.05 5.61-2.88 8.64L5.26 7.87c.79-.04 1.5-.12 1.5-.12.66-.08.58-.96-.09-.93 0 0-1.98.16-3.27.16-.23 0-.5 0-.79-.02C4.37 4.21 7.89 2.5 11.84 2.5c2.95 0 5.63 1.13 7.65 2.97-.05 0-.1 0-.15 0-1.2 0-2.06 1.05-2.06 2.18 0 1.01.58 1.87 1.2 2.88.47.81 1.01 1.86 1.01 3.37z"/></svg><span>WordPress</span></span>
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M17.55 6.09c-1.47 4.51-4.95 8.35-4.95 8.35V9.99s-2.67 4.45-6.31 8.36c0 0 1.91-6.39 4.59-12.26H7.8S5.86 10.88 4.11 16.5c0 0-.15-7.2 3.87-12.26h4.04s-.32 2.28-.32 4.75c0 0 2.82-3.48 5.85-4.75v1.85z" opacity=".85"/></svg><span>Webflow</span></span>
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M4.4 7.1c-.5.3-.8.6-1 1-.3.6-.2 1.2-.2 1.2l2.4 7.6s.4-1.6.8-2.4l-2-6.4zm4.1-.2s-.4 1.5-.8 2.3l2.3 7.6s.4-1.6.8-2.4L8.5 6.9zm3.5 0l2.4 7.6c.4-.8.8-2.3.8-2.3L12.9 5.7l-1 1.2zm3.5.2l2 6.4c.4.8.8 2.4.8 2.4l2.4-7.6s.1-.6-.2-1.2c-.2-.4-.5-.7-1-1L15.5 7.1z" opacity=".85"/></svg><span>Wix</span></span>
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12.53 11.47l-4.24 4.24a1.5 1.5 0 0 1-2.12 0 1.5 1.5 0 0 1 0-2.12l4.24-4.24a1.5 1.5 0 0 1 2.12 0 1.5 1.5 0 0 1 0 2.12zm4.24-4.24l-4.24 4.24a1.5 1.5 0 0 0 0 2.12 1.5 1.5 0 0 0 2.12 0l4.24-4.24a1.5 1.5 0 0 0 0-2.12 1.5 1.5 0 0 0-2.12 0zm-8.49 8.49l-4.24 4.24a1.5 1.5 0 0 0 0 2.12 1.5 1.5 0 0 0 2.12 0l4.24-4.24a1.5 1.5 0 0 0 0-2.12 1.5 1.5 0 0 0-2.12 0zm8.49-8.49l4.24-4.24a1.5 1.5 0 0 0-2.12-2.12l-4.24 4.24a1.5 1.5 0 0 0 0 2.12 1.5 1.5 0 0 0 2.12 0z" opacity=".85"/></svg><span>Squarespace</span></span>
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14.5" y1="4" x2="9.5" y2="20"/></svg><span>Any HTML form</span></span>
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h6v2H6v12h4v-4h2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4zm10 0h6v6h-2V6h-2v8a2 2 0 0 0 2 2h2v2h-2a4 4 0 0 1-4-4V4z" opacity=".85"/></svg><span>Jotform</span></span>
+        </div>
+        <div class="logo-banner__scroll" aria-hidden="true">
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10 10-4.49 10-10S17.51 2 12 2zm-1.03 17.74L4.54 7.87c.88-.41 1.84-.67 2.86-.76l.29.01c.56 0 .49.68.49.68L5.82 16s1.97 5.39 2.32 6.35c-2.28-.48-4.22-1.86-5.52-3.72l3.35-9.7zm9.92-7.37c0 1.14-.42 2.48-.99 4.34l-1.3 4.34-4.74-14.09c.79-.04 1.5-.12 1.5-.12.66-.08.58-.96-.08-.93 0 0-1.99.16-3.28.16-1.2 0-3.22-.16-3.22-.16-.67-.04-.75.89-.08.93 0 0 .67.08 1.38.12l2.05 5.61-2.88 8.64L5.26 7.87c.79-.04 1.5-.12 1.5-.12.66-.08.58-.96-.09-.93 0 0-1.98.16-3.27.16-.23 0-.5 0-.79-.02C4.37 4.21 7.89 2.5 11.84 2.5c2.95 0 5.63 1.13 7.65 2.97-.05 0-.1 0-.15 0-1.2 0-2.06 1.05-2.06 2.18 0 1.01.58 1.87 1.2 2.88.47.81 1.01 1.86 1.01 3.37z"/></svg><span>WordPress</span></span>
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M17.55 6.09c-1.47 4.51-4.95 8.35-4.95 8.35V9.99s-2.67 4.45-6.31 8.36c0 0 1.91-6.39 4.59-12.26H7.8S5.86 10.88 4.11 16.5c0 0-.15-7.2 3.87-12.26h4.04s-.32 2.28-.32 4.75c0 0 2.82-3.48 5.85-4.75v1.85z" opacity=".85"/></svg><span>Webflow</span></span>
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M4.4 7.1c-.5.3-.8.6-1 1-.3.6-.2 1.2-.2 1.2l2.4 7.6s.4-1.6.8-2.4l-2-6.4zm4.1-.2s-.4 1.5-.8 2.3l2.3 7.6s.4-1.6.8-2.4L8.5 6.9zm3.5 0l2.4 7.6c.4-.8.8-2.3.8-2.3L12.9 5.7l-1 1.2zm3.5.2l2 6.4c.4.8.8 2.4.8 2.4l2.4-7.6s.1-.6-.2-1.2c-.2-.4-.5-.7-1-1L15.5 7.1z" opacity=".85"/></svg><span>Wix</span></span>
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12.53 11.47l-4.24 4.24a1.5 1.5 0 0 1-2.12 0 1.5 1.5 0 0 1 0-2.12l4.24-4.24a1.5 1.5 0 0 1 2.12 0 1.5 1.5 0 0 1 0 2.12zm4.24-4.24l-4.24 4.24a1.5 1.5 0 0 0 0 2.12 1.5 1.5 0 0 0 2.12 0l4.24-4.24a1.5 1.5 0 0 0 0-2.12 1.5 1.5 0 0 0-2.12 0zm-8.49 8.49l-4.24 4.24a1.5 1.5 0 0 0 0 2.12 1.5 1.5 0 0 0 2.12 0l4.24-4.24a1.5 1.5 0 0 0 0-2.12 1.5 1.5 0 0 0-2.12 0zm8.49-8.49l4.24-4.24a1.5 1.5 0 0 0-2.12-2.12l-4.24 4.24a1.5 1.5 0 0 0 0 2.12 1.5 1.5 0 0 0 2.12 0z" opacity=".85"/></svg><span>Squarespace</span></span>
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14.5" y1="4" x2="9.5" y2="20"/></svg><span>Any HTML form</span></span>
+          <span class="logo-banner__item"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h6v2H6v12h4v-4h2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4zm10 0h6v6h-2V6h-2v8a2 2 0 0 0 2 2h2v2h-2a4 4 0 0 1-4-4V4z" opacity=".85"/></svg><span>Jotform</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM -->
+    <section class="problem">
+      <div class="container">
+        <div class="problem__top">
+          <div class="problem__kicker">The gap that costs you money</div>
+          <h2 class="problem__heading">You&rsquo;re busy working.<br/>Your leads are calling your competitor.</h2>
+        </div>
+        <div class="problem__cards">
+          <div class="problem__card problem__card--red">
+            <div class="problem__card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div>
+            <div class="problem__card-stat">62%</div>
+            <div class="problem__card-label">of callers won&rsquo;t leave a voicemail</div>
+            <div class="problem__card-sub">They just call the next business on Google.</div>
+          </div>
+          <div class="problem__card problem__card--orange">
+            <div class="problem__card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="problem__card-stat">5 min</div>
+            <div class="problem__card-label">before a lead goes cold</div>
+            <div class="problem__card-sub">Response time is the #1 factor in winning the job.</div>
+          </div>
+          <div class="problem__card problem__card--yellow">
+            <div class="problem__card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+            <div class="problem__card-stat">8pm</div>
+            <div class="problem__card-label">when most form enquiries arrive</div>
+            <div class="problem__card-sub">You see it at 7am. They&rsquo;ve already booked someone else.</div>
+          </div>
+          <div class="problem__card problem__card--dark">
+            <div class="problem__card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="problem__card-stat">2&ndash;3</div>
+            <div class="problem__card-label">jobs lost per week on average</div>
+            <div class="problem__card-sub">Just from not picking up or responding fast enough.</div>
+          </div>
+        </div>
+        <div class="problem__cta-row">
+          <p class="problem__cta-text">Cove closes that gap automatically.</p>
+          <a href="#how" class="btn btn--primary btn--lg">See how it works &darr;</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="how">
+      <div class="container">
+        <div class="how__header">
+          <div class="how__kicker">How it works</div>
+          <h2>Set up once. Works forever.<br/>Zero babysitting required.</h2>
+          <p class="how__sub">Cove runs quietly in the background. The moment a lead comes in &mdash; whether you&rsquo;re on a job, in a meeting, or asleep &mdash; it responds instantly on your behalf.</p>
+        </div>
+        <div class="how__timeline">
+          <div class="how__step reveal">
+            <div class="how__step-left">
+              <div class="how__step-num">01</div>
+              <div class="how__step-line"></div>
+            </div>
+            <div class="how__step-body">
+              <div class="how__step-trigger">
+                <span class="how__trigger-pill how__trigger-pill--blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Missed call</span>
+                <span class="how__trigger-or">or</span>
+                <span class="how__trigger-pill how__trigger-pill--cyan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Form submission</span>
+              </div>
+              <h3>A lead comes in</h3>
+              <p>Someone calls and you can&rsquo;t pick up, or fills out your website form. Cove detects it instantly &mdash; no delay, no manual check needed.</p>
+            </div>
+          </div>
+          <div class="how__step reveal reveal-delay-1">
+            <div class="how__step-left">
+              <div class="how__step-num">02</div>
+              <div class="how__step-line"></div>
+            </div>
+            <div class="how__step-body">
+              <div class="how__step-sms-preview">
+                <div class="how__sms-bubble how__sms-bubble--recv">Hi Sam! Thanks for reaching out to Bay Plumbing &#128075;<br/><br/>How urgent is this?<br/>A) Emergency now &nbsp;B) Same day &nbsp;C) Not urgent</div>
+                <div class="how__sms-bubble how__sms-bubble--sent">A</div>
+                <div class="how__sms-bubble how__sms-bubble--recv">Got it &mdash; emergency. What&rsquo;s the issue?<br/>1) Blocked drain &nbsp;2) Leak / burst pipe<br/>3) Hot water &nbsp;4) Other</div>
+              </div>
+              <h3>They&rsquo;re texted back in 10 seconds</h3>
+              <p>Cove sends a friendly, branded SMS asking 2&ndash;3 smart questions. <strong>You choose what gets asked</strong> &mdash; Cove&rsquo;s AI writes them based on your business. No generic chatbot.</p>
+            </div>
+          </div>
+          <div class="how__step reveal reveal-delay-2">
+            <div class="how__step-left">
+              <div class="how__step-num">03</div>
+            </div>
+            <div class="how__step-body">
+              <div class="how__step-notif-preview">
+                <div class="how__notif-mock">
+                  <div class="how__notif-mock-top"><svg width="16" height="16" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="url(#hnlg)"/><path d="M18 8a7 7 0 1 0 0 12" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><defs><linearGradient id="hnlg" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs></svg><span>Cove</span><span class="how__notif-time">now</span></div>
+                  <div class="how__notif-mock-title">&#128680; New Urgent Lead &mdash; Bay Plumbing</div>
+                  <div class="how__notif-mock-body">Sam Thompson &middot; Burst pipe &middot; Emergency<br/>&#128222; 0412 345 678 &middot; Call back ASAP</div>
+                </div>
+              </div>
+              <h3>You get a ready-to-call summary</h3>
+              <p>Name, what they need, urgency, and best callback time &mdash; sent straight to your phone or email. Finish your job, glance at your phone, call back sounding completely on top of it.</p>
+              <p class="how__step-note">No app. No login. No new software. Just runs.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE DEMO -->
+    <section id="demo" class="demo">
+      <div class="demo__bg"></div>
       <div class="container demo__inner">
         <div class="demo__badge">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          <span>Try it live</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <span>Try it live &mdash; no sign-up needed</span>
         </div>
-        <h2>Experience the flow yourself</h2>
-        <p class="demo__subtitle">Enter your phone number below and we'll send you the exact SMS conversation your leads receive. Reply to the questions and see the magic happen in real-time.</p>
-        
+        <h2>See what your leads get.</h2>
+        <p class="demo__subtitle">Enter your number &mdash; we&rsquo;ll text you the real flow. Reply to the questions and see the instant summary we&rsquo;d fire to you.</p>
         <form id="demo-form" class="demo__form">
           <div class="demo__input-group">
             <div class="demo__input-wrapper">
-              <svg class="demo__input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              <input 
-                type="tel" 
-                id="demo-phone" 
-                name="phone" 
-                placeholder="+61 412 345 678" 
-                required 
-                autocomplete="tel"
-              />
+              <svg class="demo__input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <input type="tel" id="demo-phone" name="phone" placeholder="+61 412 345 678" required autocomplete="tel" />
             </div>
-            <button type="submit" class="btn btn--primary btn--lg" id="demo-btn">
+            <button type="submit" class="btn btn--white btn--lg" id="demo-btn">
               <span id="demo-btn-text">Send me the demo</span>
-              <svg id="demo-btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              <svg id="demo-btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
             </button>
           </div>
           <p id="demo-status" class="demo__status"></p>
         </form>
-        
         <div class="demo__features">
-          <div class="demo__feature">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            <span>Instant SMS delivery</span>
-          </div>
-          <div class="demo__feature">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            <span>Real conversation flow</span>
-          </div>
-          <div class="demo__feature">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            <span>No commitment required</span>
-          </div>
+          <div class="demo__feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Instant SMS delivery</span></div>
+          <div class="demo__feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Real qualification flow</span></div>
+          <div class="demo__feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>No commitment</span></div>
         </div>
-        
-        <p class="demo__note">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          Standard SMS rates apply. Reply STOP to opt out anytime.
-        </p>
+        <p class="demo__note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Standard SMS rates may apply. Reply STOP to opt out anytime.</p>
       </div>
     </section>
 
-    <!-- ─── STATS ─── -->
-    <section class="stats">
-      <div class="container stats__grid">
-        <div class="stat">
-          <span class="stat__number">10 s</span>
-          <span class="stat__label">First response time</span>
-        </div>
-        <div class="stat">
-          <span class="stat__number">3</span>
-          <span class="stat__label">Triage questions</span>
-        </div>
-        <div class="stat">
-          <span class="stat__number">48 h</span>
-          <span class="stat__label">Live from signup</span>
-        </div>
-        <div class="stat">
-          <span class="stat__number">0</span>
-          <span class="stat__label">Software for staff to learn</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── HOW IT WORKS ─── -->
-    <section id="how" class="how">
+    <!-- FEATURES -->
+    <section id="features" class="features">
       <div class="container">
-        <p class="kicker">How it works</p>
-        <h2>Website enquiry &rarr; qualified callback in minutes</h2>
+        <div class="features__header">
+          <div class="features__kicker">Everything included</div>
+          <h2>Handles every lead<br/>while you work.</h2>
+        </div>
+        <div class="features__bento">
 
-        <div class="steps">
-          <article class="step-card">
-            <div class="step-card__num">01</div>
-            <h3>Lead fills your existing form</h3>
-            <p>Nothing changes on your website. ChairFlow hooks into the form submission behind the scenes.</p>
-          </article>
-          <article class="step-card">
-            <div class="step-card__num">02</div>
-            <h3>Instant SMS qualification</h3>
-            <p>Urgency, job type, and preferred callback time — qualified in 30 seconds flat via text.</p>
-          </article>
-          <article class="step-card">
-            <div class="step-card__num">03</div>
-            <h3>Your team gets a summary</h3>
-            <p>Owner or staff receive an SMS with lead details, intent, timing, and a recommended next action. Urgent? Immediate alert.</p>
-          </article>
+          <!-- Hero card: dark, 2/3 width, live SMS preview -->
+          <div class="feat-card feat-card--dark feat-bento--wide reveal">
+            <div class="feat-card__icon feat-card__icon--blue"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+            <h3>Texts back in 10 seconds &mdash; missed calls and website forms</h3>
+            <p>Cove responds to every lead instantly on your behalf, 24/7. One-time call forwarding setup &mdash; you keep your existing number.</p>
+            <div class="feat-preview">
+              <div class="feat-preview__bub feat-preview__bub--recv">Hi Sam! Thanks for reaching out to Bay Plumbing &#128075;<br/>How urgent is this? &nbsp;A) Emergency &nbsp;B) Same day &nbsp;C) Not urgent</div>
+              <div class="feat-preview__bub feat-preview__bub--sent">A</div>
+              <div class="feat-preview__bub feat-preview__bub--recv">Emergency &mdash; got it &#128680; Bay Plumbing will call you back within minutes.</div>
+            </div>
+            <div class="feat-card__tag">2-min setup</div>
+          </div>
+
+          <!-- AI questions -->
+          <div class="feat-card reveal reveal-delay-1">
+            <div class="feat-card__icon feat-card__icon--emerald"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <h3>AI-written qualification questions</h3>
+            <p>Describe your business &mdash; Cove writes your flow. A plumber gets different questions than a dentist. Edit any time.</p>
+            <div class="feat-card__tag">Tailored to you</div>
+          </div>
+
+          <!-- Lead summaries -->
+          <div class="feat-card reveal">
+            <div class="feat-card__icon feat-card__icon--amber"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div>
+            <h3>Ready-to-call summaries</h3>
+            <p>Name, need, urgency &mdash; delivered to your phone before you&rsquo;ve left the job.</p>
+            <div class="feat-card__tag">SMS &amp; email</div>
+          </div>
+
+          <!-- Website forms -->
+          <div class="feat-card reveal reveal-delay-1">
+            <div class="feat-card__icon feat-card__icon--cyan"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <h3>Website form capture</h3>
+            <p>11pm enquiry? Texted back before your competitor opens at 9am.</p>
+            <div class="feat-card__tag">Any website</div>
+          </div>
+
+          <!-- CRM + integrations -->
+          <div class="feat-card reveal reveal-delay-2">
+            <div class="feat-card__icon feat-card__icon--purple"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+            <h3>CRM &amp; integrations</h3>
+            <p>Pipes into Jobber, ServiceTitan, Podium, or any tool via webhook &amp; Zapier.</p>
+            <div class="feat-card__tag">Webhooks · Zapier</div>
+          </div>
+
+          <!-- Follow-up strip -->
+          <div class="feat-card feat-bento--strip reveal">
+            <div class="feat-card__icon feat-card__icon--rose" style="flex-shrink:0"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div>
+              <h3>Auto follow-up nudges</h3>
+              <p>Lead went quiet? Cove follows up automatically. Nothing disappears silently.</p>
+            </div>
+            <div class="feat-card__tag">Always on</div>
+          </div>
+
         </div>
       </div>
     </section>
 
-    <!-- ─── FEATURES ─── -->
-    <section class="features">
+    <!-- SOCIAL PROOF -->
+    <section class="proof">
       <div class="container">
-        <p class="kicker">What you get</p>
-        <h2>Built for service businesses, not generic SaaS</h2>
-        <div class="features__grid">
-          <div class="feat">
-            <div class="feat__icon">
-              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <h3>Instant SMS reply</h3>
-            <p>Leads get a branded text within seconds of submitting your form. No more "we'll be in touch soon" silence.</p>
-          </div>
-          <div class="feat">
-            <div class="feat__icon">
-              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <h3>Urgent job routing</h3>
-            <p>Urgent leads trigger an immediate alert to the business owner's phone — before the flow even finishes.</p>
-          </div>
-          <div class="feat">
-            <div class="feat__icon">
-              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            </div>
-            <h3>Action-ready summary</h3>
-            <p>Job type, urgency, preferred callback time, and a recommended action — in one clean SMS to the owner.</p>
-          </div>
-          <div class="feat">
-            <div class="feat__icon">
-              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <h3>48-hour setup</h3>
-            <p>We configure everything. Your team just answers the phone when summaries land. Zero software to learn.</p>
+        <div class="proof__header">
+          <div class="proof__kicker">Real results</div>
+          <h2>Businesses that stopped losing leads.</h2>
+        </div>
+        <div class="proof__grid">
+          <blockquote class="proof__hero-card reveal">
+            <div class="proof__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <p>&ldquo;We went from calling leads back in 3&ndash;4 hours to them being qualified before I even finish the current job. Booked 5 extra jobs in the first month.&rdquo;</p>
+            <footer>
+              <div class="proof__avatar proof__avatar--blue">MT</div>
+              <div><strong>Mark T.</strong><span>Bay Area Plumbing</span></div>
+              <div class="proof__result-badge">+5 jobs / month</div>
+            </footer>
+          </blockquote>
+          <div class="proof__cards-col">
+            <blockquote class="proof__card reveal">
+              <div class="proof__stars proof__stars--sm">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p>&ldquo;The missed call feature alone pays for itself. We were losing 2&ndash;3 leads a week just from not picking up. That&rsquo;s stopped.&rdquo;</p>
+              <footer><div class="proof__avatar proof__avatar--cyan">SK</div><div><strong>Sarah K.</strong><span>Bright Smile Dental</span></div></footer>
+            </blockquote>
+            <blockquote class="proof__card reveal reveal-delay-1">
+              <div class="proof__stars proof__stars--sm">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p>&ldquo;Setup took one phone call. I&rsquo;m a one-man operation &mdash; I can&rsquo;t be on the phone when I&rsquo;m on a roof. Cove handles it. Game changer.&rdquo;</p>
+              <footer><div class="proof__avatar proof__avatar--emerald">DL</div><div><strong>Dave L.</strong><span>Spark Electrical</span></div></footer>
+            </blockquote>
+            <blockquote class="proof__card reveal reveal-delay-2">
+              <div class="proof__stars proof__stars--sm">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p>&ldquo;Patients were filling out our form after hours and booking with the clinic down the road by morning. Not anymore.&rdquo;</p>
+              <footer><div class="proof__avatar proof__avatar--amber">JR</div><div><strong>Jessica R.</strong><span>Northside Physio</span></div></footer>
+            </blockquote>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ─── PRICING ─── -->
+    <!-- PRICING -->
     <section id="pricing" class="pricing">
-      <div class="container pricing__inner">
-        <div class="pricing__copy">
-          <p class="kicker">Pricing</p>
-          <h2>Simple, transparent, no lock-in</h2>
-          <p>One setup fee. Optional monthly support. Cancel any time.</p>
+      <div class="container">
+        <div class="pricing__header">
+          <div class="pricing__kicker">Pricing</div>
+          <h2>$49 a month.<br/>Two ways to get started.</h2>
+          <p class="pricing__sub">One recovered job pays for months of Cove. Most businesses are live within 48 hours.</p>
         </div>
-        <div class="pricing__card">
-          <span class="pricing__badge">Pilot offer</span>
-          <p class="pricing__amount"><span>$</span>750</p>
-          <p class="pricing__term">one-time setup</p>
-          <ul>
-            <li>SMS qualification flow configured for your industry</li>
-            <li>Dedicated business phone number</li>
-            <li>Webhook integration with your website</li>
-            <li>Go-live testing &amp; QA</li>
-            <li>Optional $99/mo support + SMS costs</li>
-          </ul>
-          <a href="#contact" class="btn btn--primary btn--lg btn--full">Get started</a>
+        <div class="pricing__two-col">
+          <!-- Self-serve -->
+          <div class="pricing__tier reveal">
+            <div class="pricing__tier-label">Set it up yourself</div>
+            <div class="pricing__amount"><span class="pricing__dollar">$</span>49<span class="pricing__per">/mo</span></div>
+            <p class="pricing__tier-sub">Create an account, describe your business, and Cove generates your questions with AI. Live in minutes.</p>
+            <ul class="pricing__list">
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Texts leads back in 10 seconds, 24/7</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>AI-generated questions for your business</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Your own dedicated AU phone number</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Lead summaries to your phone + email</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Webhook &amp; Zapier integrations</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>30-day money-back guarantee</li>
+            </ul>
+            <a href="/login" class="btn btn--primary btn--lg btn--full">Get started &rarr;</a>
+            <p class="pricing__risk">No lock-in. Cancel anytime.</p>
+          </div>
+          <!-- Done for you -->
+          <div class="pricing__tier pricing__tier--dfy reveal reveal-delay-1">
+            <div class="pricing__tier-label">Have us set it up</div>
+            <div class="pricing__amount"><span class="pricing__dollar">$</span>49<span class="pricing__per">/mo</span><span class="pricing__setup-badge">+ $750 setup</span></div>
+            <p class="pricing__tier-sub">We configure everything, test the flow, and make sure it&rsquo;s working perfectly before going live. You do nothing.</p>
+            <ul class="pricing__list">
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Everything in self-serve, plus:</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>We handle the full setup for you</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>We write and test your questions</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Live in 48 hours guaranteed</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Ongoing support from our team</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>30-day money-back guarantee</li>
+            </ul>
+            <a href="#contact" class="btn btn--primary btn--lg btn--full">Book a call &rarr;</a>
+            <p class="pricing__risk">We do the work. You take the calls.</p>
+          </div>
+        </div>
+        <div class="pricing__guarantee reveal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <p>30-day money-back guarantee on both plans. If Cove doesn&rsquo;t pay for itself in the first month, we&rsquo;ll give you a full refund. No questions, no hassle.</p>
         </div>
       </div>
     </section>
 
-    <!-- ─── CONTACT ─── -->
+    <!-- FAQ -->
+    <section id="faq" class="faq">
+      <div class="container faq__inner">
+        <div class="faq__left">
+          <div class="faq__kicker">FAQ</div>
+          <h2>Got questions?<br/>Fair enough.</h2>
+          <p>Here are the most common ones. Still unsure? Call us.</p>
+          <a href="tel:+61403720218" class="faq__phone"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>0403 720 218</a>
+        </div>
+        <div class="faq__list">
+          <details class="faq__item">
+            <summary><span>How long does setup take?</span><svg class="faq__chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+            <p>Self-serve: most people are live in under 15 minutes. You describe your business, the AI writes your questions, you add your notification number and pay. Done. Done-for-you: live within 48 hours.</p>
+          </details>
+          <details class="faq__item">
+            <summary><span>Do I need a new phone number?</span><svg class="faq__chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+            <p>No. You keep your existing number. Cove gives you a dedicated AU SMS number. A one-time call forwarding setup (2 minutes, we walk you through it) sends missed calls to Cove instead of voicemail.</p>
+          </details>
+          <details class="faq__item">
+            <summary><span>What does the money-back guarantee cover?</span><svg class="faq__chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+            <p>If Cove doesn&rsquo;t pay for itself within 30 days of going live, contact us and we&rsquo;ll give you a full refund &mdash; including the setup fee if you chose done-for-you. No conditions.</p>
+          </details>
+          <details class="faq__item">
+            <summary><span>Does it work with my existing website?</span><svg class="faq__chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+            <p>Yes. WordPress, Squarespace, Wix, Webflow, custom HTML &mdash; anything with a form or a click-to-call button. We hook into whatever you&rsquo;ve already got.</p>
+          </details>
+          <details class="faq__item">
+            <summary><span>I already use Jobber / ServiceTitan / Podium &mdash; will it clash?</span><svg class="faq__chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+            <p>No. Cove feeds into your existing tools, it doesn&rsquo;t replace them. Leads go to your CRM via webhook or Zapier. It fills the gap those tools don&rsquo;t cover &mdash; instant text-back and qualification.</p>
+          </details>
+          <details class="faq__item">
+            <summary><span>Can I customise the questions?</span><svg class="faq__chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+            <p>Yes. The AI generates them from your description, but you can edit any question directly in your dashboard. Or click &ldquo;Regenerate&rdquo; to get a fresh set.</p>
+          </details>
+          <details class="faq__item">
+            <summary><span>What if the lead doesn&rsquo;t reply?</span><svg class="faq__chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+            <p>Cove sends a gentle follow-up after a set time. If they still don&rsquo;t respond, you get whatever info was collected so you can follow up yourself. No lead disappears silently.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
     <section id="contact" class="contact">
       <div class="container contact__inner">
         <div class="contact__copy">
-          <p class="kicker">Contact</p>
-          <h2>Get your free<br/>lead audit</h2>
-          <p>Send your website. I'll map exactly where leads are leaking and show you the SMS flow I'd deploy for your business.</p>
+          <div class="contact__kicker">Done-for-you setup</div>
+          <h2>Want us to handle<br/>the whole thing?</h2>
+          <p>Tell us about your business. We&rsquo;ll set up your Cove account, write your questions, test everything, and have you live within 48 hours &mdash; while you keep doing what you do.</p>
+          <div class="contact__trust">
+            <div class="contact__trust-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>$750 one-time &middot; then $49/mo</span></div>
+            <div class="contact__trust-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Live in 48 hours</span></div>
+            <div class="contact__trust-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>30-day money-back guarantee</span></div>
+          </div>
+          <p class="contact__phone">Or call directly: <a href="tel:+61403720218">0403 720 218</a></p>
         </div>
         <form id="inquiry-form" class="form" novalidate>
           <div class="form__row">
-            <label>Full name *<input type="text" name="name" required autocomplete="name" /></label>
+            <label>Your name *<input type="text" name="name" required autocomplete="name" /></label>
             <label>Email *<input type="email" name="email" required autocomplete="email" /></label>
           </div>
           <div class="form__row">
             <label>Phone<input type="tel" name="phone" autocomplete="tel" /></label>
             <label>Business name *<input type="text" name="businessName" required autocomplete="organization" /></label>
           </div>
-          <label>Business website<input type="url" name="websiteUrl" placeholder="https://yourbusiness.com.au" /></label>
-          <label>What's your biggest enquiry bottleneck?<textarea name="message" rows="3" placeholder="e.g. We get form submissions but reply too slowly."></textarea></label>
-          <button class="btn btn--primary btn--lg btn--full" type="submit">Send enquiry</button>
+          <label>Your website<input type="url" name="websiteUrl" placeholder="https://yourbusiness.com.au" /></label>
+          <button class="btn btn--primary btn--lg btn--full" type="submit">Book a call &rarr;</button>
           <p id="form-status" class="form__status" role="status" aria-live="polite"></p>
         </form>
       </div>
     </section>
 
-    <!-- ─── FOOTER ─── -->
+    <!-- FOOTER -->
     <footer class="footer">
       <div class="container footer__inner">
-        <span class="footer__brand">ChairFlow</span>
-        <span>Lead response automation for service businesses.</span>
+        <div class="footer__left">
+          <a href="/" class="nav__logo">
+            <svg class="nav__mark" width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect width="28" height="28" rx="7" fill="url(#cove-gf)"/><path d="M18 9.5a5.5 5.5 0 1 0 0 9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/><defs><linearGradient id="cove-gf" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs></svg>
+            <span>cove</span>
+          </a>
+          <span class="footer__tagline">Stop losing jobs while you&rsquo;re working.</span>
+          <a href="tel:+61403720218" class="footer__phone">0403 720 218</a>
+          <a href="mailto:hello@coveplatform.com" class="footer__email">hello@coveplatform.com</a>
+        </div>
+        <nav class="footer__links">
+          <a href="#how">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#faq">FAQ</a>
+          <a href="#contact">Done for you</a>
+          <a href="#demo">Try demo</a>
+          <a href="/login">Sign in</a>
+        </nav>
+      </div>
+      <div class="footer__bottom">
+        <div class="container">
+          <span>&copy; 2026 Cove. All rights reserved. &middot; Australia</span>
+        </div>
       </div>
     </footer>
+
+    <!-- MOBILE STICKY CTA -->
+    <div class="sticky-cta">
+      <a href="/login" class="btn btn--primary btn--full">Get started &mdash; $49/mo</a>
+    </div>
 
     <script src="/app.js" defer></script>
   </body>

@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Cove</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/dash.css" />
+</head>
+<body class="dash-root">
+
+  <!-- ─── Sidebar ─── -->
+  <aside class="sidebar">
+    <div class="sidebar__top">
+      <a href="/" class="cove-logo">
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="7" fill="url(#d-lg)"/>
+          <path d="M18 9.5a5.5 5.5 0 1 0 0 9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          <defs><linearGradient id="d-lg" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+        </svg>
+        <span>cove</span>
+      </a>
+    </div>
+
+    <nav class="sidebar__nav">
+      <button class="sidebar__item active" data-view="overview">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </button>
+      <button class="sidebar__item" data-view="flow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        My Flow
+      </button>
+      <button class="sidebar__item" data-view="notifications">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </button>
+      <button class="sidebar__item" data-view="integrations">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Integrations
+      </button>
+      <button class="sidebar__item" data-view="billing">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Billing
+      </button>
+    </nav>
+
+    <div class="sidebar__bottom">
+      <div class="sidebar__user">
+        <div class="sidebar__user-name" id="sidebar-name">—</div>
+        <div class="sidebar__user-email" id="sidebar-email">—</div>
+      </div>
+      <button class="sidebar__item btn--ghost" id="logout-btn" style="color:var(--text-faint)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ─── Main ─── -->
+  <main class="dash-main">
+
+    <!-- ─── OVERVIEW ─── -->
+    <div id="view-overview">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+          <h1 class="page-header__title" id="biz-name-header">Your business</h1>
+          <span id="live-badge"></span>
+        </div>
+        <div class="page-header__sub" id="biz-number-sub" style="font-family:'SF Mono','Fira Code',monospace;font-size:13px;letter-spacing:.02em"></div>
+      </div>
+
+      <!-- Alert if setup incomplete -->
+      <div id="setup-alert" class="hidden" style="margin-bottom:24px">
+        <div class="setup-card">
+          <div class="setup-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          </div>
+          <div class="setup-card__body">
+            <div class="setup-card__title">Your Cove number is being provisioned</div>
+            <p class="setup-card__sub">This usually takes 1–2 minutes. Refresh the page and it should appear. If it's been more than 5 minutes, something may have gone wrong.</p>
+            <div class="setup-card__actions">
+              <button class="btn btn--secondary btn--sm" onclick="location.reload()">↻ Refresh</button>
+              <button class="btn btn--ghost btn--sm" id="reset-setup-btn">Start setup again</button>
+              <a href="mailto:hello@coveplatform.com?subject=Number+not+provisioned" class="btn btn--ghost btn--sm">Contact support</a>
+            </div>
+          </div>
+        </div>
+        <div class="setup-steps">
+          <div class="setup-step" id="sstep-1">
+            <div class="setup-step__dot setup-step__dot--done"></div>
+            <div class="setup-step__text">Account created &amp; payment confirmed</div>
+          </div>
+          <div class="setup-step" id="sstep-2">
+            <div class="setup-step__dot setup-step__dot--spin"></div>
+            <div class="setup-step__text">Provisioning your dedicated Cove number…</div>
+          </div>
+          <div class="setup-step" id="sstep-3">
+            <div class="setup-step__dot"></div>
+            <div class="setup-step__text">Set up call forwarding on your phone</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Call forwarding reminder — shown when live but no leads yet -->
+      <div id="forwarding-banner" class="hidden" style="margin-bottom:24px">
+        <div class="setup-card" style="border-color:#DBEAFE;background:#EFF6FF">
+          <div class="setup-card__icon" style="background:#DBEAFE;color:#2563EB">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 14.9a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.14 4h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 14.92z"/></svg>
+          </div>
+          <div class="setup-card__body">
+            <div class="setup-card__title" style="color:#1E40AF">One step left — set up call forwarding</div>
+            <p class="setup-card__sub">Your Cove number is live. Forward missed calls to it and every missed call will trigger the SMS flow automatically.</p>
+            <div class="setup-card__actions">
+              <a href="/onboarding?step=complete" class="btn btn--primary btn--sm">View forwarding instructions</a>
+              <button class="btn btn--ghost btn--sm" id="dismiss-forwarding-btn">Dismiss</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-strip" id="stats-strip">
+        <div class="stat-item">
+          <div class="stat-item__val" id="stat-week">—</div>
+          <div class="stat-item__key">Leads this week</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__val" id="stat-done">—</div>
+          <div class="stat-item__key">Completed flows</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__val" id="stat-abandoned">—</div>
+          <div class="stat-item__key">No reply</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section__title">Recent activity — last 7 days</div>
+        <div id="leads-container">
+          <div style="padding:24px 0;color:var(--text-faint);font-size:13.5px">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── FLOW ─── -->
+    <div id="view-flow" class="hidden">
+      <div class="page-header">
+        <h1 class="page-header__title">My Flow</h1>
+        <p class="page-header__sub">Cove texts these questions to every lead automatically — missed calls and form submissions. Edit them any time. Changes go live instantly.</p>
+      </div>
+
+      <div class="flow-explainer">
+        <div class="flow-explainer__item">
+          <div class="flow-explainer__icon">📲</div>
+          <div><strong>Lead misses you</strong><br><span>Missed call or form submission triggers Cove instantly</span></div>
+        </div>
+        <div class="flow-explainer__arrow">→</div>
+        <div class="flow-explainer__item">
+          <div class="flow-explainer__icon">💬</div>
+          <div><strong>Cove texts them</strong><br><span>Sends your questions below via SMS within 10 seconds</span></div>
+        </div>
+        <div class="flow-explainer__arrow">→</div>
+        <div class="flow-explainer__item">
+          <div class="flow-explainer__icon">📋</div>
+          <div><strong>You get a summary</strong><br><span>Name, what they need, urgency — sent to your phone</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section__title">Business details</div>
+        <div class="form-section">
+          <div class="form-group">
+            <label for="flow-biz-name">Business name</label>
+            <input type="text" id="flow-biz-name" />
+          </div>
+          <div class="form-group">
+            <label for="flow-booking">Booking link <span style="font-weight:400;color:var(--text-faint)">(optional)</span></label>
+            <input type="url" id="flow-booking" placeholder="https://book.yourbusiness.com.au" />
+            <span class="hint">Added to the completion message when a lead finishes the flow.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section__title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>SMS Questions</span>
+          <button class="flow-ai-btn" id="flow-regen-btn" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            Regenerate with AI
+          </button>
+        </div>
+        <div class="flow-hint">Each question is sent as a separate SMS. Leads reply with a letter (A, B, C…) or free text. Keep them short — they’re read on a phone screen.</div>
+        <div class="flow-section" id="flow-cards"></div>
+      </div>
+
+      <!-- Regen modal -->
+      <div id="regen-modal" class="hidden" style="background:rgba(0,0,0,.3);position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;max-width:420px;width:100%">
+          <h2 style="font-size:16px;font-weight:700;margin-bottom:6px">Regenerate questions</h2>
+          <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:16px">Describe your business and we'll rewrite the questions. This will replace your current questions.</p>
+          <textarea id="regen-desc" rows="3" placeholder="e.g. We're a residential plumbing business in Sydney…" style="width:100%;margin-bottom:14px"></textarea>
+          <div id="regen-error" class="auth-error" style="margin-bottom:12px"></div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn btn--secondary" id="regen-cancel">Cancel</button>
+            <button class="btn btn--primary" id="regen-confirm">Regenerate</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <span class="saved" id="flow-saved">Saved</span>
+        <button class="btn btn--secondary btn--sm" id="flow-cancel">Discard</button>
+        <button class="btn btn--primary" id="flow-save">Save changes</button>
+      </div>
+    </div>
+
+    <!-- ─── NOTIFICATIONS ─── -->
+    <div id="view-notifications" class="hidden">
+      <div class="page-header">
+        <h1 class="page-header__title">Notifications</h1>
+        <p class="page-header__sub">Where Cove sends lead summaries when someone completes the flow. You’ll get their name, what they need, and how urgent.</p>
+      </div>
+
+      <div class="section">
+        <div class="section__title">Lead summaries</div>
+        <div class="form-section">
+          <div class="form-group">
+            <label for="notif-phone">SMS — your mobile number</label>
+            <input type="tel" id="notif-phone" placeholder="+61 412 345 678" />
+            <span class="hint">You'll get a text with their name, what they need, and urgency.</span>
+          </div>
+          <div class="form-group">
+            <label for="notif-email">Email <span style="font-weight:400;color:var(--text-faint)">(optional)</span></label>
+            <input type="email" id="notif-email" placeholder="you@yourbusiness.com.au" />
+          </div>
+          <div class="form-group">
+            <label for="notif-webhook">Webhook URL <span style="font-weight:400;color:var(--text-faint)">(optional)</span></label>
+            <input type="url" id="notif-webhook" placeholder="https://hooks.zapier.com/…" />
+            <span class="hint">Connect to Zapier, CRMs like Jobber or ServiceTitan, or any webhook.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section__title">Operating hours</div>
+        <div class="toggle-row">
+          <div class="toggle-row__info">
+            <div class="toggle-row__label">Enable operating hours</div>
+            <div class="toggle-row__sub">Leads outside these hours get an "after hours" message instead.</div>
+          </div>
+          <label class="toggle" aria-label="Enable operating hours">
+            <input type="checkbox" id="hours-enabled" />
+            <div class="toggle__track"></div>
+            <div class="toggle__thumb"></div>
+          </label>
+        </div>
+
+        <div id="hours-config" class="hidden" style="margin-top:16px">
+          <div class="form-group" style="margin-bottom:14px">
+            <label for="hours-tz">Timezone</label>
+            <select id="hours-tz">
+              <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+              <option value="Australia/Melbourne">Australia/Melbourne</option>
+              <option value="Australia/Brisbane">Australia/Brisbane (AEST)</option>
+              <option value="Australia/Perth">Australia/Perth (AWST)</option>
+              <option value="Australia/Adelaide">Australia/Adelaide (ACST)</option>
+              <option value="Australia/Darwin">Australia/Darwin</option>
+              <option value="Australia/Hobart">Australia/Hobart</option>
+            </select>
+          </div>
+          <div class="hours-grid">
+            <div class="form-group">
+              <label for="hours-open">Open from</label>
+              <select id="hours-open"></select>
+            </div>
+            <div class="form-group">
+              <label for="hours-close">Until</label>
+              <select id="hours-close"></select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:14px">
+            <label>Closed days</label>
+            <div class="days-row" id="days-row">
+              <span class="day-chip" data-day="0">Sun</span>
+              <span class="day-chip" data-day="1">Mon</span>
+              <span class="day-chip" data-day="2">Tue</span>
+              <span class="day-chip" data-day="3">Wed</span>
+              <span class="day-chip" data-day="4">Thu</span>
+              <span class="day-chip" data-day="5">Fri</span>
+              <span class="day-chip" data-day="6">Sat</span>
+            </div>
+            <span class="hint" style="margin-top:6px">Highlighted = closed that day.</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="notif-success" class="alert alert--success hidden" style="margin-bottom:12px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Settings saved.</span>
+      </div>
+
+      <div class="save-bar">
+        <button class="btn btn--primary" id="notif-save">Save changes</button>
+      </div>
+    </div>
+
+    <!-- ─── INTEGRATIONS ─── -->
+    <div id="view-integrations" class="hidden">
+      <div class="page-header">
+        <h1 class="page-header__title">Integrations</h1>
+        <p class="page-header__sub">Three ways to get leads into Cove — pick whichever fits your setup. They all do the same thing: trigger the SMS flow to your lead.</p>
+      </div>
+
+      <!-- Method 1: Call forwarding -->
+      <div class="section">
+        <div class="section__title">Method 1 — Missed calls (call forwarding)</div>
+        <div class="form-section" style="padding:1.25rem">
+          <p style="font-size:13.5px;color:var(--text-muted);line-height:1.7;margin-bottom:1rem">
+            The simplest setup. You forward unanswered calls on <strong>your own mobile</strong> to your Cove number. When a customer calls and you don't answer, Cove automatically texts them within 10 seconds.
+          </p>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;font-size:13px;line-height:1.9;color:var(--text-muted)">
+            Customer calls your mobile → you don't answer → carrier forwards to your Cove number → <strong style="color:var(--text)">Cove texts them instantly</strong>
+          </div>
+          <div style="margin-top:1rem">
+            <a href="/onboarding?step=complete" class="btn btn--primary btn--sm">View call forwarding setup</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Method 2: Website embed -->
+      <div class="section">
+        <div class="section__title">Method 2 — Website contact/enquiry form</div>
+        <div class="form-section" style="padding:1.25rem">
+          <p style="font-size:13.5px;color:var(--text-muted);line-height:1.7;margin-bottom:1rem">
+            Add a snippet to your website. When someone submits your contact form, Cove receives their phone number and starts the SMS flow immediately — even if they filled in the form at midnight.
+          </p>
+          <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.06em">Paste this into your website's &lt;head&gt; or just before &lt;/body&gt;</div>
+          <div style="position:relative">
+            <pre id="embed-snippet" style="background:#0F172A;color:#E2E8F0;padding:1rem 1.25rem;border-radius:8px;font-size:12px;line-height:1.7;overflow-x:auto;margin:0;white-space:pre-wrap;word-break:break-all">Loading…</pre>
+            <button onclick="copySnippet()" style="position:absolute;top:8px;right:8px;background:#1E293B;color:#94A3B8;border:1px solid #334155;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer" id="copy-snippet-btn">Copy</button>
+          </div>
+          <p style="font-size:12.5px;color:var(--text-muted);margin-top:.75rem;line-height:1.6">
+            Then on your form's submit button, call <code style="background:var(--bg);padding:2px 6px;border-radius:4px">Cove.send({ phone: '...', name: '...' })</code>. Works with any form builder — Wix, Squarespace, Webflow, WordPress, custom HTML.
+          </p>
+          <div style="margin-top:1rem;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:.75rem 1rem;font-size:13px;color:#92400E">
+            <strong>Full example</strong> — replace <code>YOUR_FORM_SUBMIT</code> with your form's submit handler:
+          </div>
+          <pre style="background:#0F172A;color:#E2E8F0;padding:1rem 1.25rem;border-radius:8px;font-size:12px;line-height:1.7;overflow-x:auto;margin:.5rem 0 0;white-space:pre-wrap;word-break:break-all" id="embed-example">Loading…</pre>
+        </div>
+      </div>
+
+      <!-- Method 3: Webhook / Zapier -->
+      <div class="section">
+        <div class="section__title">Method 3 — Webhook / Zapier / CRM</div>
+        <div class="form-section" style="padding:1.25rem">
+          <p style="font-size:13.5px;color:var(--text-muted);line-height:1.7;margin-bottom:1rem">
+            Send a POST request to your Cove webhook URL from any tool — Zapier, Make, your CRM, your booking software, anything. Cove will immediately start the SMS flow for that lead.
+          </p>
+          <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.06em">Your webhook URL</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:1rem">
+            <code id="webhook-url" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem 1rem;font-size:13px;color:var(--text);word-break:break-all">Loading…</code>
+            <button onclick="copyWebhook()" class="btn btn--secondary btn--sm" id="copy-webhook-btn">Copy</button>
+          </div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.06em">POST body (JSON)</div>
+          <pre style="background:#0F172A;color:#E2E8F0;padding:1rem 1.25rem;border-radius:8px;font-size:12px;line-height:1.7;overflow-x:auto;margin:0 0 1rem;white-space:pre-wrap">{\n  "phone": "+61412345678",   // required\n  "name":  "Sam Jones",      // optional\n  "email": "sam@email.com",  // optional\n  "source": "contact-form"  // optional label\n}</pre>
+          <div style="font-size:13px;color:var(--text-muted);line-height:1.7">
+            <strong style="color:var(--text)">Zapier:</strong> Use "Webhooks by Zapier" → POST → paste your URL above → map the phone field.<br>
+            <strong style="color:var(--text)">Make (Integromat):</strong> HTTP module → POST → paste URL → set body to JSON.<br>
+            <strong style="color:var(--text)">Any CRM:</strong> Trigger on new lead → send POST to your URL with the phone number.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── BILLING ─── -->
+    <div id="view-billing" class="hidden">
+      <div class="page-header">
+        <h1 class="page-header__title">Billing</h1>
+        <p class="page-header__sub">Manage your subscription and payment details.</p>
+      </div>
+
+      <div class="section">
+        <div class="section__title">Current plan</div>
+        <div class="billing-card">
+          <div class="billing-plan-name">Cove Standard</div>
+          <div class="billing-plan-price"><strong>$49</strong>/month · Cancel anytime</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span id="billing-status-badge"></span>
+            <span id="billing-status-text" style="font-size:13px;color:var(--text-muted)"></span>
+          </div>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+            <button class="btn btn--secondary" id="billing-portal-btn">
+              Manage billing
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section__title">Your Cove number</div>
+        <div style="padding:16px 0">
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">Calls forwarded to this number trigger the SMS flow</div>
+          <div id="billing-number" style="font-size:20px;font-weight:700;letter-spacing:.01em;color:var(--text)">—</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section__title">30-day money-back guarantee</div>
+        <p style="font-size:13.5px;color:var(--text-muted);line-height:1.7">
+          If Cove doesn't pay for itself within 30 days of activation, contact us and we'll give you a full refund — no questions asked.
+          <br><br>
+          <a href="mailto:hello@coveplatform.com" style="color:var(--accent);font-weight:500">hello@coveplatform.com</a>
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // ─── State ───
+    let business = null;
+    let user = null;
+    let leadsData = [];
+    let flowEdited = null;
+
+    // ─── Navigation ───
+    const views = ['overview', 'flow', 'notifications', 'integrations', 'billing'];
+
+    function showView(name) {
+      views.forEach(v => {
+        document.getElementById('view-' + v).classList.add('hidden');
+        document.querySelector(`[data-view="${v}"]`).classList.remove('active');
+      });
+      document.getElementById('view-' + name).classList.remove('hidden');
+      document.querySelector(`[data-view="${name}"]`).classList.add('active');
+      if (name === 'flow' && business) renderFlowEditor();
+      if (name === 'notifications' && business) fillNotificationForm();
+      if (name === 'integrations' && business) fillIntegrations();
+      if (name === 'billing') fillBilling();
+    }
+
+    document.querySelectorAll('.sidebar__item[data-view]').forEach(btn => {
+      btn.addEventListener('click', () => showView(btn.dataset.view));
+    });
+
+    // ─── Load data ───
+    async function init() {
+      try {
+        const meData = await fetch('/api/auth/me').then(r => r.json());
+        if (!meData.ok) { location.href = '/login'; return; }
+
+        user = meData.user;
+        business = meData.business;
+
+        if (!user.onboarding_complete || !business?.is_active) {
+          location.href = '/onboarding';
+          return;
+        }
+
+        // Sidebar
+        document.getElementById('sidebar-name').textContent = user.name || user.email;
+        document.getElementById('sidebar-email').textContent = user.email;
+
+        // Overview
+        fillOverview();
+        await loadLeads();
+      } catch (e) {
+        console.error(e);
+        location.href = '/login';
+      }
+    }
+
+    function fillOverview() {
+      document.getElementById('biz-name-header').textContent = business.name || 'Your business';
+
+      // Status badge
+      const badge = document.getElementById('live-badge');
+      if (business.is_active && business.twilio_from_number) {
+        badge.innerHTML = '<span class="badge badge--live badge--dot">Live</span>';
+        document.getElementById('biz-number-sub').textContent = business.twilio_from_number;
+        document.getElementById('setup-alert').classList.add('hidden');
+      } else {
+        badge.innerHTML = '<span class="badge badge--setup badge--dot">Setting up</span>';
+        document.getElementById('setup-alert').classList.remove('hidden');
+      }
+
+      // Billing number
+      document.getElementById('billing-number').textContent = business.twilio_from_number || 'Being provisioned…';
+
+      // Auto-attempt provisioning if number missing
+      if (!business.twilio_from_number) {
+        tryProvision();
+      }
+
+      // Forwarding banner dismiss
+      const dismissBtn = document.getElementById('dismiss-forwarding-btn');
+      if (dismissBtn) {
+        dismissBtn.addEventListener('click', () => {
+          document.getElementById('forwarding-banner').classList.add('hidden');
+          sessionStorage.setItem('cf-dismissed', '1');
+        });
+      }
+
+      // Reset setup handler
+      const resetBtn = document.getElementById('reset-setup-btn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', async () => {
+          if (!confirm('This will reset your onboarding so you can start again. Your account and payment will be kept. Continue?')) return;
+          resetBtn.disabled = true; resetBtn.textContent = 'Resetting…';
+          await fetch('/api/auth/reset-onboarding', { method: 'POST' });
+          location.href = '/onboarding';
+        });
+      }
+
+      // Refresh button — re-attempt provision
+      const refreshBtn = document.querySelector('#setup-alert .btn--secondary');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          refreshBtn.disabled = true; refreshBtn.textContent = 'Checking…';
+          await tryProvision();
+          refreshBtn.disabled = false; refreshBtn.textContent = '↻ Refresh';
+        });
+      }
+    }
+
+    async function tryProvision() {
+      try {
+        const res = await fetch('/api/auth/provision-number', { method: 'POST' }).then(r => r.json());
+        if (res.ok && res.number) {
+          business.twilio_from_number = res.number;
+          business.is_active = true;
+          // Update UI to live state
+          document.getElementById('live-badge').innerHTML = '<span class="badge badge--live badge--dot">Live</span>';
+          document.getElementById('biz-number-sub').textContent = res.number;
+          document.getElementById('setup-alert').classList.add('hidden');
+          document.getElementById('billing-number').textContent = res.number;
+          // Advance step 2 to done, step 3 to active
+          const s2dot = document.querySelector('#sstep-2 .setup-step__dot');
+          if (s2dot) { s2dot.classList.remove('setup-step__dot--spin'); s2dot.classList.add('setup-step__dot--done'); }
+          const s3dot = document.querySelector('#sstep-3 .setup-step__dot');
+          if (s3dot) s3dot.classList.add('setup-step__dot--spin');
+          // Show forwarding reminder
+          setTimeout(() => location.href = '/onboarding?step=complete', 800);
+        }
+      } catch (e) { /* silent — user can manually refresh */ }
+    }
+
+    async function loadLeads() {
+      const data = await fetch('/api/me/leads').then(r => r.json());
+      if (!data.ok) return;
+      leadsData = data.leads || [];
+
+      const total = leadsData.length;
+      const done = leadsData.filter(l => l.status === 'completed').length;
+      const abandoned = leadsData.filter(l => {
+        if (l.status !== 'active') return false;
+        const age = (Date.now() - new Date(l.created_at).getTime()) / 60000;
+        return age > 60;
+      }).length;
+
+      document.getElementById('stat-week').textContent = total;
+      document.getElementById('stat-done').textContent = done;
+      document.getElementById('stat-abandoned').textContent = abandoned;
+
+      // Show forwarding banner if live but never had a lead
+      const banner = document.getElementById('forwarding-banner');
+      if (banner && business?.is_active && business?.twilio_from_number && total === 0
+          && !sessionStorage.getItem('cf-dismissed')) {
+        banner.classList.remove('hidden');
+      }
+
+      renderLeads(leadsData);
+    }
+
+    function getLeadStatus(lead) {
+      if (lead.status === 'completed') return { label: 'Completed', cls: 'lead-badge--done' };
+      if (lead.status === 'stopped') return { label: 'Opted out', cls: 'lead-badge--stopped' };
+      const age = (Date.now() - new Date(lead.created_at).getTime()) / 60000;
+      if (lead.status === 'active' && age > 60) return { label: 'No reply', cls: 'lead-badge--abandoned' };
+      return { label: 'In progress', cls: 'lead-badge--active' };
+    }
+
+    function getLeadNeed(lead) {
+      const answers = lead.answers || {};
+      // Try to find the first answered step label
+      const keys = Object.keys(answers).filter(k => k.endsWith('_label') && !k.startsWith('_'));
+      if (keys.length) return answers[keys[0]];
+      if (lead.message) return lead.message.replace(/^\[(.*?)\]\s*/, '').slice(0, 50);
+      return '—';
+    }
+
+    function timeAgo(date) {
+      const secs = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+      if (secs < 60) return 'just now';
+      if (secs < 3600) return Math.floor(secs / 60) + 'm ago';
+      if (secs < 86400) return Math.floor(secs / 3600) + 'h ago';
+      return Math.floor(secs / 86400) + 'd ago';
+    }
+
+    function renderLeads(leads) {
+      const container = document.getElementById('leads-container');
+      if (!leads.length) {
+        container.innerHTML = '<div class="leads-empty"><span>📭</span>No leads yet this week. Once Cove is live and call forwarding is set up, leads will appear here.</div>';
+        return;
+      }
+
+      const rows = leads.map(lead => {
+        const { label, cls } = getLeadStatus(lead);
+        const need = getLeadNeed(lead);
+        const name = lead.name || lead.phone || '—';
+        return `<tr>
+          <td class="name">${esc(name)}</td>
+          <td class="need">${esc(need)}</td>
+          <td><span class="lead-badge ${cls}">${label}</span></td>
+          <td class="time">${timeAgo(lead.created_at)}</td>
+        </tr>`;
+      }).join('');
+
+      container.innerHTML = `
+        <table class="leads-table">
+          <thead>
+            <tr>
+              <th>Name / Phone</th>
+              <th>What they need</th>
+              <th>Status</th>
+              <th style="text-align:right">Time</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    // ─── Flow editor ───
+    function getFlowConfig() {
+      if (flowEdited) return flowEdited;
+      if (business?.flow_config) return business.flow_config;
+      return null;
+    }
+
+    function renderFlowEditor() {
+      const flow = getFlowConfig();
+      document.getElementById('flow-biz-name').value = business.name || '';
+      document.getElementById('flow-booking').value = business.booking_link || '';
+
+      const container = document.getElementById('flow-cards');
+      if (!flow || !flow.steps) {
+        container.innerHTML = '<div style="color:var(--text-faint);font-size:13.5px;padding:16px 0">No flow configured. <button class="flow-ai-btn" onclick="openRegenModal()">Generate with AI</button></div>';
+        return;
+      }
+
+      container.innerHTML = flow.steps.map((step, i) => `
+        <div class="flow-card">
+          <div class="flow-card__header">
+            <span class="flow-card__num">Question ${i + 1} of ${flow.steps.length}</span>
+            ${step.free_text ? '<span class="flow-card__badge flow-card__badge--free">Free text reply</span>' : '<span class="flow-card__badge">Multiple choice</span>'}
+          </div>
+          <div class="flow-card__body">
+            <div class="flow-card__label">SMS message sent to lead</div>
+            <textarea class="flow-question-input" data-step="${i}">${esc(step.question)}</textarea>
+            ${!step.free_text ? `
+            <div class="flow-opts-label">Reply options <span style="color:var(--text-faint);font-weight:400">(lead replies with the letter)</span></div>
+            <div class="flow-opts-row">
+              ${step.options.map(o => `
+                <div class="flow-opt-chip">
+                  <strong>${esc(o.value)}</strong>
+                  <span>${esc(o.label)}</span>
+                </div>`).join('')}
+            </div>` : `
+            <div class="flow-free-note">Lead can reply with anything — their full answer is captured and included in your summary.</div>`}
+          </div>
+        </div>
+      `).join('');
+      // Auto-size all textareas to fit content
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        container.querySelectorAll('.flow-question-input').forEach(ta => {
+          ta.style.overflow = 'hidden';
+          ta.style.height = '0';
+          ta.style.height = ta.scrollHeight + 'px';
+          ta.addEventListener('input', function() {
+            this.style.height = '0';
+            this.style.height = this.scrollHeight + 'px';
+          });
+        });
+      }));
+    }
+
+    function openRegenModal() {
+      document.getElementById('regen-modal').classList.remove('hidden');
+      document.getElementById('regen-modal').style.display = 'flex';
+    }
+
+    document.getElementById('flow-regen-btn').addEventListener('click', openRegenModal);
+    document.getElementById('regen-cancel').addEventListener('click', () => {
+      document.getElementById('regen-modal').classList.add('hidden');
+    });
+    document.getElementById('regen-confirm').addEventListener('click', async () => {
+      const desc = document.getElementById('regen-desc').value.trim();
+      const err = document.getElementById('regen-error');
+      err.classList.remove('visible');
+      if (!desc) { err.textContent = 'Please describe your business first.'; err.classList.add('visible'); return; }
+
+      const btn = document.getElementById('regen-confirm');
+      btn.disabled = true; btn.textContent = 'Regenerating…';
+
+      const res = await fetch('/api/me/regenerate-flow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: desc }),
+      }).then(r => r.json());
+
+      btn.disabled = false; btn.textContent = 'Regenerate';
+
+      if (res.ok) {
+        flowEdited = res.flow;
+        document.getElementById('regen-modal').classList.add('hidden');
+        renderFlowEditor();
+      } else {
+        err.textContent = res.error || 'Could not regenerate.';
+        err.classList.add('visible');
+      }
+    });
+
+    document.getElementById('flow-cancel').addEventListener('click', () => {
+      flowEdited = null;
+      renderFlowEditor();
+    });
+
+    document.getElementById('flow-save').addEventListener('click', async () => {
+      // Capture edits
+      const flow = getFlowConfig();
+      if (flow) {
+        document.querySelectorAll('.flow-question-input').forEach((ta, i) => {
+          if (flow.steps[i]) flow.steps[i].question = ta.value.trim();
+        });
+        flowEdited = flow;
+      }
+
+      const bizName = document.getElementById('flow-biz-name').value.trim();
+      const booking = document.getElementById('flow-booking').value.trim();
+
+      const btn = document.getElementById('flow-save');
+      btn.disabled = true; btn.textContent = 'Saving…';
+
+      // Save flow
+      if (flowEdited) {
+        await fetch('/api/me/flow', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ flowConfig: flowEdited }),
+        });
+      }
+
+      // Save business name + booking link
+      await fetch('/api/me/business', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: bizName, bookingLink: booking || null }),
+      });
+
+      // Update business name/booking locally
+      business.name = bizName;
+      business.booking_link = booking;
+      if (flowEdited) { business.flow_config = flowEdited; flowEdited = null; }
+
+      document.getElementById('flow-saved').classList.add('visible');
+      setTimeout(() => document.getElementById('flow-saved').classList.remove('visible'), 2000);
+      btn.disabled = false; btn.textContent = 'Save changes';
+      document.getElementById('biz-name-header').textContent = bizName;
+    });
+
+    // ─── Notifications form ───
+    let closedDays = [0, 6];
+
+    function fillNotificationForm() {
+      document.getElementById('notif-phone').value = business.owner_notify_phone || '';
+      document.getElementById('notif-email').value = business.owner_notify_email || '';
+
+      const integrations = business.integrations || {};
+      document.getElementById('notif-webhook').value = integrations.completion_webhook_url || '';
+
+      const hours = business.operating_hours || {};
+      document.getElementById('hours-enabled').checked = !!hours.enabled;
+
+      if (hours.enabled) {
+        document.getElementById('hours-config').classList.remove('hidden');
+      }
+
+      // Populate hour selects
+      const openSel = document.getElementById('hours-open');
+      const closeSel = document.getElementById('hours-close');
+      if (!openSel.options.length) {
+        for (let h = 0; h <= 23; h++) {
+          const label = h === 0 ? '12:00 AM' : h < 12 ? `${h}:00 AM` : h === 12 ? '12:00 PM' : `${h - 12}:00 PM`;
+          openSel.add(new Option(label, h));
+          closeSel.add(new Option(label, h));
+        }
+      }
+      openSel.value = hours.open_hour ?? 8;
+      closeSel.value = hours.close_hour ?? 18;
+
+      if (hours.timezone) document.getElementById('hours-tz').value = hours.timezone;
+
+      // Days
+      closedDays = hours.closed_days || [0, 6];
+      document.querySelectorAll('.day-chip').forEach(chip => {
+        const d = Number(chip.dataset.day);
+        chip.classList.toggle('closed', closedDays.includes(d));
+      });
+    }
+
+    document.getElementById('hours-enabled').addEventListener('change', (e) => {
+      document.getElementById('hours-config').classList.toggle('hidden', !e.target.checked);
+    });
+
+    document.querySelectorAll('.day-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const d = Number(chip.dataset.day);
+        if (closedDays.includes(d)) {
+          closedDays = closedDays.filter(x => x !== d);
+        } else {
+          closedDays.push(d);
+        }
+        chip.classList.toggle('closed', closedDays.includes(d));
+      });
+    });
+
+    document.getElementById('notif-save').addEventListener('click', async () => {
+      const btn = document.getElementById('notif-save');
+      btn.disabled = true; btn.textContent = 'Saving…';
+      document.getElementById('notif-success').classList.add('hidden');
+
+      const hoursEnabled = document.getElementById('hours-enabled').checked;
+      const operatingHours = hoursEnabled ? {
+        enabled: true,
+        timezone: document.getElementById('hours-tz').value,
+        open_hour: Number(document.getElementById('hours-open').value),
+        close_hour: Number(document.getElementById('hours-close').value),
+        closed_days: closedDays,
+      } : { enabled: false };
+
+      await fetch('/api/me/notifications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          notifyPhone: document.getElementById('notif-phone').value.trim(),
+          notifyEmail: document.getElementById('notif-email').value.trim() || null,
+          webhookUrl: document.getElementById('notif-webhook').value.trim() || null,
+          operatingHours,
+        }),
+      });
+
+      document.getElementById('notif-success').classList.remove('hidden');
+      btn.disabled = false; btn.textContent = 'Save changes';
+      setTimeout(() => document.getElementById('notif-success').classList.add('hidden'), 3000);
+    });
+
+    // ─── Integrations ───
+    function fillIntegrations() {
+      const bizId = business.id;
+      const base = 'https://leads-rho-six.vercel.app';
+
+      const snippet = `<script src="${base}/cove.js" data-business="${bizId}"><\/script>`;
+      document.getElementById('embed-snippet').textContent = snippet;
+
+      const example = `<!-- Example: HTML contact form -->
+<form id="contact-form">
+  <input type="text"  name="name"  placeholder="Your name" />
+  <input type="tel"   name="phone" placeholder="Your phone" />
+  <input type="email" name="email" placeholder="Your email" />
+  <button type="submit">Send enquiry</button>
+</form>
+
+<script src="${base}/cove.js" data-business="${bizId}"><\/script>
+<script>
+  document.getElementById('contact-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const data = new FormData(e.target);
+    Cove.send({
+      name:  data.get('name'),
+      phone: data.get('phone'),
+      email: data.get('email'),
+    });
+    e.target.reset();
+    alert('Thanks! We\\'ll be in touch shortly.');
+  });
+<\/script>`;
+      document.getElementById('embed-example').textContent = example;
+
+      const webhookUrl = `${base}/api/webhook/generic/${bizId}`;
+      document.getElementById('webhook-url').textContent = webhookUrl;
+    }
+
+    function copySnippet() {
+      const text = document.getElementById('embed-snippet').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copy-snippet-btn');
+        btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
+
+    function copyWebhook() {
+      const text = document.getElementById('webhook-url').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copy-webhook-btn');
+        btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
+
+    // ─── Billing ───
+    function fillBilling() {
+      const status = user.subscription_status || 'inactive';
+      const badge = document.getElementById('billing-status-badge');
+      const text = document.getElementById('billing-status-text');
+
+      if (status === 'active') {
+        badge.innerHTML = '<span class="badge badge--live badge--dot">Active</span>';
+        text.textContent = 'Your subscription is active.';
+      } else if (status === 'past_due') {
+        badge.innerHTML = '<span class="badge badge--setup badge--dot">Payment failed</span>';
+        text.textContent = 'Your last payment failed. Update your card to keep Cove running.';
+      } else if (status === 'canceled') {
+        badge.innerHTML = '<span class="badge badge--paused badge--dot">Cancelled</span>';
+        text.textContent = 'Your subscription has been cancelled.';
+      } else {
+        badge.innerHTML = '<span class="badge badge--paused badge--dot">Inactive</span>';
+        text.textContent = '';
+      }
+    }
+
+    document.getElementById('billing-portal-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('billing-portal-btn');
+      btn.disabled = true; btn.textContent = 'Opening…';
+      const data = await fetch('/api/billing/portal').then(r => r.json());
+      btn.disabled = false; btn.textContent = 'Manage billing →';
+      if (data.ok && data.url) { location.href = data.url; }
+      else { alert(data.error || 'Could not open billing portal.'); }
+    });
+
+    // ─── Logout ───
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      location.href = '/';
+    });
+
+    // ─── Helpers ───
+    function esc(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ─── Init ───
+    init();
+  </script>
+</body>
+</html>

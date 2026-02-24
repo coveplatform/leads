@@ -1,0 +1,1146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Set up Cove</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/dash.css" />
+  <style>
+    /* ── Onboarding split layout ── */
+    .ob-root { min-height: 100vh; display: flex; flex-direction: column; background: #F8F8FA; }
+
+    .ob-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem; height: 64px;
+      background: #fff; border-bottom: 1px solid #E4E4E7;
+      flex-shrink: 0; position: sticky; top: 0; z-index: 10;
+    }
+    .ob-topbar-steps {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ob-step-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #E4E4E7; transition: all .25s;
+    }
+    .ob-step-dot.active { background: #2563EB; width: 28px; border-radius: 4px; }
+    .ob-step-dot.done { background: #10B981; }
+
+    .ob-split {
+      flex: 1; display: grid;
+      grid-template-columns: 1fr 460px;
+      min-height: calc(100vh - 64px);
+    }
+
+    /* ── Left: form content ── */
+    .ob-content {
+      padding: 4rem 5rem;
+      display: flex; flex-direction: column;
+      align-items: flex-start;
+    }
+    .ob-content > * { max-width: 520px; width: 100%; }
+    .ob-step-label {
+      font-size: .7rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: #2563EB; margin-bottom: 1rem;
+    }
+    .ob-heading {
+      font-size: 2.5rem; font-weight: 800; letter-spacing: -.04em;
+      color: #18181B; line-height: 1.15; margin-bottom: .85rem;
+    }
+    .ob-sub {
+      font-size: 1rem; color: #71717A; line-height: 1.75;
+      margin-bottom: 2.5rem;
+    }
+
+    .ob-fields { display: flex; flex-direction: column; gap: 1.25rem; }
+    .ob-field label {
+      display: block; font-size: .83rem; font-weight: 600;
+      color: #3F3F46; margin-bottom: .45rem;
+    }
+    .ob-field label .optional { font-weight: 400; color: #A1A1AA; margin-left: .3rem; }
+    .ob-field input, .ob-field textarea {
+      width: 100%; padding: .875rem 1rem;
+      font-size: 1rem; font-family: inherit;
+      background: #fff; color: #18181B;
+      border: 1.5px solid #E4E4E7; border-radius: 10px;
+      transition: border-color .15s, box-shadow .15s;
+      outline: none;
+    }
+    .ob-field input:focus, .ob-field textarea:focus {
+      border-color: #2563EB;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+    .ob-field textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
+    .ob-field-hint { font-size: .8rem; color: #A1A1AA; margin-top: .4rem; line-height: 1.5; }
+
+    .ob-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; margin-top: 2.5rem;
+    }
+    .ob-actions--right { justify-content: flex-end; }
+
+    .ob-error {
+      font-size: .85rem; color: #EF4444;
+      background: #FEF2F2; border: 1px solid #FECACA;
+      border-radius: 8px; padding: .6rem .85rem;
+      margin-top: 1rem; display: none;
+    }
+    .ob-error.visible { display: block; }
+
+    /* ── Right: marketing sidebar ── */
+    .ob-sidebar {
+      background: #0F172A;
+      display: flex; flex-direction: column;
+      padding: 3.5rem 3rem;
+      position: sticky; top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+    .ob-sidebar-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #06B6D4;
+      margin-bottom: 1.5rem;
+    }
+    .ob-sidebar-badge-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #06B6D4; box-shadow: 0 0 6px #06B6D4;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.7)} }
+
+    .ob-sidebar h2 {
+      font-size: 1.65rem; font-weight: 800; letter-spacing: -.04em;
+      color: #fff; line-height: 1.25; margin-bottom: 1rem;
+    }
+    .ob-sidebar p {
+      font-size: .9rem; color: rgba(255,255,255,.45);
+      line-height: 1.75; margin-bottom: 2rem;
+    }
+
+    .ob-stat-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .85rem;
+      margin-bottom: 2rem;
+    }
+    .ob-stat {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 14px; padding: 1.1rem 1.15rem;
+    }
+    .ob-stat strong {
+      display: block; font-size: 1.8rem; font-weight: 900;
+      letter-spacing: -.05em; color: #fff; line-height: 1;
+      margin-bottom: .3rem;
+    }
+    .ob-stat span { font-size: .72rem; color: rgba(255,255,255,.35); line-height: 1.4; }
+
+    .ob-bullets { display: flex; flex-direction: column; gap: .75rem; }
+    .ob-bullet {
+      display: flex; align-items: flex-start; gap: .75rem;
+      font-size: .875rem; color: rgba(255,255,255,.55); line-height: 1.55;
+    }
+    .ob-bullet-icon {
+      width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+      display: grid; place-items: center;
+      background: rgba(16,185,129,.15); color: #10B981;
+    }
+    .ob-bullet-icon--blue { background: rgba(37,99,235,.15); color: #60A5FA; }
+
+    .ob-sms-preview {
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px; padding: 1.1rem 1.25rem;
+      margin-top: 2rem; display: flex; flex-direction: column; gap: .6rem;
+    }
+    .ob-sms-label {
+      font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: rgba(255,255,255,.25);
+      margin-bottom: .15rem;
+    }
+    .ob-bubble {
+      font-size: .82rem; line-height: 1.55; padding: .5rem .75rem;
+      border-radius: 14px; width: fit-content; max-width: 88%;
+    }
+    .ob-bubble--recv {
+      background: rgba(255,255,255,.07); color: rgba(255,255,255,.8);
+      border-bottom-left-radius: 4px; margin-right: auto;
+    }
+    .ob-bubble--sent {
+      background: #2563EB; color: #fff; font-weight: 600;
+      border-bottom-right-radius: 4px; margin-left: auto;
+    }
+
+    .ob-guarantee {
+      display: flex; align-items: center; gap: .65rem;
+      margin-top: auto; padding-top: 2rem;
+      font-size: .8rem; color: rgba(255,255,255,.3);
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .ob-guarantee svg { color: rgba(255,255,255,.2); flex-shrink: 0; }
+
+    /* ── AI loading state ── */
+    .ob-ai-loading {
+      display: flex; flex-direction: column;
+      gap: 1.5rem; padding: 1.5rem 0;
+    }
+    .ob-ai-loading-header { display: flex; align-items: center; gap: 1rem; }
+    .ob-ai-spinner {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      border: 2.5px solid #E4E4E7; border-top-color: #2563EB;
+      animation: spin .75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ob-ai-loading-text { font-size: 1.1rem; font-weight: 700; color: #18181B; letter-spacing: -.02em; }
+    .ob-ai-loading-sub { font-size: .875rem; color: #71717A; margin-top: .15rem; }
+    .ob-ai-loading-steps { display: flex; flex-direction: column; gap: .5rem; }
+    .ob-ai-loading-step {
+      font-size: .875rem; color: #A1A1AA;
+      display: flex; align-items: center; gap: .65rem;
+      padding: .6rem .9rem; border-radius: 8px; transition: all .2s;
+    }
+    .ob-ai-loading-step.active { color: #2563EB; font-weight: 600; background: #EFF6FF; }
+    .ob-ai-loading-step.done { color: #10B981; }
+    .ob-ai-loading-step.done svg { display: block; }
+    .ob-ai-loading-step svg { display: none; }
+
+    /* ── Flow question cards ── */
+    .ob-flow-questions { display: flex; flex-direction: column; gap: .85rem; margin-bottom: 1.25rem; }
+
+    .ob-q-card {
+      background: #fff; border: 1.5px solid #E4E4E7; border-radius: 14px;
+      overflow: hidden; transition: border-color .15s, box-shadow .15s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+    .ob-q-card:focus-within { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
+    .ob-q-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .65rem 1.1rem .55rem; border-bottom: 1px solid #F4F4F5; background: #FAFAFA;
+    }
+    .ob-q-num {
+      font-size: .68rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: #A1A1AA; display: flex; align-items: center; gap: .5rem;
+    }
+    .ob-q-num-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #E4E4E7; color: #71717A; font-size: .65rem; font-weight: 800;
+    }
+    .ob-q-card:focus-within .ob-q-num-badge { background: #DBEAFE; color: #2563EB; }
+    .ob-q-edit-hint { font-size: .7rem; color: #C4C4C8; display: flex; align-items: center; gap: .3rem; }
+    .ob-q-card:focus-within .ob-q-edit-hint { color: #93C5FD; }
+
+    .ob-q-textarea {
+      width: 100%; border: none; outline: none;
+      padding: 1rem 1.1rem; font-size: 1rem; font-family: inherit;
+      color: #18181B; line-height: 1.6; resize: none;
+      background: transparent; min-height: 64px;
+    }
+    .ob-q-textarea::placeholder { color: #C4C4C8; }
+
+    .ob-q-options {
+      display: flex; flex-wrap: wrap; gap: .4rem;
+      padding: .55rem 1.1rem .8rem; border-top: 1px solid #F4F4F5;
+    }
+    .ob-q-chip {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-size: .75rem; font-weight: 500; padding: .28rem .65rem;
+      border-radius: 99px; background: #F4F4F5; color: #52525B; border: 1px solid #E4E4E7;
+    }
+    .ob-q-chip strong { font-weight: 700; color: #2563EB; }
+    .ob-q-chip--free { background: #F0FDF4; border-color: #BBF7D0; color: #16A34A; }
+
+    .ob-regen-row { display: flex; align-items: center; gap: .85rem; margin-top: .25rem; }
+    .ob-regen-btn {
+      display: inline-flex; align-items: center; gap: .45rem;
+      font-size: .82rem; font-weight: 600; color: #2563EB;
+      background: #EFF6FF; border: 1.5px solid #BFDBFE;
+      border-radius: 8px; padding: .5rem .9rem; cursor: pointer;
+      font-family: inherit; transition: background .15s;
+    }
+    .ob-regen-btn:hover { background: #DBEAFE; }
+    .ob-regen-note { font-size: .8rem; color: #A1A1AA; }
+
+    /* ── Payment card ── */
+    .ob-plan-card {
+      background: #fff; border: 1.5px solid #E4E4E7; border-radius: 16px;
+      overflow: hidden; margin-bottom: 1.75rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    }
+    .ob-plan-top {
+      background: linear-gradient(135deg, #1D4ED8 0%, #0891B2 100%);
+      padding: 2rem 1.75rem;
+    }
+    .ob-plan-price {
+      font-size: 3rem; font-weight: 900; letter-spacing: -.05em;
+      color: #fff; line-height: 1;
+    }
+    .ob-plan-price span { font-size: 1.1rem; font-weight: 500; color: rgba(255,255,255,.65); }
+    .ob-plan-note { font-size: .85rem; color: rgba(255,255,255,.6); margin-top: .4rem; }
+    .ob-plan-items {
+      padding: 1.35rem 1.75rem; display: flex; flex-direction: column; gap: .8rem;
+    }
+    .ob-plan-item {
+      display: flex; align-items: center; gap: .7rem;
+      font-size: .9rem; color: #3F3F46;
+    }
+    .ob-plan-item svg { color: #10B981; flex-shrink: 0; }
+
+    /* ── Complete step ── */
+    .ob-complete-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, #2563EB, #06B6D4);
+      display: grid; place-items: center; color: #fff;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 8px 24px rgba(37,99,235,.3);
+    }
+    .cf-num-display {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: #fff; border: 1.5px solid #E4E4E7; border-radius: 10px;
+      padding: .7rem 1rem; font-size: 1.05rem; font-weight: 700;
+      color: #18181B; margin-bottom: 1.5rem;
+    }
+    .cf-num-display svg { color: #2563EB; }
+
+    .cf-platforms { display: flex; flex-direction: column; gap: 1rem; }
+    .cf-platform-card {
+      background: #fff; border: 1.5px solid #E4E4E7; border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+    }
+    .cf-platform-label {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .8rem; font-weight: 700; color: #3F3F46;
+      margin-bottom: .85rem;
+    }
+    .cf-instructions { display: flex; flex-direction: column; gap: .55rem; }
+    .cf-row {
+      display: flex; gap: .6rem;
+      font-size: .85rem; color: #52525B; line-height: 1.5;
+    }
+    .cf-row-num { font-weight: 700; color: #2563EB; flex-shrink: 0; min-width: 18px; }
+    .cf-code {
+      display: inline-block; background: #F4F4F5; border: 1px solid #E4E4E7;
+      border-radius: 6px; padding: .15rem .55rem;
+      font-family: 'SF Mono', 'Fira Code', monospace; font-size: .82rem;
+      color: #2563EB; font-weight: 600; letter-spacing: .02em;
+    }
+
+    .cf-try-list { display: flex; flex-direction: column; gap: 0; margin-bottom: 1.25rem; border: 1.5px solid #E4E4E7; border-radius: 12px; overflow: hidden; }
+    .cf-try-title { font-size: .8rem; font-weight: 700; color: #3F3F46; padding: .75rem 1.1rem; background: #F4F4F5; border-bottom: 1px solid #E4E4E7; }
+    .cf-try-item { display: flex; gap: .85rem; align-items: flex-start; padding: .9rem 1.1rem; border-bottom: 1px solid #E4E4E7; background: #fff; }
+    .cf-try-item:last-child { border-bottom: none; }
+    .cf-try-num { font-size: .72rem; font-weight: 800; color: #fff; background: #2563EB; border-radius: 99px; padding: .2rem .55rem; flex-shrink: 0; margin-top: 2px; letter-spacing: .03em; }
+    .cf-try-body { flex: 1; }
+    .cf-try-label { font-size: .82rem; font-weight: 600; color: #18181B; margin-bottom: .3rem; }
+    .cf-try-code { font-family: 'SF Mono','Fira Code',monospace; font-size: .95rem; font-weight: 700; color: #2563EB; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: .3rem .7rem; display: inline-block; margin-bottom: .3rem; letter-spacing: .04em; cursor: pointer; user-select: all; text-decoration: none; }
+    .cf-try-code:active, .cf-try-code:hover { background: #DBEAFE; }
+    a.cf-try-code { display: inline-flex; align-items: center; gap: .4rem; }
+    a.cf-try-code::after { content: '↗'; font-size: .75rem; opacity: .6; font-family: inherit; }
+    .cf-try-note { font-size: .78rem; color: #71717A; }
+
+    .cf-test-block { background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: 1.25rem; }
+    .cf-test-title { font-size: .82rem; font-weight: 700; color: #166534; margin-bottom: .65rem; }
+    .cf-test-row { display: flex; gap: .6rem; margin-bottom: .5rem; }
+    .cf-test-input { flex: 1; padding: .6rem .85rem; font-size: .9rem; font-family: inherit; border: 1.5px solid #BBF7D0; border-radius: 8px; background: #fff; color: #18181B; }
+    .cf-test-input:focus { outline: none; border-color: #16A34A; }
+    .cf-test-status { font-size: .82rem; font-weight: 600; min-height: 1.2rem; margin-bottom: .35rem; }
+    .cf-test-status.success { color: #16A34A; }
+    .cf-test-status.error { color: #DC2626; }
+    .cf-test-note { font-size: .78rem; color: #4ADE80; }
+
+    .cf-row--note span { color: #92400E; font-size: .82rem; }
+    .cf-row--note { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: .5rem .65rem; margin-top: .25rem; }
+
+    .cf-carrier-fallback {
+      background: #F8FAFC; border: 1.5px solid #E4E4E7; border-radius: 12px;
+      padding: 1.1rem 1.25rem; margin-top: 1rem;
+    }
+    .cf-carrier-fallback__title { font-size: .85rem; font-weight: 700; color: #3F3F46; margin-bottom: .75rem; }
+    .cf-carrier-list { display: flex; flex-direction: column; gap: .5rem; }
+    .cf-carrier-item { font-size: .83rem; color: #52525B; line-height: 1.5; padding-left: .5rem; border-left: 2px solid #E4E4E7; }
+    .cf-carrier-item strong { color: #18181B; }
+
+    .ob-info-banner {
+      display: flex; align-items: flex-start; gap: .65rem;
+      background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px;
+      padding: .85rem 1rem; margin-top: 1.25rem;
+      font-size: .85rem; color: #1D4ED8; line-height: 1.5;
+    }
+    .ob-info-banner svg { flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .ob-split { grid-template-columns: 1fr 380px; }
+      .ob-content { padding: 3rem 3rem; }
+      .ob-sidebar { padding: 2.5rem 2rem; }
+    }
+    @media (max-width: 768px) {
+      .ob-split { grid-template-columns: 1fr; }
+      .ob-sidebar { display: none; }
+      .ob-content { padding: 2rem 1.5rem; }
+      .ob-heading { font-size: 1.85rem; }
+    }
+  </style>
+</head>
+<body class="ob-root">
+
+  <header class="ob-topbar">
+    <a href="/" class="cove-logo">
+      <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+        <rect width="28" height="28" rx="7" fill="url(#ob-lg)"/>
+        <path d="M18 9.5a5.5 5.5 0 1 0 0 9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <defs><linearGradient id="ob-lg" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+      </svg>
+      <span>cove</span>
+    </a>
+    <div class="ob-topbar-steps" id="step-dots">
+      <div class="ob-step-dot" data-step="1"></div>
+      <div class="ob-step-dot" data-step="2"></div>
+      <div class="ob-step-dot" data-step="3"></div>
+      <div class="ob-step-dot" data-step="4"></div>
+    </div>
+    <div style="width:80px"></div>
+  </header>
+
+  <div class="ob-split">
+
+    <!-- ── Left: form panel ── -->
+    <main class="ob-content" id="ob-content">
+
+      <!-- Step 1: Business info -->
+      <div id="step-1">
+        <div class="ob-step-label">Step 1 of 4</div>
+        <h1 class="ob-heading">Tell us about your business.</h1>
+        <p class="ob-sub">The more specific you are, the better Cove's AI can write your qualification questions.</p>
+
+        <div class="ob-fields">
+          <div class="ob-field">
+            <label for="biz-name">Business name</label>
+            <input type="text" id="biz-name" placeholder="Bay Plumbing" autocomplete="organization" />
+          </div>
+          <div class="ob-field">
+            <label for="biz-desc">What do you do?</label>
+            <textarea id="biz-desc" placeholder="e.g. We're a residential plumbing business in Sydney. We handle emergency call-outs, blocked drains, hot water systems and general repairs. Mostly homeowners and landlords." rows="4"></textarea>
+            <div class="ob-field-hint">Be specific — include what types of jobs you do and who your typical customer is.</div>
+          </div>
+          <div class="ob-field">
+            <label for="biz-booking">Online booking link <span class="optional">(optional)</span></label>
+            <input type="url" id="biz-booking" placeholder="https://book.yoursite.com.au" autocomplete="url" />
+          </div>
+        </div>
+
+        <div id="step1-error" class="ob-error"></div>
+
+        <div class="ob-actions ob-actions--right" style="margin-top:2rem">
+          <button class="btn btn--primary btn--lg" id="step1-next">
+            Generate my questions
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: AI flow -->
+      <div id="step-2" class="hidden">
+        <div class="ob-step-label">Step 2 of 4</div>
+        <h1 class="ob-heading">Your SMS questions.</h1>
+        <p class="ob-sub">These are what every lead gets asked. We wrote them for your business — edit anything that doesn't feel right, or click to customise.</p>
+
+        <!-- Loading state -->
+        <div id="flow-loading">
+          <div class="ob-ai-loading">
+            <div class="ob-ai-loading-header">
+              <div class="ob-ai-spinner"></div>
+              <div>
+                <div class="ob-ai-loading-text">Writing your questions…</div>
+                <div class="ob-ai-loading-sub">This takes about 10 seconds</div>
+              </div>
+            </div>
+            <div class="ob-ai-loading-steps">
+              <div class="ob-ai-loading-step active" id="ai-step-1">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Reading your business description
+              </div>
+              <div class="ob-ai-loading-step" id="ai-step-2">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Crafting qualification questions
+              </div>
+              <div class="ob-ai-loading-step" id="ai-step-3">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Formatting your SMS flow
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generated flow -->
+        <div id="flow-content" class="hidden">
+          <div class="ob-flow-questions" id="flow-questions"></div>
+          <div class="ob-regen-row">
+            <button class="ob-regen-btn" id="regen-btn" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+              Regenerate with AI
+            </button>
+            <span class="ob-regen-note">Click any question above to edit it directly</span>
+          </div>
+        </div>
+
+        <div id="step2-error" class="ob-error"></div>
+
+        <div class="ob-actions" style="margin-top:1.75rem">
+          <button class="btn btn--ghost" id="step2-back" type="button">← Back</button>
+          <button class="btn btn--primary btn--lg" id="step2-next" type="button">
+            Looks good
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Notifications -->
+      <div id="step-3" class="hidden">
+        <div class="ob-step-label">Step 3 of 4</div>
+        <h1 class="ob-heading">Where do lead summaries go?</h1>
+        <p class="ob-sub">When someone completes the flow you'll get a summary — their name, what they need, and how urgent. Where should we send it?</p>
+
+        <div class="ob-fields">
+          <div class="ob-field">
+            <label for="notify-phone">Your mobile number</label>
+            <input type="tel" id="notify-phone" placeholder="+61 412 345 678" autocomplete="tel" />
+            <div class="ob-field-hint">Summaries sent here by SMS. This is your personal number, not your business number.</div>
+          </div>
+          <div class="ob-field">
+            <label for="notify-email">Email address <span class="optional">(optional)</span></label>
+            <input type="email" id="notify-email" placeholder="you@business.com.au" autocomplete="email" />
+            <div class="ob-field-hint">Also receive summaries by email. Handy for end-of-day review.</div>
+          </div>
+        </div>
+
+        <div id="step3-error" class="ob-error"></div>
+
+        <div class="ob-actions" style="margin-top:2rem">
+          <button class="btn btn--ghost" id="step3-back" type="button">← Back</button>
+          <button class="btn btn--primary btn--lg" id="step3-next" type="button">
+            Save &amp; continue
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4: Payment -->
+      <div id="step-4" class="hidden">
+        <div class="ob-step-label">Last step</div>
+        <h1 class="ob-heading">Activate your account.</h1>
+        <p class="ob-sub">Add your card to go live. If Cove doesn't pay for itself in 30 days, we'll refund you in full — no questions.</p>
+
+        <div class="ob-plan-card">
+          <div class="ob-plan-top">
+            <div class="ob-plan-price">$49<span>/month</span></div>
+            <div class="ob-plan-note">Cancel anytime · 30-day money-back guarantee</div>
+          </div>
+          <div class="ob-plan-items">
+            <div class="ob-plan-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Your own dedicated AU SMS number</div>
+            <div class="ob-plan-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Texts leads back in 10 seconds, 24/7</div>
+            <div class="ob-plan-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>AI-qualified lead summaries to your phone</div>
+            <div class="ob-plan-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Webhook &amp; CRM integrations included</div>
+          </div>
+        </div>
+
+        <div id="step4-error" class="ob-error"></div>
+
+        <div class="ob-actions" style="margin-top:.5rem">
+          <button class="btn btn--ghost" id="step4-back" type="button">← Back</button>
+          <button class="btn btn--primary btn--lg" id="step4-pay" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Add payment details
+          </button>
+        </div>
+
+        <p style="font-size:.78rem;color:#A1A1AA;text-align:center;margin-top:1rem">
+          Secured by Stripe &middot; SSL encrypted &middot; Cancel anytime
+        </p>
+      </div>
+
+      <!-- Complete: call forwarding -->
+      <div id="step-complete" class="hidden">
+        <div class="ob-complete-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h1 class="ob-heading">One last step.</h1>
+        <p class="ob-sub">Your Cove number is ready. Now you need to tell <strong>your own mobile</strong> to forward unanswered calls to it. This takes about 30 seconds and only needs to be done once.</p>
+
+        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:.9rem;line-height:1.7;color:#166534">
+          <strong>How it works after this:</strong><br>
+          Customer calls your number → you don't answer → your carrier forwards to Cove → Cove texts the customer within 10 seconds → they answer your questions → you get a summary.
+        </div>
+
+        <div style="margin-bottom:1.5rem">
+          <div style="font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#71717A;margin-bottom:.5rem">Forward missed calls on your phone to this Cove number</div>
+          <div class="cf-num-display">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span id="cf-number-text">Setting up your number…</span>
+          </div>
+        </div>
+
+        <!-- Step-by-step USSD codes to try in order -->
+        <div class="cf-try-list">
+          <div class="cf-try-title">Open your Phone app, dial one of these codes, tap call — done:</div>
+
+          <div class="cf-try-item">
+            <div class="cf-try-num">Try 1</div>
+            <div class="cf-try-body">
+              <div class="cf-try-label">Forward when unanswered (recommended)</div>
+              <a class="cf-try-code" id="code-1-link" href="#"><span id="code-1">**61*+XXXXXXXXXX*11*20#</span></a>
+              <div class="cf-try-note">Tap to open in dialler · works on most AU carriers</div>
+            </div>
+          </div>
+
+          <div class="cf-try-item">
+            <div class="cf-try-num">Try 2</div>
+            <div class="cf-try-body">
+              <div class="cf-try-label">Forward when unanswered (short form)</div>
+              <a class="cf-try-code" id="code-2-link" href="#"><span id="code-2">**61*+XXXXXXXXXX#</span></a>
+              <div class="cf-try-note">Tap to open in dialler · try if Try 1 fails</div>
+            </div>
+          </div>
+
+          <div class="cf-try-item">
+            <div class="cf-try-num">Try 3</div>
+            <div class="cf-try-body">
+              <div class="cf-try-label">Without + prefix (Optus / some Android)</div>
+              <a class="cf-try-code" id="code-4-link" href="#"><span id="code-4">**61*0011XXXXXXXXXX*11*20#</span></a>
+              <div class="cf-try-note">Tap to open in dialler · use if carrier rejects the + symbol</div>
+            </div>
+          </div>
+
+          <div class="cf-try-item">
+            <div class="cf-try-num">Try 4</div>
+            <div class="cf-try-body">
+              <div class="cf-try-label">Forward all calls (unconditional fallback)</div>
+              <a class="cf-try-code" id="code-3-link" href="#"><span id="code-3">*21*+XXXXXXXXXX#</span></a>
+              <div class="cf-try-note">Tap to open in dialler · forwards every call</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Test button -->
+        <div class="cf-test-block">
+          <div class="cf-test-title">Not sure if it worked? Test it now:</div>
+          <div class="cf-test-row">
+            <input type="tel" id="cf-test-phone" placeholder="Your mobile number e.g. 0412 345 678" class="cf-test-input" />
+            <button class="btn btn--secondary" id="cf-test-btn" type="button">Send test SMS</button>
+          </div>
+          <div class="cf-test-status" id="cf-test-status"></div>
+          <div class="cf-test-note">We'll text your number. If you get it, forwarding is working.</div>
+        </div>
+
+        <!-- Carrier app fallback -->
+        <div class="cf-carrier-fallback">
+          <div class="cf-carrier-fallback__title">⚠️ Still getting errors? Use your carrier app instead:</div>
+          <div class="cf-carrier-list">
+            <div class="cf-carrier-item"><strong>Telstra</strong> → My Telstra app → Services → your number → Call forwarding → When unanswered → enter <span class="cf-code" id="carrier-number">your Cove number</span></div>
+            <div class="cf-carrier-item"><strong>Optus</strong> → My Optus app → Manage → Call divert → When unanswered → enter <span class="cf-code" id="carrier-number-local">your Cove number</span> <em style="color:#92400E;font-size:.78rem">(no + prefix — use 0... format)</em></div>
+            <div class="cf-carrier-item"><strong>Vodafone</strong> → My Vodafone app → Services → Call divert → When unanswered → enter <span class="cf-code">your Cove number</span></div>
+            <div class="cf-carrier-item"><strong>Other</strong> → Call your carrier and say: <em>"I want to set call divert when unanswered to [your Cove number]"</em></div>
+          </div>
+          <div style="margin-top:.75rem;font-size:.82rem;color:#71717A;line-height:2">
+            Standard format: <span class="cf-code" id="carrier-number">loading…</span><br>
+            Local format (AU numbers, Optus): <span class="cf-code" id="carrier-number-local">loading…</span><br>
+            <span style="color:#92400E">⚠️ If your Cove number starts with +1 (US number) and Optus rejects it — call Optus on <strong>133 937</strong> and ask them to set "call divert when unanswered" to your Cove number. Agents can set it manually.</span>
+          </div>
+        </div>
+
+        <div class="ob-info-banner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>Your number is in your dashboard any time. Need help? Email us at <a href="mailto:hello@coveplatform.com" style="color:inherit;font-weight:700">hello@coveplatform.com</a>.</span>
+        </div>
+
+        <div class="ob-actions ob-actions--right" style="margin-top:2rem">
+          <button class="btn btn--primary btn--lg" id="go-dashboard" type="button">
+            Go to my dashboard
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ── Right: marketing sidebar ── -->
+    <aside class="ob-sidebar" id="ob-sidebar">
+
+      <!-- Default sidebar (steps 1-3) -->
+      <div id="sidebar-default">
+        <div class="ob-sidebar-badge">
+          <span class="ob-sidebar-badge-dot"></span>
+          What you're getting
+        </div>
+        <h2>Never miss a lead<br/>while you're working.</h2>
+        <p>Cove runs quietly in the background — the moment someone calls and you can't pick up, they get a text back within 10 seconds.</p>
+
+        <div class="ob-stat-row">
+          <div class="ob-stat"><strong>10s</strong><span>text-back</span></div>
+          <div class="ob-stat"><strong>24/7</strong><span>always on</span></div>
+          <div class="ob-stat"><strong>$49</strong><span>per month</span></div>
+          <div class="ob-stat"><strong>30d</strong><span>money-back</span></div>
+        </div>
+
+        <div class="ob-bullets">
+          <div class="ob-bullet">
+            <div class="ob-bullet-icon">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span>Your own dedicated AU SMS number — provisioned the moment you pay</span>
+          </div>
+          <div class="ob-bullet">
+            <div class="ob-bullet-icon">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span>AI generates your questions based on your specific business type</span>
+          </div>
+          <div class="ob-bullet">
+            <div class="ob-bullet-icon">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span>Lead summaries sent to your phone and email — no new app to check</span>
+          </div>
+          <div class="ob-bullet">
+            <div class="ob-bullet-icon">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span>One-time 2-minute call forwarding setup — then automatic forever</span>
+          </div>
+        </div>
+
+        <div class="ob-sms-preview">
+          <div class="ob-sms-label">What your leads receive</div>
+          <div class="ob-bubble ob-bubble--recv">Hi Sam! Thanks for calling Bay Plumbing 👋<br/><br/>How urgent is your issue?<br/>A) Emergency now &nbsp;B) Same day &nbsp;C) Not urgent</div>
+          <div class="ob-bubble ob-bubble--sent">A</div>
+          <div class="ob-bubble ob-bubble--recv">Got it — emergency. We'll call you back within minutes.</div>
+        </div>
+
+        <div class="ob-guarantee">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          30-day money-back guarantee · No questions asked
+        </div>
+      </div>
+
+      <!-- Sidebar for payment step -->
+      <div id="sidebar-payment" class="hidden">
+        <div class="ob-sidebar-badge">
+          <span class="ob-sidebar-badge-dot"></span>
+          You're almost there
+        </div>
+        <h2>One recovered job pays for months.</h2>
+        <p>Most businesses win back 2–3 leads per week just from the missed call text-back alone. At an average job value of $400+, the maths is obvious.</p>
+
+        <div class="ob-bullets">
+          <div class="ob-bullet">
+            <div class="ob-bullet-icon ob-bullet-icon--blue">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span><strong style="color:#fff">$49/mo total</strong> — no setup fee, no contracts</span>
+          </div>
+          <div class="ob-bullet">
+            <div class="ob-bullet-icon ob-bullet-icon--blue">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span>Your AU number is activated immediately after payment</span>
+          </div>
+          <div class="ob-bullet">
+            <div class="ob-bullet-icon ob-bullet-icon--blue">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span>30-day money-back guarantee — if it doesn't pay for itself, full refund</span>
+          </div>
+          <div class="ob-bullet">
+            <div class="ob-bullet-icon ob-bullet-icon--blue">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span>Cancel any time — no lock-in, no cancellation fees</span>
+          </div>
+        </div>
+
+        <div style="margin-top:1.75rem;padding:1.25rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px">
+          <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:.75rem">What others say</div>
+          <p style="font-size:.88rem;color:rgba(255,255,255,.7);font-style:italic;line-height:1.6;margin-bottom:.75rem">"We went from calling leads back in 3–4 hours to them being qualified before I finish the current job."</p>
+          <div style="font-size:.78rem;font-weight:600;color:rgba(255,255,255,.4)">Mark T. — Bay Area Plumbing</div>
+        </div>
+
+        <div class="ob-guarantee" style="margin-top:1.75rem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Secured by Stripe · SSL encrypted
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    let flowConfig = null;
+    let bizData = {};
+
+    function showStep(n) {
+      document.querySelectorAll('[id^="step-"]').forEach(el => el.classList.add('hidden'));
+      const el = document.getElementById('step-' + n);
+      if (el) el.classList.remove('hidden');
+
+      // Update dots
+      const stepNum = typeof n === 'number' ? n : 5;
+      document.querySelectorAll('.ob-step-dot').forEach((dot, i) => {
+        dot.classList.remove('active', 'done');
+        const s = i + 1;
+        if (s < stepNum) dot.classList.add('done');
+        else if (s === stepNum) dot.classList.add('active');
+      });
+      currentStep = n;
+
+      // Swap sidebar
+      const sidebarDefault = document.getElementById('sidebar-default');
+      const sidebarPayment = document.getElementById('sidebar-payment');
+      if (n === 4) {
+        sidebarDefault.classList.add('hidden');
+        sidebarPayment.classList.remove('hidden');
+      } else {
+        sidebarDefault.classList.remove('hidden');
+        sidebarPayment.classList.add('hidden');
+      }
+
+      // Scroll form to top
+      document.getElementById('ob-content').scrollTo(0, 0);
+    }
+
+    // ─── Init ───
+    const params = new URLSearchParams(location.search);
+    if (params.get('step') === 'complete') {
+      showStep('complete');
+      loadNumber();
+    } else if (params.get('step') === 'billing') {
+      showStep(4);
+    } else {
+      fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(data => {
+          if (!data.ok) { location.href = '/login'; return; }
+          if (data.user?.onboarding_complete && data.business?.is_active) {
+            location.href = '/dashboard'; return;
+          }
+          if (data.business?.name) {
+            bizData.businessName = data.business.name;
+            document.getElementById('biz-name').value = data.business.name;
+          }
+          showStep(1);
+        })
+        .catch(() => location.href = '/login');
+    }
+
+    let _loadNumberAttempts = 0;
+    async function loadNumber() {
+      _loadNumberAttempts++;
+      const numText = document.getElementById('cf-number-text');
+      try {
+        const data = await fetch('/api/auth/me').then(r => r.json());
+        const num = data.business?.twilio_from_number;
+        if (num) {
+          numText.textContent = num;
+          // Convert +61XXXXXXXXX → 0XXXXXXXXX for carriers that don't accept +
+          const localNum = num.startsWith('+61') ? '0' + num.slice(3) : num;
+          // Strip leading + for 0011 format: +61412345678 → 001161412345678
+          const intlNum = num.startsWith('+') ? '0011' + num.slice(1) : num;
+          const codes = {
+            'code-1': `**61*${num}*11*20#`,
+            'code-2': `**61*${num}#`,
+            'code-3': `*21*${num}#`,
+            'code-4': `**61*${intlNum}*11*20#`,
+          };
+          for (const [id, code] of Object.entries(codes)) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = code;
+            const link = document.getElementById(id + '-link');
+            if (link) link.href = `tel:${encodeURIComponent(code)}`;
+          }
+          const cn = document.getElementById('carrier-number');
+          if (cn) cn.textContent = num;
+          const ln = document.getElementById('carrier-number-local');
+          if (ln) ln.textContent = localNum;
+          const ios = document.getElementById('ios-code');
+          const and = document.getElementById('android-number');
+          if (ios) ios.textContent = `**61*${num}#`;
+          if (and) and.textContent = num;
+          return; // done
+        }
+      } catch(e) { /* network error, retry */ }
+
+      // Still waiting — show progress and retry
+      if (_loadNumberAttempts < 20) {
+        if (numText) numText.textContent = `Setting up your number… (${_loadNumberAttempts * 3}s)`;
+        setTimeout(loadNumber, 3000);
+      } else {
+        // Took too long — offer manual provision
+        if (numText) numText.innerHTML = `Taking longer than expected — <a href="#" id="retry-provision" style="color:#2563EB">retry</a>`;
+        const retryLink = document.getElementById('retry-provision');
+        if (retryLink) retryLink.addEventListener('click', async (e) => {
+          e.preventDefault();
+          if (numText) numText.textContent = 'Requesting number…';
+          try {
+            const r = await fetch('/api/auth/provision-number', { method: 'POST' }).then(r => r.json());
+            if (r.ok && r.number) {
+              _loadNumberAttempts = 0;
+              loadNumber();
+            } else {
+              if (numText) numText.textContent = r.error || 'Could not provision — contact support.';
+            }
+          } catch(e) {
+            if (numText) numText.textContent = 'Network error — please refresh.';
+          }
+        });
+      }
+    }
+
+    // ─── Test SMS ───
+    const testBtn = document.getElementById('cf-test-btn');
+    if (testBtn) {
+      testBtn.addEventListener('click', async () => {
+        const phone = document.getElementById('cf-test-phone').value.trim();
+        const status = document.getElementById('cf-test-status');
+        if (!phone) { status.textContent = 'Enter your mobile number first.'; status.className = 'cf-test-status error'; return; }
+        testBtn.disabled = true; testBtn.textContent = 'Sending…';
+        status.textContent = ''; status.className = 'cf-test-status';
+        try {
+          const res = await fetch('/api/demo/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, message: `✅ Cove is connected! Your call forwarding is set up correctly. Missed calls will now be texted back automatically.` })
+          }).then(r => r.json());
+          if (res.ok) {
+            status.textContent = '✅ Test SMS sent! Check your phone — if you got it, you\'re all set.';
+            status.className = 'cf-test-status success';
+          } else {
+            status.textContent = res.error || 'Could not send — check your number and try again.';
+            status.className = 'cf-test-status error';
+          }
+        } catch(e) {
+          status.textContent = 'Network error — try again.';
+          status.className = 'cf-test-status error';
+        }
+        testBtn.disabled = false; testBtn.textContent = 'Send test SMS';
+      });
+    }
+
+    // ─── AI loading animation ───
+    function animateAISteps() {
+      const steps = ['ai-step-1', 'ai-step-2', 'ai-step-3'];
+      let i = 0;
+      function advance() {
+        if (i > 0) {
+          const prev = document.getElementById(steps[i - 1]);
+          if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
+        }
+        if (i < steps.length) {
+          const cur = document.getElementById(steps[i]);
+          if (cur) cur.classList.add('active');
+          i++;
+          if (i < steps.length) setTimeout(advance, 1200);
+        }
+      }
+      // Reset
+      steps.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.remove('active', 'done'); }
+      });
+      setTimeout(advance, 400);
+    }
+
+    // ─── Render flow questions ───
+    function renderFlow(flow) {
+      const container = document.getElementById('flow-questions');
+      container.innerHTML = '';
+      flow.steps.forEach((step, i) => {
+        const div = document.createElement('div');
+        div.className = 'ob-q-card';
+        const opts = step.options.map(o =>
+          `<span class="ob-q-chip"><strong>${o.value}</strong> ${o.label}</span>`
+        ).join('');
+        div.innerHTML = `
+          <div class="ob-q-header">
+            <span class="ob-q-num">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Question ${i + 1}
+            </span>
+            <span class="ob-q-edit-hint">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Click to edit
+            </span>
+          </div>
+          <textarea class="ob-q-textarea" rows="2" data-step="${i}">${step.question}</textarea>
+          <div class="ob-q-options">${opts}</div>
+        `;
+        // Auto-resize textarea
+        const ta = div.querySelector('textarea');
+        ta.addEventListener('input', () => {
+          ta.style.height = 'auto';
+          ta.style.height = ta.scrollHeight + 'px';
+        });
+        container.appendChild(div);
+      });
+    }
+
+    // ─── Step 1 → 2 ───
+    document.getElementById('step1-next').addEventListener('click', async () => {
+      const name = document.getElementById('biz-name').value.trim();
+      const desc = document.getElementById('biz-desc').value.trim();
+      const err = document.getElementById('step1-error');
+      err.classList.remove('visible');
+
+      if (!name) { err.textContent = 'Please enter your business name.'; err.classList.add('visible'); return; }
+      if (!desc || desc.length < 20) { err.textContent = 'Please describe your business in a bit more detail (at least 20 characters).'; err.classList.add('visible'); return; }
+
+      bizData = { ...bizData, businessName: name, description: desc, bookingLink: document.getElementById('biz-booking').value.trim() };
+
+      const btn = document.getElementById('step1-next');
+      btn.disabled = true;
+      btn.textContent = 'Generating…';
+
+      showStep(2);
+      document.getElementById('flow-loading').classList.remove('hidden');
+      document.getElementById('flow-content').classList.add('hidden');
+      animateAISteps();
+
+      const res = await fetch('/api/onboarding/generate-flow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessName: name, description: desc }),
+      }).then(r => r.json());
+
+      btn.disabled = false;
+      btn.innerHTML = 'Generate my questions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+
+      document.getElementById('flow-loading').classList.add('hidden');
+
+      if (res.ok) {
+        flowConfig = res.flow;
+        renderFlow(flowConfig);
+        document.getElementById('flow-content').classList.remove('hidden');
+      } else {
+        const stepErr = document.getElementById('step2-error');
+        stepErr.textContent = res.error || 'Could not generate questions. Please check your OpenAI key.';
+        stepErr.classList.add('visible');
+        document.getElementById('flow-content').classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('regen-btn').addEventListener('click', async () => {
+      document.getElementById('flow-loading').classList.remove('hidden');
+      document.getElementById('flow-content').classList.add('hidden');
+      animateAISteps();
+
+      const res = await fetch('/api/onboarding/generate-flow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessName: bizData.businessName, description: bizData.description }),
+      }).then(r => r.json());
+
+      document.getElementById('flow-loading').classList.add('hidden');
+      if (res.ok) {
+        flowConfig = res.flow;
+        renderFlow(flowConfig);
+      }
+      document.getElementById('flow-content').classList.remove('hidden');
+    });
+
+    // ─── Step 2 → 3 ───
+    document.getElementById('step2-back').addEventListener('click', () => showStep(1));
+    document.getElementById('step2-next').addEventListener('click', () => {
+      if (flowConfig) {
+        document.querySelectorAll('.ob-q-textarea').forEach((ta, i) => {
+          if (flowConfig.steps[i]) flowConfig.steps[i].question = ta.value.trim();
+        });
+        bizData.flowConfig = flowConfig;
+      }
+      showStep(3);
+    });
+
+    // ─── Step 3 → 4 ───
+    document.getElementById('step3-back').addEventListener('click', () => showStep(2));
+    document.getElementById('step3-next').addEventListener('click', async () => {
+      const phone = document.getElementById('notify-phone').value.trim();
+      const email = document.getElementById('notify-email').value.trim();
+      const err = document.getElementById('step3-error');
+      err.classList.remove('visible');
+
+      if (!phone) { err.textContent = 'Please enter your mobile number.'; err.classList.add('visible'); return; }
+
+      bizData = { ...bizData, notifyPhone: phone, notifyEmail: email };
+
+      const btn = document.getElementById('step3-next');
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      const res = await fetch('/api/onboarding/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessName: bizData.businessName,
+          flowConfig: bizData.flowConfig || null,
+          notifyPhone: phone,
+          notifyEmail: email || null,
+          bookingLink: bizData.bookingLink || null,
+        }),
+      }).then(r => r.json());
+
+      btn.disabled = false;
+      btn.innerHTML = 'Save &amp; continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+
+      if (res.ok) {
+        showStep(4);
+      } else {
+        err.textContent = res.error || 'Could not save. Please try again.';
+        err.classList.add('visible');
+      }
+    });
+
+    // ─── Step 4 → Stripe (or free bypass in dev) ───
+    document.getElementById('step4-back').addEventListener('click', () => showStep(3));
+
+    async function startCheckout() {
+      const btn = document.getElementById('step4-pay');
+      const err = document.getElementById('step4-error');
+      btn.disabled = true;
+      btn.textContent = 'Setting up your account…';
+      err.classList.remove('visible');
+
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      }).then(r => r.json());
+
+      if (res.ok && res.url) {
+        location.href = res.url;
+      } else {
+        err.textContent = res.error || 'Could not start checkout. Please try again.';
+        err.classList.add('visible');
+        btn.disabled = false;
+        btn.innerHTML = originalPayBtnHtml;
+      }
+    }
+
+    const payBtn = document.getElementById('step4-pay');
+    const originalPayBtnHtml = payBtn.innerHTML;
+
+    // Check if Stripe is configured — update button label accordingly
+    fetch('/api/config/stripe-mode').then(r => r.json()).then(res => {
+      if (!res.stripeEnabled) {
+        payBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Activate account (free trial)`;
+        document.querySelector('#step-4 .ob-sub').textContent = 'Click below to activate your account and get your dedicated number set up.';
+      }
+    }).catch(() => {});
+
+    payBtn.addEventListener('click', startCheckout);
+
+    // ─── Complete → Dashboard ───
+    document.getElementById('go-dashboard').addEventListener('click', () => {
+      location.href = '/dashboard';
+    });
+  </script>
+</body>
+</html>

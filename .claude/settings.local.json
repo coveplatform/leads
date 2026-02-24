@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(cat:*)",
+      "Bash(npm install:*)",
+      "Bash(node -e:*)",
+      "Bash(node migrations/run.mjs:*)",
+      "Bash(curl:*)",
+      "Bash(node --input-type=module:*)"
+    ]
+  }
+}

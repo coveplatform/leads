@@ -3,6 +3,76 @@ import { config } from "./config.js";
 
 const sql = neon(config.databaseUrl);
 
+// ─── Users ───
+
+export async function createUser({ email, passwordHash, googleId, name }) {
+  const rows = await sql`
+    INSERT INTO users (email, password_hash, google_id, name)
+    VALUES (${email}, ${passwordHash || null}, ${googleId || null}, ${name || null})
+    RETURNING id, email, name, google_id, subscription_status, onboarding_complete, created_at
+  `;
+  return rows[0];
+}
+
+export async function getUserById(id) {
+  const rows = await sql`
+    SELECT id, email, name, google_id, stripe_customer_id, stripe_subscription_id,
+           subscription_status, onboarding_complete, created_at
+    FROM users WHERE id = ${id} LIMIT 1
+  `;
+  return rows[0] || null;
+}
+
+export async function getUserByEmail(email) {
+  const rows = await sql`
+    SELECT * FROM users WHERE email = ${email} LIMIT 1
+  `;
+  return rows[0] || null;
+}
+
+export async function getUserByGoogleId(googleId) {
+  const rows = await sql`
+    SELECT id, email, name, google_id, stripe_customer_id, stripe_subscription_id,
+           subscription_status, onboarding_complete, created_at
+    FROM users WHERE google_id = ${googleId} LIMIT 1
+  `;
+  return rows[0] || null;
+}
+
+export async function updateUser(userId, fields) {
+  const rows = await sql`
+    UPDATE users SET
+      name                  = COALESCE(${fields.name ?? null}, name),
+      stripe_customer_id    = COALESCE(${fields.stripeCustomerId ?? null}, stripe_customer_id),
+      stripe_subscription_id = COALESCE(${fields.stripeSubscriptionId ?? null}, stripe_subscription_id),
+      subscription_status   = COALESCE(${fields.subscriptionStatus ?? null}, subscription_status),
+      onboarding_complete   = COALESCE(${fields.onboardingComplete ?? null}, onboarding_complete),
+      updated_at            = now()
+    WHERE id = ${userId}
+    RETURNING id, email, name, stripe_customer_id, subscription_status, onboarding_complete
+  `;
+  return rows[0];
+}
+
+export async function getBusinessByUserId(userId) {
+  const rows = await sql`
+    SELECT * FROM businesses WHERE user_id = ${userId} LIMIT 1
+  `;
+  return rows[0] || null;
+}
+
+export async function getRecentLeadsByBusinessId(businessId, days = 7) {
+  const rows = await sql`
+    SELECT id, name, phone, status, current_step, answers, created_at, finished_at
+    FROM leads
+    WHERE business_id = ${businessId}
+      AND created_at > NOW() - ${days + ' days'}::interval
+    ORDER BY created_at DESC
+    LIMIT 50
+  `;
+  return rows;
+}
+
 export async function getBusinessById(id) {
   const rows = await sql`
     SELECT * FROM businesses
@@ -80,10 +150,35 @@ export async function createBusiness({
   ownerNotifyPhone,
   ownerNotifyEmail,
   bookingLink,
+  industry,
+  flowConfig,
+  isActive = true,
+  userId = null,
 }) {
+  const flowJson = flowConfig ? JSON.stringify(flowConfig) : null;
   const rows = await sql`
-    INSERT INTO businesses (name, twilio_from_number, owner_notify_phone, owner_notify_email, booking_link, is_active)
-    VALUES (${name}, ${twilioFromNumber}, ${ownerNotifyPhone || null}, ${ownerNotifyEmail || null}, ${bookingLink || null}, true)
+    INSERT INTO businesses (name, twilio_from_number, owner_notify_phone, owner_notify_email, booking_link, is_active, industry, flow_config, user_id)
+    VALUES (${name}, ${twilioFromNumber || null}, ${ownerNotifyPhone || null}, ${ownerNotifyEmail || null}, ${bookingLink || null}, ${isActive}, ${industry || null}, ${flowJson}::jsonb, ${userId})
+    RETURNING *
+  `;
+  return rows[0];
+}
+
+export async function updateBusiness(businessId, fields) {
+  const flowJson = fields.flowConfig ? JSON.stringify(fields.flowConfig) : undefined;
+  const rows = await sql`
+    UPDATE businesses SET
+      name              = COALESCE(${fields.name ?? null}, name),
+      owner_notify_phone = COALESCE(${fields.ownerNotifyPhone ?? null}, owner_notify_phone),
+      owner_notify_email = COALESCE(${fields.ownerNotifyEmail ?? null}, owner_notify_email),
+      booking_link      = COALESCE(${fields.bookingLink ?? null}, booking_link),
+      industry          = COALESCE(${fields.industry ?? null}, industry),
+      flow_config       = COALESCE(${flowJson ?? null}::jsonb, flow_config),
+      operating_hours   = COALESCE(${fields.operatingHours ? JSON.stringify(fields.operatingHours) : null}::jsonb, operating_hours),
+      integrations      = COALESCE(${fields.integrations ? JSON.stringify(fields.integrations) : null}::jsonb, integrations),
+      user_id           = COALESCE(${fields.userId ?? null}, user_id),
+      is_active         = COALESCE(${fields.isActive ?? null}, is_active)
+    WHERE id = ${businessId}
     RETURNING *
   `;
   return rows[0];
@@ -109,4 +204,27 @@ export async function getAllLeadsWithBusiness() {
     ORDER BY l.created_at DESC
   `;
   return rows;
+}
+
+export async function checkDemoRateLimit(phone) {
+  const rows = await sql`
+    SELECT COUNT(*) as cnt FROM demo_rate_limits
+    WHERE phone = ${phone} AND sent_at > NOW() - INTERVAL '1 hour'
+  `;
+  return Number(rows[0]?.cnt || 0);
+}
+
+export async function recordDemoSend(phone) {
+  await sql`INSERT INTO demo_rate_limits (phone) VALUES (${phone})`;
+}
+
+export async function checkDuplicateLead(phone, minutesWindow) {
+  const rows = await sql`
+    SELECT id FROM leads
+    WHERE phone = ${phone}
+      AND status = 'active'
+      AND created_at > NOW() - ${minutesWindow + ' minutes'}::interval
+    LIMIT 1
+  `;
+  return rows[0] || null;
 }
