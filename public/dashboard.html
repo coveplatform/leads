@@ -185,6 +185,16 @@
       </div>
 
       <div class="section">
+        <div class="section__title">Welcome message</div>
+        <div class="flow-hint">Sent immediately when someone misses a call. <code style="font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px">{firstName}</code> and <code style="font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px">{businessName}</code> are filled in automatically.</div>
+        <div class="form-section">
+          <div class="form-group">
+            <textarea id="flow-intro" rows="2" placeholder="Hi {firstName}, this is {businessName}. Quick question…" style="resize:none;overflow:hidden"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
         <div class="section__title" style="display:flex;align-items:center;justify-content:space-between">
           <span>SMS Questions</span>
           <button class="flow-ai-btn" id="flow-regen-btn" type="button">
@@ -666,6 +676,14 @@
         return;
       }
 
+      // Populate intro field
+      const introEl = document.getElementById('flow-intro');
+      if (introEl) {
+        introEl.value = flow.intro || '';
+        requestAnimationFrame(() => { introEl.style.height = 'auto'; introEl.style.height = introEl.scrollHeight + 'px'; });
+        introEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; }, { once: false });
+      }
+
       container.innerHTML = flow.steps.map((step, i) => `
         <div class="flow-card">
           <div class="flow-card__header">
@@ -755,6 +773,9 @@
 
       const bizName = document.getElementById('flow-biz-name').value.trim();
       const booking = document.getElementById('flow-booking').value.trim();
+      const introMsg = document.getElementById('flow-intro')?.value.trim();
+      if (flowEdited && introMsg) flowEdited.intro = introMsg;
+      else if (flow && introMsg) flow.intro = introMsg;
 
       const btn = document.getElementById('flow-save');
       btn.disabled = true; btn.textContent = 'Saving…';

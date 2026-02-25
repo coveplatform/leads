@@ -372,7 +372,7 @@ em { font-style: italic; }
 .iphone--hero .iphone__statusbar-icons svg { transform: scale(.85); }
 .iphone--hero .iphone__island { width: 95px; height: 27px; margin: -9px auto 4px; border-radius: 16px; }
 .iphone--hero .iphone__header { padding: .35rem .7rem .4rem; gap: .4rem; }
-.iphone--hero .iphone__avatar { width: 24px; height: 24px; font-size: .45rem; }
+.iphone--hero .iphone__avatar { width: 24px; height: 24px; min-width: 24px; flex-shrink: 0; font-size: .45rem; }
 .iphone--hero .iphone__name { font-size: .7rem; }
 .iphone--hero .iphone__sub { font-size: .5rem; }
 .iphone--hero .iphone__back svg { width: 8px; height: 14px; }
