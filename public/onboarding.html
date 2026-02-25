@@ -1499,7 +1499,8 @@
       const ta   = document.getElementById('qb-active-text');
 
       document.getElementById('qb-active').style.display = 'block';
-      document.getElementById('qb-active-label').textContent = `Question ${idx + 1}`;
+      const activeLabel = document.getElementById('qb-active-label');
+      if (activeLabel) activeLabel.textContent = `Question ${idx + 1}`;
       const numBadge = document.getElementById('qb-active-num');
       if (numBadge) numBadge.textContent = idx + 1;
 
