@@ -31,28 +31,29 @@
 
     .ob-split {
       flex: 1; display: grid;
-      grid-template-columns: 1fr 460px;
+      grid-template-columns: 1fr 480px;
       min-height: calc(100vh - 64px);
     }
 
     /* ── Left: form content ── */
     .ob-content {
-      padding: 4rem 5rem;
+      padding: 3.5rem 4.5rem;
       display: flex; flex-direction: column;
       align-items: flex-start;
+      overflow-y: auto;
     }
-    .ob-content > * { max-width: 520px; width: 100%; }
+    .ob-content > * { max-width: 480px; width: 100%; }
     .ob-step-label {
       font-size: .7rem; font-weight: 700; letter-spacing: .12em;
       text-transform: uppercase; color: #2563EB; margin-bottom: 1rem;
     }
     .ob-heading {
-      font-size: 2.5rem; font-weight: 800; letter-spacing: -.04em;
-      color: #18181B; line-height: 1.15; margin-bottom: .85rem;
+      font-size: 2.2rem; font-weight: 800; letter-spacing: -.04em;
+      color: #18181B; line-height: 1.15; margin-bottom: .75rem;
     }
     .ob-sub {
-      font-size: 1rem; color: #71717A; line-height: 1.75;
-      margin-bottom: 2.5rem;
+      font-size: .95rem; color: #71717A; line-height: 1.7;
+      margin-bottom: 2rem;
     }
 
     .ob-fields { display: flex; flex-direction: column; gap: 1.25rem; }
@@ -94,78 +95,78 @@
     .ob-sidebar {
       background: #0F172A;
       display: flex; flex-direction: column;
-      padding: 3.5rem 3rem;
+      padding: 3rem 2.75rem;
       position: sticky; top: 64px;
       height: calc(100vh - 64px);
       overflow-y: auto;
     }
     .ob-sidebar-badge {
       display: inline-flex; align-items: center; gap: .5rem;
-      font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+      font-size: .7rem; font-weight: 700; letter-spacing: .1em;
       text-transform: uppercase; color: #06B6D4;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
     .ob-sidebar-badge-dot {
-      width: 7px; height: 7px; border-radius: 50%;
+      width: 6px; height: 6px; border-radius: 50%;
       background: #06B6D4; box-shadow: 0 0 6px #06B6D4;
       animation: pulse-dot 2s ease-in-out infinite;
     }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.7)} }
 
     .ob-sidebar h2 {
-      font-size: 1.65rem; font-weight: 800; letter-spacing: -.04em;
-      color: #fff; line-height: 1.25; margin-bottom: 1rem;
+      font-size: 1.75rem; font-weight: 800; letter-spacing: -.04em;
+      color: #fff; line-height: 1.2; margin-bottom: .85rem;
     }
-    .ob-sidebar p {
-      font-size: .9rem; color: rgba(255,255,255,.45);
-      line-height: 1.75; margin-bottom: 2rem;
+    .ob-sidebar > p, .ob-sidebar #sidebar-default > p {
+      font-size: .88rem; color: rgba(255,255,255,.4);
+      line-height: 1.65; margin-bottom: 1.75rem;
     }
 
     .ob-stat-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: .85rem;
-      margin-bottom: 2rem;
+      display: grid; grid-template-columns: 1fr 1fr; gap: .75rem;
+      margin-bottom: 1.75rem;
     }
     .ob-stat {
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: 14px; padding: 1.1rem 1.15rem;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px; padding: 1rem 1.1rem;
     }
     .ob-stat strong {
-      display: block; font-size: 1.8rem; font-weight: 900;
+      display: block; font-size: 2rem; font-weight: 900;
       letter-spacing: -.05em; color: #fff; line-height: 1;
-      margin-bottom: .3rem;
+      margin-bottom: .25rem;
     }
-    .ob-stat span { font-size: .72rem; color: rgba(255,255,255,.35); line-height: 1.4; }
+    .ob-stat span { font-size: .7rem; color: rgba(255,255,255,.3); line-height: 1.4; text-transform: uppercase; letter-spacing: .06em; }
 
-    .ob-bullets { display: flex; flex-direction: column; gap: .75rem; }
+    .ob-bullets { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.75rem; }
     .ob-bullet {
-      display: flex; align-items: flex-start; gap: .75rem;
-      font-size: .875rem; color: rgba(255,255,255,.55); line-height: 1.55;
+      display: flex; align-items: center; gap: .7rem;
+      font-size: .85rem; color: rgba(255,255,255,.5); line-height: 1.5;
     }
     .ob-bullet-icon {
-      width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
       display: grid; place-items: center;
       background: rgba(16,185,129,.15); color: #10B981;
     }
     .ob-bullet-icon--blue { background: rgba(37,99,235,.15); color: #60A5FA; }
 
     .ob-sms-preview {
-      background: rgba(255,255,255,.035);
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: 16px; padding: 1.1rem 1.25rem;
-      margin-top: 2rem; display: flex; flex-direction: column; gap: .6rem;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px; padding: 1rem 1.15rem;
+      margin-top: auto; display: flex; flex-direction: column; gap: .55rem;
     }
     .ob-sms-label {
-      font-size: .65rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: rgba(255,255,255,.25);
-      margin-bottom: .15rem;
+      font-size: .62rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: rgba(255,255,255,.2);
+      margin-bottom: .1rem;
     }
     .ob-bubble {
-      font-size: .82rem; line-height: 1.55; padding: .5rem .75rem;
-      border-radius: 14px; width: fit-content; max-width: 88%;
+      font-size: .82rem; line-height: 1.5; padding: .5rem .75rem;
+      border-radius: 14px; width: fit-content; max-width: 90%;
     }
     .ob-bubble--recv {
-      background: rgba(255,255,255,.07); color: rgba(255,255,255,.8);
+      background: rgba(255,255,255,.08); color: rgba(255,255,255,.8);
       border-bottom-left-radius: 4px; margin-right: auto;
     }
     .ob-bubble--sent {
@@ -174,12 +175,12 @@
     }
 
     .ob-guarantee {
-      display: flex; align-items: center; gap: .65rem;
-      margin-top: auto; padding-top: 2rem;
-      font-size: .8rem; color: rgba(255,255,255,.3);
+      display: flex; align-items: center; gap: .6rem;
+      margin-top: 1.25rem; padding-top: 1.25rem;
+      font-size: .78rem; color: rgba(255,255,255,.25);
       border-top: 1px solid rgba(255,255,255,.06);
     }
-    .ob-guarantee svg { color: rgba(255,255,255,.2); flex-shrink: 0; }
+    .ob-guarantee svg { color: rgba(255,255,255,.15); flex-shrink: 0; }
 
     /* ── AI loading state ── */
     .ob-ai-loading {
@@ -290,36 +291,53 @@
 
     /* ── Complete step ── */
     .ob-complete-icon {
-      width: 64px; height: 64px; border-radius: 50%;
+      width: 56px; height: 56px; border-radius: 50%;
       background: linear-gradient(135deg, #2563EB, #06B6D4);
       display: grid; place-items: center; color: #fff;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 8px 24px rgba(37,99,235,.3);
+      margin-bottom: 1.25rem;
+      box-shadow: 0 8px 24px rgba(37,99,235,.25);
     }
-    .cf-num-display {
-      display: inline-flex; align-items: center; gap: .6rem;
-      background: #fff; border: 1.5px solid #E4E4E7; border-radius: 10px;
-      padding: .7rem 1rem; font-size: 1.05rem; font-weight: 700;
-      color: #18181B; margin-bottom: 1.5rem;
-    }
-    .cf-num-display svg { color: #2563EB; }
-
-    .cf-platforms { display: flex; flex-direction: column; gap: 1rem; }
-    .cf-platform-card {
+    .cf-num-box {
+      display: flex; align-items: center; justify-content: space-between;
       background: #fff; border: 1.5px solid #E4E4E7; border-radius: 12px;
-      padding: 1.1rem 1.25rem;
+      padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.04);
     }
-    .cf-platform-label {
-      display: flex; align-items: center; gap: .5rem;
-      font-size: .8rem; font-weight: 700; color: #3F3F46;
-      margin-bottom: .85rem;
+    .cf-num-box-left { display: flex; align-items: center; gap: .75rem; }
+    .cf-num-box-label { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #A1A1AA; margin-bottom: .2rem; }
+    .cf-num-box-number { font-size: 1.35rem; font-weight: 800; letter-spacing: -.02em; color: #18181B; font-family: 'SF Mono','Fira Code',monospace; }
+    .cf-num-box-icon { width: 38px; height: 38px; border-radius: 10px; background: #EFF6FF; display: grid; place-items: center; color: #2563EB; flex-shrink: 0; }
+    .cf-num-loading { font-size: 1rem; font-weight: 600; color: #A1A1AA; font-family: inherit; }
+
+    /* Carrier tabs */
+    .cf-tabs { display: flex; gap: 6px; margin-bottom: 0; }
+    .cf-tab {
+      flex: 1; padding: .55rem .5rem; border-radius: 8px 8px 0 0;
+      border: 1.5px solid #E4E4E7; border-bottom: none;
+      background: #F4F4F5; color: #71717A;
+      font-size: .8rem; font-weight: 600; cursor: pointer;
+      font-family: inherit; text-align: center; transition: all .15s;
     }
-    .cf-instructions { display: flex; flex-direction: column; gap: .55rem; }
-    .cf-row {
-      display: flex; gap: .6rem;
-      font-size: .85rem; color: #52525B; line-height: 1.5;
+    .cf-tab.active { background: #fff; color: #18181B; border-color: #E4E4E7; }
+    .cf-tab-panels { border: 1.5px solid #E4E4E7; border-radius: 0 0 12px 12px; background: #fff; margin-bottom: 1.25rem; overflow: hidden; }
+    .cf-panel { display: none; padding: 1.25rem; }
+    .cf-panel.active { display: block; }
+    .cf-panel-step { display: flex; align-items: flex-start; gap: .85rem; padding: .6rem 0; border-bottom: 1px solid #F4F4F5; }
+    .cf-panel-step:last-child { border-bottom: none; padding-bottom: 0; }
+    .cf-panel-num { width: 22px; height: 22px; border-radius: 50%; background: #2563EB; color: #fff; font-size: .7rem; font-weight: 800; display: grid; place-items: center; flex-shrink: 0; margin-top: 1px; }
+    .cf-panel-text { font-size: .88rem; color: #3F3F46; line-height: 1.5; flex: 1; }
+    .cf-panel-text strong { color: #18181B; }
+    .cf-dial-btn {
+      display: inline-flex; align-items: center; gap: .4rem; margin-top: .5rem;
+      background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 8px;
+      padding: .45rem .9rem; font-size: .82rem; font-weight: 700;
+      color: #2563EB; font-family: 'SF Mono','Fira Code',monospace;
+      text-decoration: none; cursor: pointer; letter-spacing: .03em;
+      transition: background .15s;
     }
-    .cf-row-num { font-weight: 700; color: #2563EB; flex-shrink: 0; min-width: 18px; }
+    .cf-dial-btn:hover { background: #DBEAFE; }
+    .cf-dial-btn-icon { font-family: inherit; font-size: .75rem; opacity: .6; }
+
     .cf-code {
       display: inline-block; background: #F4F4F5; border: 1px solid #E4E4E7;
       border-radius: 6px; padding: .15rem .55rem;
@@ -327,48 +345,23 @@
       color: #2563EB; font-weight: 600; letter-spacing: .02em;
     }
 
-    .cf-try-list { display: flex; flex-direction: column; gap: 0; margin-bottom: 1.25rem; border: 1.5px solid #E4E4E7; border-radius: 12px; overflow: hidden; }
-    .cf-try-title { font-size: .8rem; font-weight: 700; color: #3F3F46; padding: .75rem 1.1rem; background: #F4F4F5; border-bottom: 1px solid #E4E4E7; }
-    .cf-try-item { display: flex; gap: .85rem; align-items: flex-start; padding: .9rem 1.1rem; border-bottom: 1px solid #E4E4E7; background: #fff; }
-    .cf-try-item:last-child { border-bottom: none; }
-    .cf-try-num { font-size: .72rem; font-weight: 800; color: #fff; background: #2563EB; border-radius: 99px; padding: .2rem .55rem; flex-shrink: 0; margin-top: 2px; letter-spacing: .03em; }
-    .cf-try-body { flex: 1; }
-    .cf-try-label { font-size: .82rem; font-weight: 600; color: #18181B; margin-bottom: .3rem; }
-    .cf-try-code { font-family: 'SF Mono','Fira Code',monospace; font-size: .95rem; font-weight: 700; color: #2563EB; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: .3rem .7rem; display: inline-block; margin-bottom: .3rem; letter-spacing: .04em; cursor: pointer; user-select: all; text-decoration: none; }
-    .cf-try-code:active, .cf-try-code:hover { background: #DBEAFE; }
-    a.cf-try-code { display: inline-flex; align-items: center; gap: .4rem; }
-    a.cf-try-code::after { content: '↗'; font-size: .75rem; opacity: .6; font-family: inherit; }
-    .cf-try-note { font-size: .78rem; color: #71717A; }
-
-    .cf-test-block { background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: 1.25rem; }
-    .cf-test-title { font-size: .82rem; font-weight: 700; color: #166534; margin-bottom: .65rem; }
+    .cf-test-block { border: 1.5px solid #E4E4E7; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; background: #fff; }
+    .cf-test-title { font-size: .82rem; font-weight: 700; color: #3F3F46; margin-bottom: .65rem; }
     .cf-test-row { display: flex; gap: .6rem; margin-bottom: .5rem; }
-    .cf-test-input { flex: 1; padding: .6rem .85rem; font-size: .9rem; font-family: inherit; border: 1.5px solid #BBF7D0; border-radius: 8px; background: #fff; color: #18181B; }
-    .cf-test-input:focus { outline: none; border-color: #16A34A; }
-    .cf-test-status { font-size: .82rem; font-weight: 600; min-height: 1.2rem; margin-bottom: .35rem; }
+    .cf-test-input { flex: 1; padding: .6rem .85rem; font-size: .9rem; font-family: inherit; border: 1.5px solid #E4E4E7; border-radius: 8px; background: #fff; color: #18181B; outline: none; }
+    .cf-test-input:focus { border-color: #2563EB; }
+    .cf-test-status { font-size: .82rem; font-weight: 600; min-height: 1.2rem; margin-bottom: .2rem; }
     .cf-test-status.success { color: #16A34A; }
     .cf-test-status.error { color: #DC2626; }
-    .cf-test-note { font-size: .78rem; color: #4ADE80; }
-
-    .cf-row--note span { color: #92400E; font-size: .82rem; }
-    .cf-row--note { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: .5rem .65rem; margin-top: .25rem; }
-
-    .cf-carrier-fallback {
-      background: #F8FAFC; border: 1.5px solid #E4E4E7; border-radius: 12px;
-      padding: 1.1rem 1.25rem; margin-top: 1rem;
-    }
-    .cf-carrier-fallback__title { font-size: .85rem; font-weight: 700; color: #3F3F46; margin-bottom: .75rem; }
-    .cf-carrier-list { display: flex; flex-direction: column; gap: .5rem; }
-    .cf-carrier-item { font-size: .83rem; color: #52525B; line-height: 1.5; padding-left: .5rem; border-left: 2px solid #E4E4E7; }
-    .cf-carrier-item strong { color: #18181B; }
+    .cf-test-note { font-size: .78rem; color: #A1A1AA; }
 
     .ob-info-banner {
       display: flex; align-items: flex-start; gap: .65rem;
-      background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px;
-      padding: .85rem 1rem; margin-top: 1.25rem;
-      font-size: .85rem; color: #1D4ED8; line-height: 1.5;
+      background: #F8FAFC; border: 1px solid #E4E4E7; border-radius: 10px;
+      padding: .75rem 1rem; margin-top: 1rem;
+      font-size: .82rem; color: #52525B; line-height: 1.5;
     }
-    .ob-info-banner svg { flex-shrink: 0; margin-top: 1px; }
+    .ob-info-banner svg { flex-shrink: 0; margin-top: 1px; color: #A1A1AA; }
 
     /* ── Responsive ── */
     @media (max-width: 1024px) {
@@ -564,99 +557,127 @@
       <!-- Complete: call forwarding -->
       <div id="step-complete" class="hidden">
         <div class="ob-complete-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h1 class="ob-heading">One last step.</h1>
-        <p class="ob-sub">Your Cove number is ready. Now you need to tell <strong>your own mobile</strong> to forward unanswered calls to it. This takes about 30 seconds and only needs to be done once.</p>
+        <h1 class="ob-heading">Set up call forwarding.</h1>
+        <p class="ob-sub">Forward missed calls on your mobile to your Cove number. Takes 30 seconds. After that, every missed call sends an automatic text to your lead.</p>
 
-        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:.9rem;line-height:1.7;color:#166534">
-          <strong>How it works after this:</strong><br>
-          Customer calls your number → you don't answer → your carrier forwards to Cove → Cove texts the customer within 10 seconds → they answer your questions → you get a summary.
-        </div>
-
-        <div style="margin-bottom:1.5rem">
-          <div style="font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#71717A;margin-bottom:.5rem">Forward missed calls on your phone to this Cove number</div>
-          <div class="cf-num-display">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            <span id="cf-number-text">Setting up your number…</span>
-          </div>
-        </div>
-
-        <!-- Step-by-step USSD codes to try in order -->
-        <div class="cf-try-list">
-          <div class="cf-try-title">Open your Phone app, dial one of these codes, tap call — done:</div>
-
-          <div class="cf-try-item">
-            <div class="cf-try-num">Try 1</div>
-            <div class="cf-try-body">
-              <div class="cf-try-label">Forward when unanswered (recommended)</div>
-              <a class="cf-try-code" id="code-1-link" href="#"><span id="code-1">**61*+XXXXXXXXXX*11*20#</span></a>
-              <div class="cf-try-note">Tap to open in dialler · works on most AU carriers</div>
+        <!-- Number display -->
+        <div class="cf-num-box">
+          <div class="cf-num-box-left">
+            <div class="cf-num-box-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             </div>
-          </div>
-
-          <div class="cf-try-item">
-            <div class="cf-try-num">Try 2</div>
-            <div class="cf-try-body">
-              <div class="cf-try-label">Forward when unanswered (short form)</div>
-              <a class="cf-try-code" id="code-2-link" href="#"><span id="code-2">**61*+XXXXXXXXXX#</span></a>
-              <div class="cf-try-note">Tap to open in dialler · try if Try 1 fails</div>
-            </div>
-          </div>
-
-          <div class="cf-try-item">
-            <div class="cf-try-num">Try 3</div>
-            <div class="cf-try-body">
-              <div class="cf-try-label">Without + prefix (Optus / some Android)</div>
-              <a class="cf-try-code" id="code-4-link" href="#"><span id="code-4">**61*0011XXXXXXXXXX*11*20#</span></a>
-              <div class="cf-try-note">Tap to open in dialler · use if carrier rejects the + symbol</div>
-            </div>
-          </div>
-
-          <div class="cf-try-item">
-            <div class="cf-try-num">Try 4</div>
-            <div class="cf-try-body">
-              <div class="cf-try-label">Forward all calls (unconditional fallback)</div>
-              <a class="cf-try-code" id="code-3-link" href="#"><span id="code-3">*21*+XXXXXXXXXX#</span></a>
-              <div class="cf-try-note">Tap to open in dialler · forwards every call</div>
+            <div>
+              <div class="cf-num-box-label">Your Cove number</div>
+              <div class="cf-num-box-number" id="cf-number-text"><span class="cf-num-loading">Setting up…</span></div>
             </div>
           </div>
         </div>
 
-        <!-- Test button -->
+        <!-- Carrier tabs -->
+        <div class="cf-tabs">
+          <button class="cf-tab active" data-tab="telstra">Telstra</button>
+          <button class="cf-tab" data-tab="optus">Optus</button>
+          <button class="cf-tab" data-tab="vodafone">Vodafone</button>
+          <button class="cf-tab" data-tab="other">Other</button>
+        </div>
+        <div class="cf-tab-panels">
+
+          <!-- Telstra -->
+          <div class="cf-panel active" id="panel-telstra">
+            <div class="cf-panel-step">
+              <div class="cf-panel-num">1</div>
+              <div class="cf-panel-text">Open your <strong>Phone app</strong> and go to the dial pad</div>
+            </div>
+            <div class="cf-panel-step">
+              <div class="cf-panel-num">2</div>
+              <div class="cf-panel-text">
+                Dial this code and tap <strong>Call</strong>
+                <br><a class="cf-dial-btn" id="code-1-link" href="#"><span id="code-1">**61*+XXXXXXXXXX*11*20#</span> <span class="cf-dial-btn-icon">↗</span></a>
+              </div>
+            </div>
+            <div class="cf-panel-step">
+              <div class="cf-panel-num">3</div>
+              <div class="cf-panel-text">You'll hear a confirmation tone. Done — call forwarding is active.</div>
+            </div>
+          </div>
+
+          <!-- Optus -->
+          <div class="cf-panel" id="panel-optus">
+            <div class="cf-panel-step">
+              <div class="cf-panel-num">1</div>
+              <div class="cf-panel-text">Open <strong>My Optus app</strong> → tap <strong>Manage</strong> → <strong>Call divert</strong></div>
+            </div>
+            <div class="cf-panel-step">
+              <div class="cf-panel-num">2</div>
+              <div class="cf-panel-text">Under <strong>When unanswered</strong>, enter your Cove number in local format:<br>
+                <span class="cf-code" id="carrier-number-local" style="margin-top:.35rem;display:inline-block">loading…</span>
+              </div>
+            </div>
+            <div class="cf-panel-step">
+              <div class="cf-panel-num">3</div>
+              <div class="cf-panel-text">Tap <strong>Save</strong>. Or try the dial code:<br>
+                <a class="cf-dial-btn" id="code-2-link" href="#" style="margin-top:.35rem"><span id="code-2">**61*+XXXXXXXXXX#</span> <span class="cf-dial-btn-icon">↗</span></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vodafone -->
+          <div class="cf-panel" id="panel-vodafone">
+            <div class="cf-panel-step">
+              <div class="cf-panel-num">1</div>
+              <div class="cf-panel-text">Open <strong>My Vodafone app</strong> → <strong>Services</strong> → <strong>Call divert</strong></div>
+            </div>
+            <div class="cf-panel-step">
+              <div class="cf-panel-num">2</div>
+              <div class="cf-panel-text">Set <strong>Divert when unanswered</strong> to your Cove number:<br>
+                <span class="cf-code" id="carrier-number" style="margin-top:.35rem;display:inline-block">loading…</span>
+              </div>
+            </div>
+            <div class="cf-panel-step">
+              <div class="cf-panel-num">3</div>
+              <div class="cf-panel-text">Save. Or dial from the keypad:<br>
+                <a class="cf-dial-btn" id="code-3-link" href="#" style="margin-top:.35rem"><span id="code-3">*61*+XXXXXXXXXX*11*20#</span> <span class="cf-dial-btn-icon">↗</span></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Other -->
+          <div class="cf-panel" id="panel-other">
+            <div class="cf-panel-step">
+              <div class="cf-panel-num">1</div>
+              <div class="cf-panel-text">Open your <strong>Phone app</strong> dial pad and enter this code, then tap <strong>Call</strong>:<br>
+                <a class="cf-dial-btn" id="code-4-link" href="#" style="margin-top:.35rem"><span id="code-4">**61*+XXXXXXXXXX*11*20#</span> <span class="cf-dial-btn-icon">↗</span></a>
+              </div>
+            </div>
+            <div class="cf-panel-step">
+              <div class="cf-panel-num">2</div>
+              <div class="cf-panel-text">If that fails, call your carrier and say: <em>"Set call divert when unanswered to <span id="other-number">your Cove number</span>"</em></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Test SMS -->
         <div class="cf-test-block">
-          <div class="cf-test-title">Not sure if it worked? Test it now:</div>
+          <div class="cf-test-title">Test it — send yourself an SMS</div>
           <div class="cf-test-row">
-            <input type="tel" id="cf-test-phone" placeholder="Your mobile number e.g. 0412 345 678" class="cf-test-input" />
-            <button class="btn btn--secondary" id="cf-test-btn" type="button">Send test SMS</button>
+            <input type="tel" id="cf-test-phone" placeholder="Your mobile e.g. 0412 345 678" class="cf-test-input" />
+            <button class="btn btn--primary btn--sm" id="cf-test-btn" type="button">Send</button>
           </div>
           <div class="cf-test-status" id="cf-test-status"></div>
-          <div class="cf-test-note">We'll text your number. If you get it, forwarding is working.</div>
-        </div>
-
-        <!-- Carrier app fallback -->
-        <div class="cf-carrier-fallback">
-          <div class="cf-carrier-fallback__title">⚠️ Still getting errors? Use your carrier app instead:</div>
-          <div class="cf-carrier-list">
-            <div class="cf-carrier-item"><strong>Telstra</strong> → My Telstra app → Services → your number → Call forwarding → When unanswered → enter <span class="cf-code" id="carrier-number">your Cove number</span></div>
-            <div class="cf-carrier-item"><strong>Optus</strong> → My Optus app → Manage → Call divert → When unanswered → enter <span class="cf-code" id="carrier-number-local">your Cove number</span> <em style="color:#92400E;font-size:.78rem">(no + prefix — use 0... format)</em></div>
-            <div class="cf-carrier-item"><strong>Vodafone</strong> → My Vodafone app → Services → Call divert → When unanswered → enter <span class="cf-code">your Cove number</span></div>
-            <div class="cf-carrier-item"><strong>Other</strong> → Call your carrier and say: <em>"I want to set call divert when unanswered to [your Cove number]"</em></div>
-          </div>
-          <div style="margin-top:.75rem;font-size:.82rem;color:#71717A;line-height:2">
-            Standard format: <span class="cf-code" id="carrier-number">loading…</span><br>
-            Local format (AU numbers, Optus): <span class="cf-code" id="carrier-number-local">loading…</span><br>
-          </div>
+          <div class="cf-test-note">If you receive it, your Cove number is working.</div>
         </div>
 
         <div class="ob-info-banner">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          <span>Your number is in your dashboard any time. Need help? Email us at <a href="mailto:hello@coveplatform.com" style="color:inherit;font-weight:700">hello@coveplatform.com</a>.</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>Your number is saved in your dashboard. Questions? <a href="mailto:hello@coveplatform.com" style="color:#2563EB;font-weight:600">hello@coveplatform.com</a></span>
         </div>
 
-        <div class="ob-actions ob-actions--right" style="margin-top:2rem">
+        <div class="ob-actions ob-actions--right" style="margin-top:1.75rem">
           <button class="btn btn--primary btn--lg" id="go-dashboard" type="button">
-            Go to my dashboard
+            Go to dashboard
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
@@ -671,15 +692,15 @@
       <div id="sidebar-default">
         <div class="ob-sidebar-badge">
           <span class="ob-sidebar-badge-dot"></span>
-          What you're getting
+          Live in minutes
         </div>
-        <h2>Never miss a lead<br/>while you're working.</h2>
-        <p>Cove runs quietly in the background — the moment someone calls and you can't pick up, they get a text back within 10 seconds.</p>
+        <h2>Stop losing jobs to voicemail.</h2>
+        <p>Miss a call, lose the job. Cove texts every missed caller back within 10 seconds — automatically.</p>
 
         <div class="ob-stat-row">
           <div class="ob-stat"><strong>10s</strong><span>text-back</span></div>
           <div class="ob-stat"><strong>24/7</strong><span>always on</span></div>
-          <div class="ob-stat"><strong>$49</strong><span>per month</span></div>
+          <div class="ob-stat"><strong>$49</strong><span>/ month</span></div>
           <div class="ob-stat"><strong>30d</strong><span>money-back</span></div>
         </div>
 
@@ -688,38 +709,32 @@
             <div class="ob-bullet-icon">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <span>Your own dedicated AU SMS number — provisioned the moment you pay</span>
+            <span>Dedicated AU number, set up instantly</span>
           </div>
           <div class="ob-bullet">
             <div class="ob-bullet-icon">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <span>AI generates your questions based on your specific business type</span>
+            <span>Questions written by AI for your trade</span>
           </div>
           <div class="ob-bullet">
             <div class="ob-bullet-icon">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <span>Lead summaries sent to your phone and email — no new app to check</span>
-          </div>
-          <div class="ob-bullet">
-            <div class="ob-bullet-icon">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <span>One-time 2-minute call forwarding setup — then automatic forever</span>
+            <span>Lead summary to your phone, no app needed</span>
           </div>
         </div>
 
         <div class="ob-sms-preview">
-          <div class="ob-sms-label">What your leads receive</div>
-          <div class="ob-bubble ob-bubble--recv">Hi Sam! Thanks for calling Bay Plumbing 👋<br/><br/>How urgent is your issue?<br/>A) Emergency now &nbsp;B) Same day &nbsp;C) Not urgent</div>
+          <div class="ob-sms-label">What your customer receives</div>
+          <div class="ob-bubble ob-bubble--recv">Hi Sam — thanks for calling Bay Plumbing. How urgent is your issue?<br/><br/>A) Emergency &nbsp; B) Same day &nbsp; C) Can wait</div>
           <div class="ob-bubble ob-bubble--sent">A</div>
-          <div class="ob-bubble ob-bubble--recv">Got it — emergency. We'll call you back within minutes.</div>
+          <div class="ob-bubble ob-bubble--recv">Got it. We'll call you back within the hour.</div>
         </div>
 
         <div class="ob-guarantee">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          30-day money-back guarantee · No questions asked
+          30-day money-back · no questions asked
         </div>
       </div>
 
@@ -727,45 +742,43 @@
       <div id="sidebar-payment" class="hidden">
         <div class="ob-sidebar-badge">
           <span class="ob-sidebar-badge-dot"></span>
-          You're almost there
+          Almost live
         </div>
-        <h2>One recovered job pays for months.</h2>
-        <p>Most businesses win back 2–3 leads per week just from the missed call text-back alone. At an average job value of $400+, the maths is obvious.</p>
+        <h2>One job pays for six months.</h2>
+        <p>Average trade job is $400+. Cove costs $49/mo. The maths is easy.</p>
+
+        <div class="ob-stat-row">
+          <div class="ob-stat"><strong>$49</strong><span>/ month</span></div>
+          <div class="ob-stat"><strong>30d</strong><span>money-back</span></div>
+        </div>
 
         <div class="ob-bullets">
           <div class="ob-bullet">
             <div class="ob-bullet-icon ob-bullet-icon--blue">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <span><strong style="color:#fff">$49/mo total</strong> — no setup fee, no contracts</span>
+            <span>AU number activated immediately after payment</span>
           </div>
           <div class="ob-bullet">
             <div class="ob-bullet-icon ob-bullet-icon--blue">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <span>Your AU number is activated immediately after payment</span>
+            <span>No setup fee, no lock-in, cancel any time</span>
           </div>
           <div class="ob-bullet">
             <div class="ob-bullet-icon ob-bullet-icon--blue">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <span>30-day money-back guarantee — if it doesn't pay for itself, full refund</span>
-          </div>
-          <div class="ob-bullet">
-            <div class="ob-bullet-icon ob-bullet-icon--blue">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <span>Cancel any time — no lock-in, no cancellation fees</span>
+            <span>Full refund if it doesn't pay for itself in 30 days</span>
           </div>
         </div>
 
-        <div style="margin-top:1.75rem;padding:1.25rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px">
-          <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:.75rem">What others say</div>
-          <p style="font-size:.88rem;color:rgba(255,255,255,.7);font-style:italic;line-height:1.6;margin-bottom:.75rem">"We went from calling leads back in 3–4 hours to them being qualified before I finish the current job."</p>
-          <div style="font-size:.78rem;font-weight:600;color:rgba(255,255,255,.4)">Mark T. — Bay Area Plumbing</div>
+        <div style="margin-top:1.5rem;padding:1.25rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px">
+          <p style="font-size:.88rem;color:rgba(255,255,255,.65);font-style:italic;line-height:1.6;margin-bottom:.6rem">"Qualified before I finish the current job."</p>
+          <div style="font-size:.75rem;font-weight:600;color:rgba(255,255,255,.3)">Mark T. — Bay Area Plumbing</div>
         </div>
 
-        <div class="ob-guarantee" style="margin-top:1.75rem">
+        <div class="ob-guarantee" style="margin-top:1.5rem">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           Secured by Stripe · SSL encrypted
         </div>
@@ -842,14 +855,16 @@
     let _provisionAttempted = false;
 
     function fillNumber(num) {
-      const numText = document.getElementById('cf-number-text');
-      if (numText) numText.textContent = num;
+      const numBox = document.getElementById('cf-number-text');
+      if (numBox) numBox.textContent = num;
+
       const localNum = num.startsWith('+61') ? '0' + num.slice(3) : num;
       const intlNum  = num.startsWith('+')   ? '0011' + num.slice(1) : num;
+
       const codes = {
         'code-1': `**61*${num}*11*20#`,
         'code-2': `**61*${num}#`,
-        'code-3': `*21*${num}#`,
+        'code-3': `*61*${num}*11*20#`,
         'code-4': `**61*${intlNum}*11*20#`,
       };
       for (const [id, code] of Object.entries(codes)) {
@@ -862,11 +877,20 @@
       if (cn) cn.textContent = num;
       const ln = document.getElementById('carrier-number-local');
       if (ln) ln.textContent = localNum;
-      const ios = document.getElementById('ios-code');
-      const and = document.getElementById('android-number');
-      if (ios) ios.textContent = `**61*${num}#`;
-      if (and) and.textContent = num;
+      const on = document.getElementById('other-number');
+      if (on) on.textContent = num;
     }
+
+    // ─── Carrier tabs ───
+    document.querySelectorAll('.cf-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.cf-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.cf-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        const panel = document.getElementById('panel-' + tab.dataset.tab);
+        if (panel) panel.classList.add('active');
+      });
+    });
 
     async function loadNumber() {
       _loadNumberAttempts++;
