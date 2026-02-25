@@ -369,10 +369,11 @@
 
     /* ── Conversation builder ── */
     .cv-section-label {
-      font-size: .68rem; font-weight: 700; color: #A1A1AA;
-      text-transform: uppercase; letter-spacing: .08em;
-      margin-bottom: .5rem; display:flex; align-items:center; gap:.4rem;
+      font-size: .82rem; font-weight: 700; color: #18181B;
+      letter-spacing: -.01em; margin-bottom: .6rem;
+      display:flex; align-items:center; gap:.5rem;
     }
+    .cv-section-label svg { color: #2563EB; flex-shrink:0; }
     /* Greeting card */
     .cv-greeting-card {
       background: #fff; border: 1.5px solid #E4E4E7; border-radius: 16px;
@@ -388,13 +389,13 @@
       background: linear-gradient(135deg,#2563EB,#06B6D4);
       display: grid; place-items: center; flex-shrink: 0;
     }
-    .cv-greeting-title { font-size: .82rem; font-weight: 700; color: #18181B; }
-    .cv-greeting-sub { font-size: .7rem; color: #A1A1AA; margin-top: .05rem; }
+    .cv-greeting-title { font-size: .9rem; font-weight: 700; color: #18181B; }
+    .cv-greeting-sub { font-size: .75rem; color: #71717A; margin-top: .1rem; }
     .cv-greeting-textarea {
       width: 100%; box-sizing: border-box; background: transparent;
-      border: none; outline: none; font-size: .9rem; line-height: 1.6;
+      border: none; outline: none; font-size: .9rem; line-height: 1.65;
       color: #18181B; font-family: inherit; resize: none; overflow: hidden;
-      padding: .75rem 1rem .85rem; min-height: 3rem;
+      padding: .75rem 1rem .85rem; min-height: 5.5rem;
     }
     .cv-greeting-hint {
       padding: .4rem 1rem .65rem;
@@ -418,12 +419,12 @@
     }
     .cv-q-num {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 22px; height: 22px; border-radius: 50%;
-      background: #EFF6FF; color: #2563EB; font-size: .7rem; font-weight: 800;
-      flex-shrink: 0;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #2563EB; color: #fff; font-size: .72rem; font-weight: 800;
+      flex-shrink: 0; letter-spacing: 0;
     }
     .cv-q-num-label {
-      font-size: .78rem; font-weight: 600; color: #52525B; margin-left: .5rem;
+      font-size: .88rem; font-weight: 700; color: #18181B; margin-left: .55rem;
     }
     .cv-q-done-badge {
       display: inline-flex; align-items: center; gap: .3rem;
@@ -444,8 +445,7 @@
       border-top: 1px solid #F4F4F5;
     }
     .cv-reply-type-label {
-      font-size: .68rem; font-weight: 700; color: #A1A1AA;
-      text-transform: uppercase; letter-spacing: .07em;
+      font-size: .78rem; font-weight: 600; color: #71717A;
       margin-bottom: .45rem;
     }
     .cv-reply-type-btns { display: flex; gap: .45rem; }
@@ -466,8 +466,8 @@
       width: 7px; height: 7px; border-radius: 50%; background: #2563EB; display: none;
     }
     .cv-rt-btn.active .cv-rt-dot { display: block; }
-    .cv-rt-title { font-size: .8rem; font-weight: 600; color: #18181B; line-height: 1.2; }
-    .cv-rt-sub { font-size: .68rem; color: #A1A1AA; margin-top: .1rem; }
+    .cv-rt-title { font-size: .82rem; font-weight: 700; color: #18181B; line-height: 1.2; }
+    .cv-rt-sub { font-size: .72rem; color: #71717A; margin-top: .1rem; }
     /* Options chips preview */
     .cv-opts-preview {
       display: flex; flex-wrap: wrap; gap: .3rem;
@@ -491,6 +491,9 @@
       white-space: nowrap; flex-shrink: 0; margin-top: .15rem;
     }
     .cv-connector-line { width: 2px; height: 16px; background: #E4E4E7; margin: 0 0 .5rem 10px; }
+    .cv-step-counter {
+      font-size: .78rem; color: #A1A1AA; font-weight: 500; margin-left: auto;
+    }
     .cv-reply-pill {
       display: inline-flex; align-items: center; gap: .35rem;
       background: #18181B; color: rgba(255,255,255,.7);
@@ -756,10 +759,6 @@
         <div id="flow-content" class="hidden">
 
           <!-- Greeting message card -->
-          <div class="cv-section-label">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Greeting — sent first
-          </div>
           <div class="cv-greeting-card">
             <div class="cv-greeting-header">
               <div class="cv-greeting-icon">
@@ -779,10 +778,6 @@
 
           <!-- Active question editor -->
           <div id="qb-active" style="display:none">
-            <div class="cv-section-label" style="margin-top:.25rem">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <span id="qb-active-label">Question 1</span>
-            </div>
 
             <!-- Question card -->
             <div class="cv-q-card">
@@ -820,16 +815,16 @@
             </div>
 
             <!-- Add another / Done -->
-            <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;margin-top:.85rem">
+            <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;margin-top:.9rem">
               <button class="btn btn--primary" id="qb-add-btn" type="button" style="gap:.4rem">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                Add another question
+                Add another
               </button>
               <button class="btn btn--ghost" id="qb-done-btn" type="button">
-                That's all →
+                I'm done →
               </button>
+              <span class="cv-step-counter" id="qb-count-hint"></span>
             </div>
-            <div style="font-size:.72rem;color:#A1A1AA;margin-top:.55rem" id="qb-count-hint"></div>
           </div>
 
           <!-- Regen link -->
@@ -1145,7 +1140,7 @@
         </div>
 
         <!-- Phone shell -->
-        <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:1.25rem;display:flex;flex-direction:column;overflow:hidden">
+        <div style="flex:1;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:1rem 1.1rem;display:flex;flex-direction:column;overflow:hidden">
           <!-- Fake SMS header -->
           <div style="display:flex;align-items:center;gap:.65rem;padding-bottom:.85rem;margin-bottom:.85rem;border-bottom:1px solid rgba(255,255,255,.07)">
             <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#06b6d4);display:grid;place-items:center;font-size:.7rem;font-weight:800;color:#fff" id="sidebar-step2-avatar">BP</div>
@@ -1156,9 +1151,9 @@
           </div>
 
           <!-- Messages — populated by JS -->
-          <div id="sidebar-step2-msgs" style="display:flex;flex-direction:column;gap:.5rem;overflow-y:auto;flex:1">
-            <div style="background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);font-size:.78rem;padding:.65rem .85rem;border-radius:10px;text-align:center">
-              Your questions will appear here as they load…
+          <div id="sidebar-step2-msgs" style="display:flex;flex-direction:column;overflow-y:auto;flex:1;gap:.1rem;padding:.25rem 0">
+            <div style="color:rgba(255,255,255,.2);font-size:.7rem;padding:.5rem 0;text-align:center">
+              Preview loads as you type your questions…
             </div>
           </div>
         </div>
@@ -1430,12 +1425,15 @@
     let qbActiveIdx = 0;
 
     function mkBubble(text, sent) {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;' + (sent ? 'justify-content:flex-end;' : 'justify-content:flex-start;') + 'margin-bottom:.25rem;';
       const d = document.createElement('div');
       d.style.cssText = sent
-        ? 'background:#0a84ff;color:#fff;font-size:.65rem;line-height:1.45;padding:.35rem .55rem;border-radius:14px;border-bottom-right-radius:4px;margin-bottom:.25rem;margin-left:auto;width:fit-content;max-width:82%;font-weight:600;white-space:pre-line'
-        : 'background:#1c1c1e;color:rgba(255,255,255,.88);font-size:.65rem;line-height:1.45;padding:.35rem .55rem;border-radius:14px;border-bottom-left-radius:4px;margin-bottom:.25rem;margin-right:auto;width:fit-content;max-width:82%;white-space:pre-line';
+        ? 'background:#0a84ff;color:#fff;font-size:.72rem;line-height:1.5;padding:.4rem .65rem;border-radius:16px;border-bottom-right-radius:4px;max-width:80%;font-weight:600;white-space:pre-line'
+        : 'background:#1c1c1e;color:rgba(255,255,255,.9);font-size:.72rem;line-height:1.5;padding:.4rem .65rem;border-radius:16px;border-bottom-left-radius:4px;max-width:80%;white-space:pre-line';
       d.textContent = text;
-      return d;
+      row.appendChild(d);
+      return row;
     }
 
     // Render the "done" stack above the active question
@@ -1512,9 +1510,7 @@
       qbSetReplyMode(!!step.free_text);
 
       const total = flowConfig.steps.length;
-      hint.textContent = idx === 0
-        ? 'Most businesses use 3 questions. You can add up to 5.'
-        : `${idx + 1} question${idx + 1 !== 1 ? 's' : ''} so far — add more or finish.`;
+      hint.textContent = `Question ${idx + 1} of ${Math.max(idx + 1, total)}`;
 
       updateSidebarPreview();
       ta.focus();
