@@ -368,88 +368,157 @@
     .ob-info-banner svg { flex-shrink: 0; margin-top: 1px; color: #A1A1AA; }
 
     /* ── Conversation builder ── */
-    .cv-row {
-      margin-bottom: 1.25rem;
+    .cv-section-label {
+      font-size: .68rem; font-weight: 700; color: #A1A1AA;
+      text-transform: uppercase; letter-spacing: .08em;
+      margin-bottom: .5rem; display:flex; align-items:center; gap:.4rem;
     }
-    .cv-label {
-      display: flex; align-items: center; gap: .4rem;
-      font-size: .72rem; font-weight: 600; color: #A1A1AA;
-      text-transform: uppercase; letter-spacing: .06em;
-      margin-bottom: .4rem;
+    /* Greeting card */
+    .cv-greeting-card {
+      background: #fff; border: 1.5px solid #E4E4E7; border-radius: 16px;
+      margin-bottom: 1.5rem; overflow: hidden; transition: border-color .15s;
     }
-    .cv-bubble {
-      background: #F8FAFC; border: 1.5px solid #E4E4E7;
-      border-radius: 14px; overflow: hidden;
-      transition: border-color .15s;
+    .cv-greeting-card:focus-within { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
+    .cv-greeting-header {
+      display: flex; align-items: center; gap: .65rem;
+      padding: .75rem 1rem .6rem; border-bottom: 1px solid #F4F4F5;
     }
-    .cv-bubble:focus-within { border-color: #2563EB; }
-    .cv-bubble--out { border-radius: 14px 14px 4px 14px; }
-    .cv-bubble--q  { border-radius: 14px 14px 4px 14px; }
+    .cv-greeting-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg,#2563EB,#06B6D4);
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .cv-greeting-title { font-size: .82rem; font-weight: 700; color: #18181B; }
+    .cv-greeting-sub { font-size: .7rem; color: #A1A1AA; margin-top: .05rem; }
+    .cv-greeting-textarea {
+      width: 100%; box-sizing: border-box; background: transparent;
+      border: none; outline: none; font-size: .9rem; line-height: 1.6;
+      color: #18181B; font-family: inherit; resize: none; overflow: hidden;
+      padding: .75rem 1rem .85rem; min-height: 3rem;
+    }
+    .cv-greeting-hint {
+      padding: .4rem 1rem .65rem;
+      font-size: .7rem; color: #A1A1AA; line-height: 1.5;
+    }
+    .cv-greeting-hint code {
+      background: #F4F4F5; border: 1px solid #E4E4E7;
+      border-radius: 4px; padding: 0 4px; font-size: .68rem;
+      font-family: monospace; color: #71717A;
+    }
+    /* Question card */
+    .cv-q-card {
+      background: #fff; border: 1.5px solid #E4E4E7; border-radius: 16px;
+      margin-bottom: .65rem; overflow: hidden; transition: border-color .15s;
+    }
+    .cv-q-card:focus-within { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
+    .cv-q-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .65rem 1rem .55rem;
+      border-bottom: 1px solid #F4F4F5;
+    }
+    .cv-q-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #EFF6FF; color: #2563EB; font-size: .7rem; font-weight: 800;
+      flex-shrink: 0;
+    }
+    .cv-q-num-label {
+      font-size: .78rem; font-weight: 600; color: #52525B; margin-left: .5rem;
+    }
+    .cv-q-done-badge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-size: .68rem; font-weight: 600; color: #10B981;
+      background: #F0FDF4; border: 1px solid #BBF7D0;
+      border-radius: 20px; padding: .15rem .55rem;
+    }
     .cv-textarea {
       width: 100%; box-sizing: border-box;
       background: transparent; border: none; outline: none;
-      font-size: .9rem; line-height: 1.55; color: #18181B;
+      font-size: .9rem; line-height: 1.6; color: #18181B;
       font-family: inherit; resize: none; overflow: hidden;
-      padding: .75rem 1rem .5rem;
-      min-height: 2.4rem;
+      padding: .75rem 1rem .5rem; min-height: 2.8rem;
     }
-    .cv-bubble-hint {
-      font-size: .7rem; color: #A1A1AA;
-      padding: 0 1rem .55rem; line-height: 1.4;
+    /* Reply type selector */
+    .cv-reply-type {
+      padding: .65rem 1rem .75rem;
+      border-top: 1px solid #F4F4F5;
     }
-    .cv-bubble-footer {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .3rem .75rem .55rem; gap: .5rem; flex-wrap: wrap;
+    .cv-reply-type-label {
+      font-size: .68rem; font-weight: 700; color: #A1A1AA;
+      text-transform: uppercase; letter-spacing: .07em;
+      margin-bottom: .45rem;
     }
-    .cv-chips { display: flex; flex-wrap: wrap; gap: .3rem; flex: 1; }
+    .cv-reply-type-btns { display: flex; gap: .45rem; }
+    .cv-rt-btn {
+      flex: 1; display: flex; align-items: center; gap: .5rem;
+      padding: .55rem .75rem; border-radius: 10px; cursor: pointer;
+      border: 1.5px solid #E4E4E7; background: #FAFAFA;
+      text-align: left; transition: all .15s; font-family: inherit;
+    }
+    .cv-rt-btn.active { border-color: #2563EB; background: #EFF6FF; }
+    .cv-rt-radio {
+      width: 15px; height: 15px; border-radius: 50%;
+      border: 2px solid #D4D4D8; background: #fff;
+      display: grid; place-items: center; flex-shrink: 0; transition: border-color .15s;
+    }
+    .cv-rt-btn.active .cv-rt-radio { border-color: #2563EB; }
+    .cv-rt-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #2563EB; display: none;
+    }
+    .cv-rt-btn.active .cv-rt-dot { display: block; }
+    .cv-rt-title { font-size: .8rem; font-weight: 600; color: #18181B; line-height: 1.2; }
+    .cv-rt-sub { font-size: .68rem; color: #A1A1AA; margin-top: .1rem; }
+    /* Options chips preview */
+    .cv-opts-preview {
+      display: flex; flex-wrap: wrap; gap: .3rem;
+      padding: .45rem 1rem .65rem;
+      border-top: 1px solid #F4F4F5;
+    }
     .cv-chip {
-      font-size: .7rem; font-weight: 600; color: #2563EB;
+      font-size: .72rem; font-weight: 600; color: #2563EB;
       background: #EFF6FF; border: 1px solid #BFDBFE;
-      border-radius: 6px; padding: .15rem .5rem;
+      border-radius: 6px; padding: .2rem .55rem;
     }
-    .cv-mode-btn {
-      font-size: .68rem; font-weight: 600; font-family: inherit;
-      border-radius: 6px; padding: .2rem .5rem; cursor: pointer;
-      border: 1px solid #E4E4E7; background: #F4F4F5; color: #A1A1AA;
-      transition: all .15s; white-space: nowrap; flex-shrink: 0;
+    /* Done step compact */
+    .cv-done-step {
+      background: #fff; border: 1.5px solid #E4E4E7; border-radius: 14px;
+      padding: .7rem 1rem; margin-bottom: .5rem;
+      display: flex; align-items: flex-start; gap: .75rem;
     }
-    .cv-mode-btn.free { color: #10B981; background: #F0FDF4; border-color: #BBF7D0; }
-    .cv-del-btn {
-      display: flex; align-items: center; gap: .25rem;
-      font-size: .68rem; font-weight: 600; font-family: inherit; cursor: pointer;
-      border: none; background: none; color: #EF4444; padding: .2rem .3rem;
-      opacity: 0; transition: opacity .15s;
+    .cv-done-q { flex: 1; font-size: .85rem; color: #18181B; line-height: 1.5; }
+    .cv-done-reply {
+      font-size: .72rem; color: #10B981; font-weight: 600;
+      white-space: nowrap; flex-shrink: 0; margin-top: .15rem;
     }
-    .cv-row:hover .cv-del-btn { opacity: 1; }
-    .cv-reply-row {
-      display: flex; justify-content: flex-end; margin-bottom: 1.25rem; margin-top: -.6rem;
-    }
+    .cv-connector-line { width: 2px; height: 16px; background: #E4E4E7; margin: 0 0 .5rem 10px; }
     .cv-reply-pill {
       display: inline-flex; align-items: center; gap: .35rem;
       background: #18181B; color: rgba(255,255,255,.7);
       font-size: .72rem; border-radius: 10px 10px 10px 2px;
       padding: .3rem .7rem; max-width: 70%;
     }
-    .cv-connector {
-      display: flex; align-items: center; gap: .5rem;
-      margin: .3rem 0; padding-left: .5rem;
+    /* Typing dots for iPhone preview */
+    .qb-typing {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #1c1c1e; padding: .45rem .65rem;
+      border-radius: 14px; border-bottom-left-radius: 4px;
+      margin-bottom: .25rem;
     }
-    .cv-connector-line { width: 2px; height: 20px; background: #E4E4E7; margin-left: 10px; }
-    .cv-add-row {
-      display: flex; align-items: center; gap: .75rem; margin-top: 1rem;
+    .qb-typing__dot {
+      width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.5);
+      animation: qbDotPulse 1.2s ease-in-out infinite;
     }
-    .cv-add-btn {
-      display: inline-flex; align-items: center; gap: .4rem;
-      font-size: .82rem; font-weight: 600; font-family: inherit;
-      color: #2563EB; background: #EFF6FF; border: 1.5px dashed #93C5FD;
-      border-radius: 10px; padding: .55rem 1rem; cursor: pointer;
-      transition: all .15s;
+    .qb-typing__dot:nth-child(2) { animation-delay: .2s; }
+    .qb-typing__dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes qbDotPulse {
+      0%,80%,100% { transform: scale(.7); opacity: .4; }
+      40% { transform: scale(1); opacity: 1; }
     }
-    .cv-add-btn:hover { background: #DBEAFE; border-color: #2563EB; }
-    .cv-row-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: .4rem;
-    }
+    .cv-bubble { background: #F8FAFC; border: 1.5px solid #E4E4E7; border-radius: 14px; overflow: hidden; }
+    .cv-bubble-hint { font-size: .7rem; color: #A1A1AA; padding: 0 1rem .55rem; line-height: 1.4; }
+    .cv-add-row { display: flex; align-items: center; gap: .75rem; margin-top: 1rem; }
+    .cv-row-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .4rem; }
+    .cv-label { display: flex; align-items: center; gap: .4rem; font-size: .72rem; font-weight: 600; color: #A1A1AA; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .4rem; }
 
     /* ── iPhone mockup (ported from styles.css) ── */
     .iphone {
@@ -686,56 +755,72 @@
         <!-- One-at-a-time question builder -->
         <div id="flow-content" class="hidden">
 
+          <!-- Greeting message card -->
+          <div class="cv-section-label">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Greeting — sent first
+          </div>
+          <div class="cv-greeting-card">
+            <div class="cv-greeting-header">
+              <div class="cv-greeting-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <div>
+                <div class="cv-greeting-title">Welcome message</div>
+                <div class="cv-greeting-sub">Sent within 10 seconds of a missed call</div>
+              </div>
+            </div>
+            <textarea class="cv-greeting-textarea" id="cv-intro-text" rows="2" placeholder="Hi {firstName}, this is {businessName}. We missed your call — mind if we ask a couple of quick questions so we can help you faster?"></textarea>
+            <div class="cv-greeting-hint"><code>{firstName}</code> and <code>{businessName}</code> are filled in automatically</div>
+          </div>
+
           <!-- Completed questions (stack) -->
           <div id="qb-done-list"></div>
 
           <!-- Active question editor -->
           <div id="qb-active" style="display:none">
-
-            <!-- Question label -->
-            <div class="cv-label" style="margin-bottom:.5rem">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div class="cv-section-label" style="margin-top:.25rem">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               <span id="qb-active-label">Question 1</span>
             </div>
 
-            <!-- Question textarea -->
-            <div class="cv-bubble cv-bubble--q" style="margin-bottom:.6rem">
-              <textarea class="cv-textarea" id="qb-active-text" rows="2" placeholder="Type your question here…"></textarea>
-            </div>
-
-            <!-- How should customers reply? -->
-            <div style="margin-bottom:.75rem">
-              <div style="font-size:.72rem;font-weight:600;color:#71717A;margin-bottom:.4rem;letter-spacing:.03em">How do customers reply?</div>
-              <div style="display:flex;gap:.5rem">
-                <button type="button" class="qb-reply-opt" id="qb-opt-choice" data-mode="choice" style="flex:1;display:flex;align-items:flex-start;gap:.6rem;padding:.65rem .8rem;border-radius:10px;border:1.5px solid #E4E4E7;background:#fff;cursor:pointer;text-align:left;transition:all .15s">
-                  <div style="margin-top:1px;flex-shrink:0">
-                    <div style="width:14px;height:14px;border-radius:50%;border:2px solid #D4D4D8;background:#fff;display:grid;place-items:center" id="qb-opt-choice-radio">
-                      <div style="width:6px;height:6px;border-radius:50%;background:#2563EB;display:none" id="qb-opt-choice-dot"></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div style="font-size:.82rem;font-weight:600;color:#18181B;line-height:1.3">Multiple choice</div>
-                    <div style="font-size:.72rem;color:#71717A;margin-top:.15rem">Customer picks A, B or C — fast and structured</div>
-                  </div>
-                </button>
-                <button type="button" class="qb-reply-opt" id="qb-opt-free" data-mode="free" style="flex:1;display:flex;align-items:flex-start;gap:.6rem;padding:.65rem .8rem;border-radius:10px;border:1.5px solid #E4E4E7;background:#fff;cursor:pointer;text-align:left;transition:all .15s">
-                  <div style="margin-top:1px;flex-shrink:0">
-                    <div style="width:14px;height:14px;border-radius:50%;border:2px solid #D4D4D8;background:#fff;display:grid;place-items:center" id="qb-opt-free-radio">
-                      <div style="width:6px;height:6px;border-radius:50%;background:#2563EB;display:none" id="qb-opt-free-dot"></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div style="font-size:.82rem;font-weight:600;color:#18181B;line-height:1.3">Free text</div>
-                    <div style="font-size:.72rem;color:#71717A;margin-top:.15rem">Customer types anything — more natural, open-ended</div>
-                  </div>
-                </button>
+            <!-- Question card -->
+            <div class="cv-q-card">
+              <div class="cv-q-header">
+                <div style="display:flex;align-items:center">
+                  <div class="cv-q-num" id="qb-active-num">1</div>
+                  <span class="cv-q-num-label">What do you want to ask?</span>
+                </div>
               </div>
-              <!-- Options preview (shown for multiple choice) -->
-              <div id="qb-options-preview" style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem"></div>
+              <textarea class="cv-textarea" id="qb-active-text" rows="2" placeholder="e.g. What type of job do you need help with?"></textarea>
+
+              <!-- Reply type -->
+              <div class="cv-reply-type">
+                <div class="cv-reply-type-label">How does the customer reply?</div>
+                <div class="cv-reply-type-btns">
+                  <button type="button" class="cv-rt-btn qb-reply-opt active" id="qb-opt-choice" data-mode="choice">
+                    <div class="cv-rt-radio"><div class="cv-rt-dot"></div></div>
+                    <div>
+                      <div class="cv-rt-title">Multiple choice</div>
+                      <div class="cv-rt-sub">Picks A, B or C</div>
+                    </div>
+                  </button>
+                  <button type="button" class="cv-rt-btn qb-reply-opt" id="qb-opt-free" data-mode="free">
+                    <div class="cv-rt-radio"><div class="cv-rt-dot"></div></div>
+                    <div>
+                      <div class="cv-rt-title">Free text</div>
+                      <div class="cv-rt-sub">Types anything</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Options chips preview (multiple choice only) -->
+              <div class="cv-opts-preview" id="qb-options-preview"></div>
             </div>
 
             <!-- Add another / Done -->
-            <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap">
+            <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;margin-top:.85rem">
               <button class="btn btn--primary" id="qb-add-btn" type="button" style="gap:.4rem">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                 Add another question
@@ -744,14 +829,14 @@
                 That's all →
               </button>
             </div>
-            <div style="font-size:.72rem;color:#A1A1AA;margin-top:.6rem" id="qb-count-hint"></div>
+            <div style="font-size:.72rem;color:#A1A1AA;margin-top:.55rem" id="qb-count-hint"></div>
           </div>
 
           <!-- Regen link -->
-          <div style="margin-top:1.25rem">
+          <div style="margin-top:1.5rem">
             <button class="ob-regen-btn" id="regen-btn" type="button">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-              Start over with AI
+              Regenerate all with AI
             </button>
           </div>
         </div>
@@ -1358,60 +1443,44 @@
       const list = document.getElementById('qb-done-list');
       list.innerHTML = '';
       qbSteps.forEach((step, i) => {
-        const row = document.createElement('div');
-        row.style.cssText = 'margin-bottom:.75rem';
         const isFree = !!step.free_text;
         const replyText = isFree
-          ? smartSampleReply(step.question, true)
+          ? (step._aiReply || smartSampleReply(step.question, true))
           : (step.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A');
 
+        const row = document.createElement('div');
+        row.className = 'cv-done-step';
         row.innerHTML = `
-          <div class="cv-label" style="margin-bottom:.3rem;justify-content:space-between">
-            <span style="display:flex;align-items:center;gap:.4rem">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Question ${i + 1}
-            </span>
-            <button type="button" style="font-size:.68rem;font-weight:600;color:#2563EB;background:none;border:none;cursor:pointer;font-family:inherit;padding:0" data-edit="${i}">Edit</button>
+          <div class="cv-q-num" style="margin-top:.15rem">${i + 1}</div>
+          <div style="flex:1;min-width:0">
+            <div class="cv-done-q">${step.question || '<em style="color:#A1A1AA">Empty</em>'}</div>
+            <div style="font-size:.68rem;color:#A1A1AA;margin-top:.2rem">${isFree ? 'Free text' : 'Multiple choice'}</div>
           </div>
-          <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px 12px 4px 12px;padding:.6rem .85rem;font-size:.85rem;color:#18181B;line-height:1.5;margin-bottom:.3rem">${step.question || '<em style="color:#A1A1AA">Empty question</em>'}</div>
-          <div style="display:flex;justify-content:flex-end">
-            <div class="cv-reply-pill" style="font-size:.7rem">${replyText}</div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem">
+            <button type="button" style="font-size:.68rem;font-weight:600;color:#2563EB;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;white-space:nowrap" data-edit="${i}">Edit</button>
+            <span class="cv-done-reply">${replyText}</span>
           </div>
         `;
         row.querySelector('[data-edit]').addEventListener('click', () => qbEditStep(i));
         list.appendChild(row);
       });
 
-      // Connector line to active question
       if (qbSteps.length > 0) {
         const line = document.createElement('div');
         line.className = 'cv-connector-line';
-        line.style.marginBottom = '8px';
         list.appendChild(line);
       }
     }
 
-    // Set the reply-type radio UI
+    // Set the reply-type radio UI using cv-rt-btn/active classes
     function qbSetReplyMode(isFree) {
-      const choiceBtn   = document.getElementById('qb-opt-choice');
-      const freeBtn     = document.getElementById('qb-opt-free');
-      const choiceDot   = document.getElementById('qb-opt-choice-dot');
-      const freeDot     = document.getElementById('qb-opt-free-dot');
-      const choiceRadio = document.getElementById('qb-opt-choice-radio');
-      const freeRadio   = document.getElementById('qb-opt-free-radio');
-      const preview     = document.getElementById('qb-options-preview');
+      const choiceBtn = document.getElementById('qb-opt-choice');
+      const freeBtn   = document.getElementById('qb-opt-free');
+      const preview   = document.getElementById('qb-options-preview');
 
-      // Selected = blue border + filled dot
-      choiceBtn.style.borderColor  = isFree ? '#E4E4E7' : '#2563EB';
-      choiceBtn.style.background   = isFree ? '#fff' : '#EFF6FF';
-      freeBtn.style.borderColor    = isFree ? '#2563EB' : '#E4E4E7';
-      freeBtn.style.background     = isFree ? '#EFF6FF' : '#fff';
-      choiceRadio.style.borderColor = isFree ? '#D4D4D8' : '#2563EB';
-      freeRadio.style.borderColor   = isFree ? '#2563EB' : '#D4D4D8';
-      choiceDot.style.display = isFree ? 'none' : 'block';
-      freeDot.style.display   = isFree ? 'block' : 'none';
+      choiceBtn.classList.toggle('active', !isFree);
+      freeBtn.classList.toggle('active', isFree);
 
-      // Options preview
       const step = flowConfig?.steps[qbActiveIdx];
       if (!isFree && step?.options?.length) {
         preview.style.display = 'flex';
@@ -1427,12 +1496,14 @@
     // Load a step into the active editor
     function qbLoadActive(idx) {
       qbActiveIdx = idx;
-      const step    = flowConfig.steps[idx];
-      const hint    = document.getElementById('qb-count-hint');
-      const ta      = document.getElementById('qb-active-text');
+      const step = flowConfig.steps[idx];
+      const hint = document.getElementById('qb-count-hint');
+      const ta   = document.getElementById('qb-active-text');
 
       document.getElementById('qb-active').style.display = 'block';
       document.getElementById('qb-active-label').textContent = `Question ${idx + 1}`;
+      const numBadge = document.getElementById('qb-active-num');
+      if (numBadge) numBadge.textContent = idx + 1;
 
       ta.value = step.question || '';
       ta.style.height = 'auto';
@@ -1442,8 +1513,8 @@
 
       const total = flowConfig.steps.length;
       hint.textContent = idx === 0
-        ? 'You can add up to 5 questions. Most businesses use 3.'
-        : `${total} question${total !== 1 ? 's' : ''} so far. Add more or finish.`;
+        ? 'Most businesses use 3 questions. You can add up to 5.'
+        : `${idx + 1} question${idx + 1 !== 1 ? 's' : ''} so far — add more or finish.`;
 
       updateSidebarPreview();
       ta.focus();
@@ -1474,8 +1545,14 @@
     }
 
     // Add another question button
-    document.getElementById('qb-add-btn').addEventListener('click', () => {
+    document.getElementById('qb-add-btn').addEventListener('click', async () => {
       if (!qbCommitActive()) return;
+      // Cache the AI reply for the committed step so done list shows it
+      const step = flowConfig.steps[qbActiveIdx];
+      if (step && !step._aiReply) {
+        const cacheKey = step.question + '|' + !!step.free_text;
+        step._aiReply = _aiReplyCache[cacheKey] || smartSampleReply(step.question, !!step.free_text);
+      }
       qbSteps = flowConfig.steps.slice(0, qbActiveIdx + 1);
 
       // Add a new blank step after current if not already there
@@ -1494,14 +1571,19 @@
     });
 
     // I'm done button
-    document.getElementById('qb-done-btn').addEventListener('click', () => {
+    document.getElementById('qb-done-btn').addEventListener('click', async () => {
       if (!qbCommitActive()) {
         document.getElementById('qb-active-text').style.outline = '2px solid #EF4444';
         setTimeout(() => document.getElementById('qb-active-text').style.outline = '', 1200);
         return;
       }
       qbSteps = flowConfig.steps.slice(0, qbActiveIdx + 1);
-      // Trim any trailing empty steps
+      // Store AI reply on last step
+      const lastStep = flowConfig.steps[qbActiveIdx];
+      if (lastStep && !lastStep._aiReply) {
+        const cacheKey = lastStep.question + '|' + !!lastStep.free_text;
+        lastStep._aiReply = _aiReplyCache[cacheKey] || smartSampleReply(lastStep.question, !!lastStep.free_text);
+      }
       flowConfig.steps = qbSteps;
       qbRenderDoneList();
       document.getElementById('qb-active').style.display = 'none';
@@ -1516,6 +1598,9 @@
         if (flowConfig?.steps[qbActiveIdx]) {
           flowConfig.steps[qbActiveIdx].free_text = isFree;
         }
+        // Clear cache so AI re-generates for new mode
+        const q = document.getElementById('qb-active-text')?.value.trim();
+        if (q) delete _aiReplyCache[q + '|' + !isFree];
         qbSetReplyMode(isFree);
         updateSidebarPreview();
       });
@@ -1533,8 +1618,16 @@
     function renderFlow(flow) {
       qbSteps = [];
       qbActiveIdx = 0;
+      _aiReplyCache = {};
       document.getElementById('qb-done-list').innerHTML = '';
       document.getElementById('step2-final-actions').style.display = 'none';
+      // Populate greeting
+      const introEl = document.getElementById('cv-intro-text');
+      if (introEl && flow.intro) {
+        introEl.value = flow.intro;
+        introEl.style.height = 'auto';
+        introEl.style.height = introEl.scrollHeight + 'px';
+      }
       qbLoadActive(0);
       updateSidebarPreview();
     }
@@ -1557,49 +1650,120 @@
       return 'Yes, that works for me';
     }
 
-    // ─── Live sidebar preview (iPhone) ───
+    // ─── AI typing animation system ───
+    let _aiReplyTimer = null;
+    let _aiReplyCache = {}; // key = question+mode → reply text
+
+    function mkTypingDots() {
+      const wrap = document.createElement('div');
+      wrap.className = 'qb-typing';
+      wrap.id = 'qb-typing-indicator';
+      wrap.innerHTML = '<div class="qb-typing__dot"></div><div class="qb-typing__dot"></div><div class="qb-typing__dot"></div>';
+      return wrap;
+    }
+
+    async function fetchAIReply(question, isFree, options) {
+      const cacheKey = question + '|' + isFree;
+      if (_aiReplyCache[cacheKey]) return _aiReplyCache[cacheKey];
+      try {
+        const res = await fetch('/api/onboarding/sample-reply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question,
+            isFree,
+            options,
+            businessName: bizData.businessName || 'the business',
+          }),
+        }).then(r => r.json());
+        const reply = res.reply || smartSampleReply(question, isFree);
+        _aiReplyCache[cacheKey] = reply;
+        return reply;
+      } catch {
+        return smartSampleReply(question, isFree);
+      }
+    }
+
+    // Render static bubbles (committed steps + intro), then animate active question reply
     function updateSidebarPreview() {
       const msgs = document.getElementById('sidebar-step2-msgs');
       if (!msgs) return;
       msgs.innerHTML = '';
       const bizName = bizData.businessName || 'Your Business';
 
-      // Intro from flowConfig
-      if (flowConfig?.intro) {
-        const rendered = flowConfig.intro.replace(/{firstName}/g, 'Sam').replace(/{businessName}/g, bizName);
+      // Intro
+      const introEl = document.getElementById('cv-intro-text');
+      const introText = introEl?.value.trim() || flowConfig?.intro || '';
+      if (introText) {
+        const rendered = introText.replace(/{firstName}/g, 'Sam').replace(/{businessName}/g, bizName);
         msgs.appendChild(mkBubble(rendered, false));
       }
 
-      // Committed questions + replies
-      const allDone = [...qbSteps];
-      const activeTa = document.getElementById('qb-active-text');
-      const activeQ = activeTa?.value.trim();
-
-      allDone.forEach((step, i) => {
+      // Committed Q + replies
+      qbSteps.forEach(step => {
         if (!step.question?.trim()) return;
         msgs.appendChild(mkBubble(step.question, false));
-        const reply = step.free_text
-          ? smartSampleReply(step.question, true)
-          : (step.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A');
+        const reply = step._aiReply
+          || (step.free_text ? smartSampleReply(step.question, true)
+          : (step.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A'));
         msgs.appendChild(mkBubble(reply, true));
       });
 
-      // Current active question being typed
-      if (activeQ && document.getElementById('qb-active')?.style.display !== 'none') {
+      // Active question + animated AI reply
+      const activeTa = document.getElementById('qb-active-text');
+      const activeQ = activeTa?.value.trim();
+      const isActiveVisible = document.getElementById('qb-active')?.style.display !== 'none';
+
+      if (activeQ && isActiveVisible) {
         msgs.appendChild(mkBubble(activeQ, false));
+
+        // Show typing dots immediately
+        const dots = mkTypingDots();
+        msgs.appendChild(dots);
+        msgs.scrollTop = msgs.scrollHeight;
+
+        // Debounce AI call — 700ms after last keystroke
+        clearTimeout(_aiReplyTimer);
+        const capturedQ = activeQ;
         const isFree = !!flowConfig?.steps[qbActiveIdx]?.free_text;
-        const step = flowConfig?.steps[qbActiveIdx];
-        const reply = isFree
-          ? smartSampleReply(activeQ, true)
-          : (step?.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A');
-        // Show reply as faded "pending" bubble
-        const typing = document.createElement('div');
-        typing.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:.25rem';
-        typing.innerHTML = `<div style="background:#0a84ff;opacity:.35;color:#fff;font-size:.6rem;padding:.3rem .55rem;border-radius:12px;border-bottom-right-radius:3px;max-width:75%;line-height:1.4">${reply}</div>`;
-        msgs.appendChild(typing);
+        const opts = flowConfig?.steps[qbActiveIdx]?.options || [];
+
+        _aiReplyTimer = setTimeout(async () => {
+          // Only proceed if question hasn't changed
+          const currentQ = document.getElementById('qb-active-text')?.value.trim();
+          if (currentQ !== capturedQ) return;
+
+          const reply = await fetchAIReply(capturedQ, isFree, opts);
+
+          // Remove typing dots, add real reply bubble with fade-in
+          const dotsEl = document.getElementById('qb-typing-indicator');
+          if (dotsEl) {
+            const replyBubble = mkBubble(reply, true);
+            replyBubble.style.opacity = '0';
+            replyBubble.style.transform = 'translateY(4px)';
+            replyBubble.style.transition = 'opacity .3s, transform .3s';
+            dotsEl.replaceWith(replyBubble);
+            requestAnimationFrame(() => {
+              replyBubble.style.opacity = '1';
+              replyBubble.style.transform = 'translateY(0)';
+            });
+          }
+          msgs.scrollTop = msgs.scrollHeight;
+        }, 700);
       }
 
       msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    // Wire greeting textarea — live resize + preview + flowConfig sync
+    const cvIntroEl = document.getElementById('cv-intro-text');
+    if (cvIntroEl) {
+      cvIntroEl.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+        if (flowConfig) flowConfig.intro = this.value;
+        updateSidebarPreview();
+      });
     }
 
     // ─── Step 1 → 2a (bridge) ───

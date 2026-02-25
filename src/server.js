@@ -300,6 +300,36 @@ app.post("/api/onboarding/generate-flow", requireAuth, async (req, res) => {
   }
 });
 
+app.post("/api/onboarding/sample-reply", requireAuth, async (req, res) => {
+  try {
+    const { question, isFree, options, businessName } = req.body || {};
+    if (!question) return res.json({ ok: true, reply: "Yes, that works for me" });
+
+    if (!isAIConfigured()) {
+      // Fallback without AI
+      return res.json({ ok: true, reply: isFree ? "My hot water system stopped working" : (options?.[0] ? `${options[0].value}) ${options[0].label}` : "A") });
+    }
+
+    const prompt = isFree
+      ? `You are a customer receiving this SMS question from a service business called "${businessName || "the business"}": "${question}"\n\nReply naturally in 1 short sentence as a real customer would via SMS. Be specific and realistic. No quotes, no labels, just the reply text.`
+      : `You are a customer receiving this SMS question: "${question}"\n\nThe options are: ${options?.map(o => `${o.value}) ${o.label}`).join(", ")}\n\nReply with just the letter and option label, e.g. "A) Emergency". Pick the most realistic option. No extra text.`;
+
+    const OpenAI = (await import("openai")).default;
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const chat = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 60,
+      temperature: 0.8,
+    });
+    const reply = chat.choices[0]?.message?.content?.trim() || "Yes, that works";
+    return res.json({ ok: true, reply });
+  } catch (err) {
+    console.error("Sample reply error:", err);
+    return res.json({ ok: true, reply: "Yes, that works for me" });
+  }
+});
+
 app.post("/api/onboarding/save", requireAuth, async (req, res) => {
   try {
     const {
