@@ -367,6 +367,70 @@
     }
     .ob-info-banner svg { flex-shrink: 0; margin-top: 1px; color: #A1A1AA; }
 
+    /* ── iPhone mockup (ported from styles.css) ── */
+    .iphone {
+      width: 340px; margin: 0 auto;
+      background: #000; border-radius: 44px;
+      border: 3px solid #2a2a2a; overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.05) inset,
+        0 30px 60px rgba(0,0,0,.6);
+    }
+    .iphone__statusbar { display:flex; justify-content:space-between; align-items:center; padding:14px 26px 0; font-size:.72rem; font-weight:600; color:#fff; }
+    .iphone__statusbar-icons { display:flex; align-items:center; gap:5px; }
+    .iphone__island { width:120px; height:34px; background:#000; border-radius:20px; margin:-12px auto 6px; position:relative; z-index:2; border:2px solid #1a1a1a; }
+    .iphone__header { display:flex; align-items:center; gap:.5rem; padding:.45rem .85rem .55rem; background:rgba(0,0,0,.92); backdrop-filter:blur(12px); border-bottom:.5px solid rgba(255,255,255,.08); }
+    .iphone__back { color:#0a84ff; display:flex; align-items:center; flex-shrink:0; }
+    .iphone__contact { display:flex; align-items:center; gap:.45rem; flex:1; min-width:0; }
+    .iphone__avatar { width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,#2563eb,#06b6d4); color:#fff; font-size:.55rem; font-weight:700; display:grid; place-items:center; flex-shrink:0; letter-spacing:.02em; }
+    .iphone__contact-info { min-width:0; }
+    .iphone__name { font-size:.82rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .iphone__sub { font-size:.6rem; color:#8e8e93; }
+    .iphone__actions { display:flex; gap:.6rem; color:#0a84ff; flex-shrink:0; }
+    .iphone__screen { display:flex; flex-direction:column; padding:.25rem .65rem; min-height:280px; }
+    .iphone__time { text-align:center; font-size:.63rem; font-weight:500; color:#8e8e93; padding:.6rem 0 .5rem; }
+    .iphone__inputbar { display:flex; align-items:center; gap:.4rem; padding:.4rem .65rem .65rem; background:#000; border-top:.5px solid rgba(255,255,255,.08); }
+    .iphone__inputbar-plus { width:28px; height:28px; border-radius:50%; background:#636366; display:grid; place-items:center; flex-shrink:0; }
+    .iphone__inputbar-field { flex:1; background:transparent; border:1px solid #3a3a3c; border-radius:18px; padding:.4rem .75rem; color:#8e8e93; font-size:.78rem; font-family:inherit; }
+    .iphone__inputbar-send { width:28px; height:28px; border-radius:50%; background:#0a84ff; display:grid; place-items:center; flex-shrink:0; }
+    .imsg { width:fit-content; max-width:78%; padding:.5rem .75rem; border-radius:18px; font-size:.82rem; line-height:1.5; margin-bottom:.2rem; white-space:pre-line; }
+    .imsg--recv { background:#1c1c1e; color:rgba(255,255,255,.92); border-bottom-left-radius:6px; margin-right:auto; }
+    .imsg--sent { background:#0a84ff; color:#fff; margin-left:auto; border-bottom-right-radius:6px; font-weight:600; }
+    .imsg--delivered { width:fit-content; margin-left:auto; font-size:.58rem; color:#8e8e93; padding:1px 4px 4px; }
+    .iphone--hero { width:260px; border-radius:36px; border-width:2.5px; box-shadow:0 0 0 1px rgba(255,255,255,.05) inset, 0 25px 50px rgba(37,99,235,.2), 0 10px 20px rgba(0,0,0,.15); }
+    .iphone--hero .iphone__statusbar { padding:10px 20px 0; font-size:.6rem; }
+    .iphone--hero .iphone__statusbar-icons { gap:4px; }
+    .iphone--hero .iphone__statusbar-icons svg { transform:scale(.85); }
+    .iphone--hero .iphone__island { width:95px; height:27px; margin:-9px auto 4px; border-radius:16px; }
+    .iphone--hero .iphone__header { padding:.35rem .7rem .4rem; gap:.4rem; }
+    .iphone--hero .iphone__avatar { width:24px; height:24px; font-size:.45rem; }
+    .iphone--hero .iphone__name { font-size:.7rem; }
+    .iphone--hero .iphone__sub { font-size:.5rem; }
+    .iphone--hero .iphone__back svg { width:8px; height:14px; }
+    .iphone--hero .iphone__actions svg { width:14px; height:14px; }
+    .iphone--hero .iphone__screen { display:block; height:300px; min-height:unset; padding:.2rem .55rem; overflow-y:auto; overflow-x:hidden; scroll-behavior:smooth; background:#000; position:relative; }
+    .iphone--hero .iphone__screen::-webkit-scrollbar { width:0; }
+    .iphone--hero .iphone__time { font-size:.52rem; padding:.4rem 0 .3rem; }
+    .iphone--hero .imsg { font-size:.68rem; padding:.35rem .55rem; border-radius:16px; margin-bottom:.15rem; line-height:1.45; }
+    .iphone--hero .imsg--recv { border-bottom-left-radius:5px; }
+    .iphone--hero .imsg--sent { border-bottom-right-radius:5px; }
+    .iphone--hero .imsg--delivered { font-size:.48rem; padding:1px 3px 3px; }
+    .iphone--hero .iphone__inputbar { padding:.3rem .55rem .5rem; gap:.3rem; }
+    .iphone--hero .iphone__inputbar-plus, .iphone--hero .iphone__inputbar-send { width:22px; height:22px; }
+    .iphone--hero .iphone__inputbar-plus svg, .iphone--hero .iphone__inputbar-send svg { width:10px; height:10px; }
+    .iphone--hero .iphone__inputbar-field { font-size:.64rem; padding:.3rem .6rem; border-radius:15px; }
+    .hero-typing { display:none; align-items:center; padding:.15rem .3rem; }
+    .hero-typing.show { display:flex; }
+    .hero-typing__dots { display:flex; gap:2.5px; background:#1c1c1e; padding:.35rem .55rem; border-radius:16px; border-bottom-left-radius:5px; }
+    .hero-typing__dot { width:5px; height:5px; background:#636366; border-radius:50%; animation:htBounce .9s ease-in-out infinite; }
+    .hero-typing__dot:nth-child(2) { animation-delay:.15s; }
+    .hero-typing__dot:nth-child(3) { animation-delay:.3s; }
+    @keyframes htBounce { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-3px);opacity:1} }
+    .iphone--hero .imsg:not(.show) { opacity:0; transform:translateY(8px); }
+    .iphone--hero .imsg.show { animation:heroMsgIn .3s ease-out forwards; }
+    @keyframes heroMsgIn { to{opacity:1;transform:translateY(0)} }
+    .iphone--hero .imsg--delivered { opacity:1!important; transform:none!important; }
+    .ob-notif-card { transition:opacity .5s ease, transform .5s ease; }
+
     /* ── Responsive ── */
     @media (max-width: 1200px) {
       .ob-split { grid-template-columns: 1fr 460px; }
@@ -700,66 +764,83 @@
     <aside class="ob-sidebar" id="ob-sidebar">
 
       <!-- Default sidebar (steps 1-3) -->
-      <div id="sidebar-default" style="display:flex;flex-direction:column;height:100%">
-        <div class="ob-sidebar-badge">
-          <span class="ob-sidebar-badge-dot"></span>
-          Always on
+      <div id="sidebar-default" style="display:flex;flex-direction:column;height:100%;align-items:center;justify-content:center;gap:1.5rem">
+
+        <div style="text-align:center">
+          <div class="ob-sidebar-badge" style="justify-content:center;margin-bottom:.75rem">
+            <span class="ob-sidebar-badge-dot"></span>
+            Live in 10 seconds
+          </div>
+          <div style="font-size:1.5rem;font-weight:900;letter-spacing:-.04em;color:#fff;line-height:1.15">
+            What your customer gets.
+          </div>
+          <div style="font-size:.82rem;color:rgba(255,255,255,.35);margin-top:.4rem">
+            The moment you miss a call — this lands on their phone.
+          </div>
         </div>
 
-        <div style="font-size:2.8rem;font-weight:900;letter-spacing:-.05em;color:#fff;line-height:1.05;margin-bottom:.9rem">
-          Every missed call,<br/>texted back<br/><span style="color:#06B6D4">in 10 seconds.</span>
-        </div>
-
-        <div style="font-size:.9rem;color:rgba(255,255,255,.35);line-height:1.6;margin-bottom:2rem">
-          While you're on the job, Cove handles every missed caller automatically.
-        </div>
-
-        <!-- SMS conversation mockup -->
-        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:1.5rem;margin-bottom:1.25rem">
-          <div style="font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:1rem">What your customer receives</div>
-          <div style="display:flex;flex-direction:column;gap:.75rem">
-            <div style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.82);font-size:.88rem;line-height:1.6;padding:.7rem 1rem;border-radius:16px;border-bottom-left-radius:3px;max-width:90%">
-              Hi Sam — thanks for calling Bay Plumbing. How urgent is your issue?<br/><br/>A) Emergency &nbsp;·&nbsp; B) Same day &nbsp;·&nbsp; C) Not urgent
+        <!-- iPhone mockup -->
+        <div style="position:relative">
+          <div class="iphone iphone--hero">
+            <div class="iphone__statusbar">
+              <span>9:41</span>
+              <div class="iphone__statusbar-icons">
+                <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><rect y="3.5" width="3" height="7.5" rx=".8" opacity=".3"/><rect x="4.3" y="1.5" width="3" height="9.5" rx=".8" opacity=".55"/><rect x="8.6" y="0" width="3" height="11" rx=".8" opacity=".8"/><rect x="12.9" y="0" width="3" height="11" rx=".8"/></svg>
+                <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="#fff" stroke-width="1.2"><path d="M1.5 7.5C3.5 3 6.5 1 7.5 1s4 2 6 6.5" opacity=".3"/><path d="M3.5 7C5 4 6.5 2.5 7.5 2.5S10 4 11.5 7" opacity=".6"/><path d="M5.5 7C6.2 5 7 4 7.5 4s1.3 1 2 3"/><circle cx="7.5" cy="8.5" r="1.2" fill="#fff" stroke="none"/></svg>
+                <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x=".5" y=".5" width="20" height="10" rx="2.5" stroke="#fff" stroke-opacity=".35"/><rect x="21.5" y="3" width="1.5" height="5" rx=".75" fill="#fff" opacity=".4"/><rect x="1.5" y="1.5" width="15" height="8" rx="1.5" fill="#fff"/></svg>
+              </div>
             </div>
-            <div style="background:#2563EB;color:#fff;font-weight:600;font-size:.88rem;padding:.6rem 1rem;border-radius:16px;border-bottom-right-radius:3px;margin-left:auto">
-              A
+            <div class="iphone__island"></div>
+            <div class="iphone__header">
+              <div class="iphone__back"><svg width="10" height="17" viewBox="0 0 10 17" fill="none" stroke="#0a84ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1L2 8.5 9 16"/></svg></div>
+              <div class="iphone__contact">
+                <div class="iphone__avatar" id="ob-iphone-avatar">BP</div>
+                <div class="iphone__contact-info">
+                  <div class="iphone__name" id="ob-iphone-name">Bay Plumbing</div>
+                  <div class="iphone__sub">SMS</div>
+                </div>
+              </div>
+              <div class="iphone__actions">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </div>
             </div>
-            <div style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.82);font-size:.88rem;line-height:1.6;padding:.7rem 1rem;border-radius:16px;border-bottom-left-radius:3px;max-width:90%">
-              Got it — emergency. We'll call you back shortly.
+            <div class="iphone__screen" id="ob-iphone-screen">
+              <div class="iphone__time">Today 9:41 AM</div>
+              <div class="hero-typing" id="ob-iphone-typing"><div class="hero-typing__dots"><div class="hero-typing__dot"></div><div class="hero-typing__dot"></div><div class="hero-typing__dot"></div></div></div>
+            </div>
+            <div class="iphone__inputbar">
+              <div class="iphone__inputbar-plus"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+              <div class="iphone__inputbar-field">Text Message</div>
+              <div class="iphone__inputbar-send"><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></div>
             </div>
           </div>
+
+          <!-- Notification card -->
+          <div class="ob-notif-card" id="ob-iphone-notif" style="opacity:0;transform:translateY(12px);width:260px;margin-top:.75rem">
+            <div style="text-align:center;font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#06B6D4;margin-bottom:.35rem">↓ Sent to your phone instantly</div>
+            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.65rem .75rem .6rem;backdrop-filter:blur(12px)">
+              <div style="display:flex;align-items:center;gap:.35rem;margin-bottom:.3rem">
+                <svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="url(#ob-nlg)"/><path d="M18 8a7 7 0 1 0 0 12" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><defs><linearGradient id="ob-nlg" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs></svg>
+                <span style="font-size:.58rem;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.04em">Cove</span>
+                <span style="margin-left:auto;font-size:.52rem;color:rgba(255,255,255,.35)">now</span>
+              </div>
+              <div style="font-size:.7rem;font-weight:700;color:#fff;margin-bottom:.15rem">🚨 New Urgent Lead</div>
+              <div style="font-size:.62rem;line-height:1.5;color:rgba(255,255,255,.55)">Sam Thompson — Burst pipe<br>Urgency: Emergency · Call back ASAP</div>
+            </div>
+            <div style="text-align:center;font-size:.56rem;color:rgba(255,255,255,.3);margin-top:.35rem;letter-spacing:.02em;font-weight:500">Delivered via SMS + Email · No app needed</div>
+          </div>
         </div>
 
-        <!-- Stats row -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:auto">
-          <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.9rem .75rem;text-align:center">
-            <div style="font-size:1.75rem;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1">10s</div>
-            <div style="font-size:.62rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-top:.3rem">text-back</div>
+        <!-- Demo input -->
+        <div style="width:260px;background:rgba(37,99,235,.15);border:1px solid rgba(37,99,235,.4);border-radius:14px;padding:1rem 1.1rem">
+          <div style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.65);margin-bottom:.5rem">Try it — text yourself the demo</div>
+          <div style="display:flex;gap:.4rem">
+            <input id="ob-demo-phone" type="tel" placeholder="0412 345 678" style="flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.5rem .75rem;font-size:.82rem;color:#fff;font-family:inherit;outline:none;min-width:0" />
+            <button id="ob-demo-btn" type="button" onclick="obSendDemo()" style="background:#2563EB;color:#fff;border:none;border-radius:8px;padding:.5rem .85rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">Send</button>
           </div>
-          <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.9rem .75rem;text-align:center">
-            <div style="font-size:1.75rem;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1">24/7</div>
-            <div style="font-size:.62rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-top:.3rem">always on</div>
-          </div>
-          <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.9rem .75rem;text-align:center">
-            <div style="font-size:1.75rem;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1">$49</div>
-            <div style="font-size:.62rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-top:.3rem">/ month</div>
-          </div>
+          <div id="ob-demo-status" style="font-size:.72rem;margin-top:.4rem;min-height:1rem;color:rgba(255,255,255,.45)"></div>
         </div>
 
-        <!-- Demo widget -->
-        <div style="margin-top:1.5rem;background:rgba(37,99,235,.15);border:1px solid rgba(37,99,235,.35);border-radius:16px;padding:1.25rem 1.5rem">
-          <div style="font-size:.78rem;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:.5rem">Try it — get the real SMS</div>
-          <div style="display:flex;gap:.5rem">
-            <input id="ob-demo-phone" type="tel" placeholder="0412 345 678" style="flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.55rem .85rem;font-size:.88rem;color:#fff;font-family:inherit;outline:none" />
-            <button id="ob-demo-btn" type="button" onclick="obSendDemo()" style="background:#2563EB;color:#fff;border:none;border-radius:8px;padding:.55rem 1rem;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Send demo</button>
-          </div>
-          <div id="ob-demo-status" style="font-size:.78rem;margin-top:.5rem;min-height:1.1rem;color:rgba(255,255,255,.5)"></div>
-        </div>
-
-        <div style="display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.18);padding-top:1.25rem;margin-top:1.25rem;border-top:1px solid rgba(255,255,255,.06)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          30-day money-back guarantee
-        </div>
       </div>
 
       <!-- Sidebar for step 2: live phone preview -->
@@ -1292,6 +1373,74 @@
     document.getElementById('go-dashboard').addEventListener('click', () => {
       location.href = '/dashboard';
     });
+
+    // ─── Sidebar iPhone animation ───
+    function runObIphoneAnim() {
+      const screen   = document.getElementById('ob-iphone-screen');
+      const typing   = document.getElementById('ob-iphone-typing');
+      const notif    = document.getElementById('ob-iphone-notif');
+      if (!screen || !typing) return;
+
+      const msgs = [
+        { cls: 'imsg--recv', text: 'Hi Sam — thanks for calling Bay Plumbing.\n\nHow urgent is this?\nA) Emergency  B) Same day  C) Can wait' },
+        { cls: 'imsg--sent', text: 'A' },
+        { cls: 'imsg--delivered', text: '✓ Delivered' },
+        { cls: 'imsg--recv', text: 'Got it — emergency. What\'s the issue?\n1) Leak / burst pipe  2) Blocked drain\n3) Hot water  4) Other' },
+        { cls: 'imsg--sent', text: '1' },
+        { cls: 'imsg--delivered', text: '✓ Delivered' },
+        { cls: 'imsg--recv', text: 'Thanks Sam! We\'ll have someone call you back within the hour. 🔧' },
+      ];
+
+      // Clear old messages (keep time div)
+      [...screen.querySelectorAll('.imsg')].forEach(el => el.remove());
+      typing.classList.remove('show');
+      if (notif) { notif.style.opacity = '0'; notif.style.transform = 'translateY(12px)'; }
+
+      let i = 0;
+      function next() {
+        if (i >= msgs.length) {
+          // Show notification card
+          if (notif) {
+            setTimeout(() => {
+              notif.style.opacity = '1';
+              notif.style.transform = 'translateY(0)';
+            }, 600);
+          }
+          // Loop after delay
+          setTimeout(runObIphoneAnim, 6000);
+          return;
+        }
+        const m = msgs[i];
+        const isRecv = m.cls === 'imsg--recv';
+        // Show typing before recv messages
+        if (isRecv) {
+          typing.classList.add('show');
+          screen.appendChild(typing); // move to end
+          screen.scrollTop = screen.scrollHeight;
+          setTimeout(() => {
+            typing.classList.remove('show');
+            addMsg();
+          }, 900);
+        } else {
+          addMsg();
+        }
+      }
+      function addMsg() {
+        const m = msgs[i];
+        const div = document.createElement('div');
+        div.className = `imsg ${m.cls}`;
+        div.textContent = m.text;
+        screen.insertBefore(div, typing);
+        requestAnimationFrame(() => div.classList.add('show'));
+        screen.scrollTop = screen.scrollHeight;
+        i++;
+        setTimeout(next, m.cls === 'imsg--delivered' ? 200 : 700);
+      }
+      setTimeout(next, 500);
+    }
+
+    // Start animation once page is ready
+    window.addEventListener('load', () => setTimeout(runObIphoneAnim, 800));
 
     // ─── Sidebar demo widget ───
     async function obSendDemo() {
