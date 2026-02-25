@@ -691,17 +691,49 @@
 
           <!-- Active question editor -->
           <div id="qb-active" style="display:none">
+
+            <!-- Question label -->
             <div class="cv-label" style="margin-bottom:.5rem">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               <span id="qb-active-label">Question 1</span>
             </div>
-            <div class="cv-bubble cv-bubble--q" style="margin-bottom:.75rem">
+
+            <!-- Question textarea -->
+            <div class="cv-bubble cv-bubble--q" style="margin-bottom:.6rem">
               <textarea class="cv-textarea" id="qb-active-text" rows="2" placeholder="Type your question here…"></textarea>
-              <div class="cv-bubble-footer">
-                <div class="cv-chips" id="qb-active-chips"></div>
-                <button type="button" class="cv-mode-btn" id="qb-mode-btn">⊞ A/B/C</button>
-              </div>
             </div>
+
+            <!-- How should customers reply? -->
+            <div style="margin-bottom:.75rem">
+              <div style="font-size:.72rem;font-weight:600;color:#71717A;margin-bottom:.4rem;letter-spacing:.03em">How do customers reply?</div>
+              <div style="display:flex;gap:.5rem">
+                <button type="button" class="qb-reply-opt" id="qb-opt-choice" data-mode="choice" style="flex:1;display:flex;align-items:flex-start;gap:.6rem;padding:.65rem .8rem;border-radius:10px;border:1.5px solid #E4E4E7;background:#fff;cursor:pointer;text-align:left;transition:all .15s">
+                  <div style="margin-top:1px;flex-shrink:0">
+                    <div style="width:14px;height:14px;border-radius:50%;border:2px solid #D4D4D8;background:#fff;display:grid;place-items:center" id="qb-opt-choice-radio">
+                      <div style="width:6px;height:6px;border-radius:50%;background:#2563EB;display:none" id="qb-opt-choice-dot"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style="font-size:.82rem;font-weight:600;color:#18181B;line-height:1.3">Multiple choice</div>
+                    <div style="font-size:.72rem;color:#71717A;margin-top:.15rem">Customer picks A, B or C — fast and structured</div>
+                  </div>
+                </button>
+                <button type="button" class="qb-reply-opt" id="qb-opt-free" data-mode="free" style="flex:1;display:flex;align-items:flex-start;gap:.6rem;padding:.65rem .8rem;border-radius:10px;border:1.5px solid #E4E4E7;background:#fff;cursor:pointer;text-align:left;transition:all .15s">
+                  <div style="margin-top:1px;flex-shrink:0">
+                    <div style="width:14px;height:14px;border-radius:50%;border:2px solid #D4D4D8;background:#fff;display:grid;place-items:center" id="qb-opt-free-radio">
+                      <div style="width:6px;height:6px;border-radius:50%;background:#2563EB;display:none" id="qb-opt-free-dot"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style="font-size:.82rem;font-weight:600;color:#18181B;line-height:1.3">Free text</div>
+                    <div style="font-size:.72rem;color:#71717A;margin-top:.15rem">Customer types anything — more natural, open-ended</div>
+                  </div>
+                </button>
+              </div>
+              <!-- Options preview (shown for multiple choice) -->
+              <div id="qb-options-preview" style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem"></div>
+            </div>
+
             <!-- Add another / Done -->
             <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap">
               <button class="btn btn--primary" id="qb-add-btn" type="button" style="gap:.4rem">
@@ -1359,32 +1391,54 @@
       }
     }
 
+    // Set the reply-type radio UI
+    function qbSetReplyMode(isFree) {
+      const choiceBtn   = document.getElementById('qb-opt-choice');
+      const freeBtn     = document.getElementById('qb-opt-free');
+      const choiceDot   = document.getElementById('qb-opt-choice-dot');
+      const freeDot     = document.getElementById('qb-opt-free-dot');
+      const choiceRadio = document.getElementById('qb-opt-choice-radio');
+      const freeRadio   = document.getElementById('qb-opt-free-radio');
+      const preview     = document.getElementById('qb-options-preview');
+
+      // Selected = blue border + filled dot
+      choiceBtn.style.borderColor  = isFree ? '#E4E4E7' : '#2563EB';
+      choiceBtn.style.background   = isFree ? '#fff' : '#EFF6FF';
+      freeBtn.style.borderColor    = isFree ? '#2563EB' : '#E4E4E7';
+      freeBtn.style.background     = isFree ? '#EFF6FF' : '#fff';
+      choiceRadio.style.borderColor = isFree ? '#D4D4D8' : '#2563EB';
+      freeRadio.style.borderColor   = isFree ? '#2563EB' : '#D4D4D8';
+      choiceDot.style.display = isFree ? 'none' : 'block';
+      freeDot.style.display   = isFree ? 'block' : 'none';
+
+      // Options preview
+      const step = flowConfig?.steps[qbActiveIdx];
+      if (!isFree && step?.options?.length) {
+        preview.style.display = 'flex';
+        preview.innerHTML = step.options.map(o =>
+          `<span class="cv-chip">${o.value}) ${o.label}</span>`
+        ).join('');
+      } else {
+        preview.style.display = 'none';
+        preview.innerHTML = '';
+      }
+    }
+
     // Load a step into the active editor
     function qbLoadActive(idx) {
       qbActiveIdx = idx;
-      const step = flowConfig.steps[idx];
-      const activeEl = document.getElementById('qb-active');
-      const labelEl  = document.getElementById('qb-active-label');
-      const ta       = document.getElementById('qb-active-text');
-      const chipsEl  = document.getElementById('qb-active-chips');
-      const modeBtn  = document.getElementById('qb-mode-btn');
-      const hint     = document.getElementById('qb-count-hint');
+      const step    = flowConfig.steps[idx];
+      const hint    = document.getElementById('qb-count-hint');
+      const ta      = document.getElementById('qb-active-text');
 
-      activeEl.style.display = 'block';
-      labelEl.textContent = `Question ${idx + 1}`;
+      document.getElementById('qb-active').style.display = 'block';
+      document.getElementById('qb-active-label').textContent = `Question ${idx + 1}`;
 
       ta.value = step.question || '';
       ta.style.height = 'auto';
       ta.style.height = (ta.scrollHeight || 56) + 'px';
 
-      const isFree = !!step.free_text;
-      modeBtn.dataset.modefree = isFree;
-      modeBtn.classList.toggle('free', isFree);
-      modeBtn.textContent = isFree ? '✎ Free text' : '⊞ A/B/C';
-
-      chipsEl.innerHTML = isFree
-        ? '<span style="font-size:.7rem;color:#A1A1AA">Customer types freely</span>'
-        : step.options.map(o => `<span class="cv-chip">${o.value}) ${o.label}</span>`).join('');
+      qbSetReplyMode(!!step.free_text);
 
       const total = flowConfig.steps.length;
       hint.textContent = idx === 0
@@ -1395,15 +1449,14 @@
       ta.focus();
     }
 
-    // Commit current active question and optionally advance
+    // Commit current active question
     function qbCommitActive() {
       const ta = document.getElementById('qb-active-text');
-      const modeBtn = document.getElementById('qb-mode-btn');
       const q = ta.value.trim();
       if (!q) return false;
       if (!flowConfig.steps[qbActiveIdx]) return false;
       flowConfig.steps[qbActiveIdx].question = q;
-      flowConfig.steps[qbActiveIdx].free_text = modeBtn.dataset.modefree === 'true';
+      // free_text is kept up-to-date on click — just read it
       return true;
     }
 
@@ -1456,20 +1509,16 @@
       updateSidebarPreview();
     });
 
-    // Mode toggle (A/B/C ↔ free text) on active question
-    document.getElementById('qb-mode-btn').addEventListener('click', function() {
-      const nowFree = this.dataset.modefree !== 'true';
-      this.dataset.modefree = nowFree;
-      this.classList.toggle('free', nowFree);
-      this.textContent = nowFree ? '✎ Free text' : '⊞ A/B/C';
-      const step = flowConfig.steps[qbActiveIdx];
-      const chipsEl = document.getElementById('qb-active-chips');
-      if (nowFree) {
-        chipsEl.innerHTML = '<span style="font-size:.7rem;color:#A1A1AA">Customer types freely</span>';
-      } else {
-        chipsEl.innerHTML = step.options.map(o => `<span class="cv-chip">${o.value}) ${o.label}</span>`).join('');
-      }
-      updateSidebarPreview();
+    // Reply-type radio buttons
+    document.querySelectorAll('.qb-reply-opt').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const isFree = this.dataset.mode === 'free';
+        if (flowConfig?.steps[qbActiveIdx]) {
+          flowConfig.steps[qbActiveIdx].free_text = isFree;
+        }
+        qbSetReplyMode(isFree);
+        updateSidebarPreview();
+      });
     });
 
     // Active textarea — live resize + preview
@@ -1479,6 +1528,7 @@
       if (flowConfig?.steps[qbActiveIdx]) flowConfig.steps[qbActiveIdx].question = this.value;
       updateSidebarPreview();
     });
+
 
     function renderFlow(flow) {
       qbSteps = [];
@@ -1522,10 +1572,8 @@
 
       // Committed questions + replies
       const allDone = [...qbSteps];
-      // Also include the current active if it has content
       const activeTa = document.getElementById('qb-active-text');
       const activeQ = activeTa?.value.trim();
-      const modeBtn = document.getElementById('qb-mode-btn');
 
       allDone.forEach((step, i) => {
         if (!step.question?.trim()) return;
@@ -1539,7 +1587,7 @@
       // Current active question being typed
       if (activeQ && document.getElementById('qb-active')?.style.display !== 'none') {
         msgs.appendChild(mkBubble(activeQ, false));
-        const isFree = modeBtn?.dataset.modefree === 'true';
+        const isFree = !!flowConfig?.steps[qbActiveIdx]?.free_text;
         const step = flowConfig?.steps[qbActiveIdx];
         const reply = isFree
           ? smartSampleReply(activeQ, true)
