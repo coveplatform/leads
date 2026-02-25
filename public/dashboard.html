@@ -352,25 +352,37 @@
         </div>
       </div>
 
-      <!-- Method 3: Webhook / Zapier -->
+      <!-- Method 3: One-click CRM integrations -->
       <div class="section">
-        <div class="section__title">Method 3 — Webhook / Zapier / CRM</div>
+        <div class="section__title">Method 3 — Connect your CRM or booking software</div>
         <div class="form-section" style="padding:1.25rem">
-          <p style="font-size:13.5px;color:var(--text-muted);line-height:1.7;margin-bottom:1rem">
-            Send a POST request to your Cove webhook URL from any tool — Zapier, Make, your CRM, your booking software, anything. Cove will immediately start the SMS flow for that lead.
+          <p style="font-size:13.5px;color:var(--text-muted);line-height:1.7;margin-bottom:1.25rem">
+            Connect Cove to your existing software in one click via Zapier. When a new lead or booking comes in, Cove automatically texts them.
           </p>
-          <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.06em">Your webhook URL</div>
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:1rem">
-            <code id="webhook-url" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem 1rem;font-size:13px;color:var(--text);word-break:break-all">Loading…</code>
-            <button onclick="copyWebhook()" class="btn btn--secondary btn--sm" id="copy-webhook-btn">Copy</button>
-          </div>
-          <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.06em">POST body (JSON)</div>
-          <pre style="background:#0F172A;color:#E2E8F0;padding:1rem 1.25rem;border-radius:8px;font-size:12px;line-height:1.7;overflow-x:auto;margin:0 0 1rem;white-space:pre-wrap">{\n  "phone": "+61412345678",   // required\n  "name":  "Sam Jones",      // optional\n  "email": "sam@email.com",  // optional\n  "source": "contact-form"  // optional label\n}</pre>
-          <div style="font-size:13px;color:var(--text-muted);line-height:1.7">
-            <strong style="color:var(--text)">Zapier:</strong> Use "Webhooks by Zapier" → POST → paste your URL above → map the phone field.<br>
-            <strong style="color:var(--text)">Make (Integromat):</strong> HTTP module → POST → paste URL → set body to JSON.<br>
-            <strong style="color:var(--text)">Any CRM:</strong> Trigger on new lead → send POST to your URL with the phone number.
-          </div>
+
+          <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em">One-click connect</div>
+          <div id="zapier-buttons" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem"></div>
+
+          <details style="margin-top:.5rem">
+            <summary style="font-size:12.5px;font-weight:600;color:var(--text-muted);cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:.4rem">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+              Advanced — raw webhook URL
+            </summary>
+            <div style="margin-top:.75rem">
+              <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.06em">Your webhook URL</div>
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:.75rem">
+                <code id="webhook-url" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.55rem .9rem;font-size:12.5px;color:var(--text);word-break:break-all">Loading…</code>
+                <button onclick="copyWebhook()" class="btn btn--secondary btn--sm" id="copy-webhook-btn">Copy</button>
+              </div>
+              <pre style="background:#0F172A;color:#E2E8F0;padding:.9rem 1.1rem;border-radius:8px;font-size:12px;line-height:1.7;overflow-x:auto;margin:0;white-space:pre-wrap">POST  (application/json)
+{
+  "phone":  "+61412345678",  // required
+  "name":   "Sam Jones",     // optional
+  "email":  "sam@email.com", // optional
+  "source": "hubspot"        // optional label
+}</pre>
+            </div>
+          </details>
         </div>
       </div>
     </div>
@@ -894,6 +906,36 @@
 
       const webhookUrl = `${base}/api/webhook/generic/${bizId}`;
       document.getElementById('webhook-url').textContent = webhookUrl;
+
+      // One-click Zapier integration buttons
+      // Each links to a Zapier template with the webhook URL pre-filled via query param
+      const encoded = encodeURIComponent(webhookUrl);
+      const integrations = [
+        { name: 'HubSpot',     icon: '🟠', desc: 'New contact → Cove',    url: `https://zapier.com/apps/hubspot/integrations/webhooks?utm_source=zapier&create=true&entry.1=webhooks&entry.2=${encoded}` },
+        { name: 'Jobber',      icon: '🔵', desc: 'New request → Cove',    url: `https://zapier.com/apps/jobber/integrations/webhooks?utm_source=zapier&create=true` },
+        { name: 'ServiceM8',   icon: '🟢', desc: 'New job → Cove',        url: `https://zapier.com/apps/servicem8/integrations/webhooks?utm_source=zapier&create=true` },
+        { name: 'Google Forms', icon: '📋', desc: 'Form submit → Cove',   url: `https://zapier.com/apps/google-forms/integrations/webhooks?utm_source=zapier&create=true` },
+        { name: 'Pipedrive',   icon: '🟣', desc: 'New lead → Cove',       url: `https://zapier.com/apps/pipedrive/integrations/webhooks?utm_source=zapier&create=true` },
+        { name: 'Make',        icon: '⚙️',  desc: 'Any app → Cove',        url: `https://www.make.com/en/integrations/webhooks` },
+      ];
+
+      const container = document.getElementById('zapier-buttons');
+      container.innerHTML = integrations.map(i => `
+        <a href="${i.url}" target="_blank" rel="noopener" style="
+          display:flex;align-items:center;gap:10px;
+          border:1.5px solid var(--border);border-radius:10px;
+          padding:.7rem .9rem;text-decoration:none;
+          background:var(--surface);transition:border-color .15s,box-shadow .15s;
+        " onmouseover="this.style.borderColor='#2563EB';this.style.boxShadow='0 0 0 3px rgba(37,99,235,.08)'"
+           onmouseout="this.style.borderColor='';this.style.boxShadow=''">
+          <span style="font-size:1.1rem;line-height:1">${i.icon}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">${i.name}</div>
+            <div style="font-size:11.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i.desc}</div>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+      `).join('');
     }
 
     function copySnippet() {
