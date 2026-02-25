@@ -499,7 +499,68 @@
 
         <div class="ob-actions ob-actions--right" style="margin-top:2rem">
           <button class="btn btn--primary btn--lg" id="step1-next">
-            Generate my questions
+            Next
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2a: How it works bridge -->
+      <div id="step-2a" class="ob-form-inner hidden">
+        <div class="ob-step-label">Step 2 of 4</div>
+        <h1 class="ob-heading">Here's what Cove does.</h1>
+        <p class="ob-sub">Every time someone calls and you can't pick up, this is what happens automatically — no action needed from you.</p>
+
+        <div style="display:flex;flex-direction:column;gap:1px;margin:2rem 0">
+
+          <div style="display:flex;gap:1.25rem;align-items:flex-start;padding:1.25rem 1.5rem;background:#F8FAFC;border:1px solid #E4E4E7;border-radius:16px 16px 4px 4px">
+            <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#DBEAFE,#EFF6FF);display:grid;place-items:center;flex-shrink:0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:.95rem;color:#18181B;margin-bottom:.2rem">Someone calls, you miss it</div>
+              <div style="font-size:.83rem;color:#71717A;line-height:1.55">Instead of going to voicemail, the call forwards to Cove. You set this up once with a 2-digit code — we'll walk you through it later.</div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:center;padding:2px 0">
+            <div style="width:2px;height:20px;background:#E4E4E7"></div>
+          </div>
+
+          <div style="display:flex;gap:1.25rem;align-items:flex-start;padding:1.25rem 1.5rem;background:#F8FAFC;border:1px solid #E4E4E7;border-radius:4px">
+            <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#D1FAE5,#ECFDF5);display:grid;place-items:center;flex-shrink:0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:.95rem;color:#18181B;margin-bottom:.2rem">Cove texts them back in 10 seconds</div>
+              <div style="font-size:.83rem;color:#71717A;line-height:1.55">Your caller gets an SMS from your dedicated number. It asks them a few short questions — what they need, how urgent, when they want a callback.</div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:center;padding:2px 0">
+            <div style="width:2px;height:20px;background:#E4E4E7"></div>
+          </div>
+
+          <div style="display:flex;gap:1.25rem;align-items:flex-start;padding:1.25rem 1.5rem;background:#F8FAFC;border:1px solid #E4E4E7;border-radius:4px 4px 16px 16px">
+            <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#FEF3C7,#FFFBEB);display:grid;place-items:center;flex-shrink:0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:.95rem;color:#18181B;margin-bottom:.2rem">You get a lead summary instantly</div>
+              <div style="font-size:.83rem;color:#71717A;line-height:1.55">Once they reply, you get a text with their name, what they need and urgency. Urgent jobs flag immediately. Everything logs to your dashboard.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:12px;padding:.9rem 1.1rem;display:flex;align-items:flex-start;gap:.75rem;margin-bottom:2rem">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div style="font-size:.82rem;color:#1D4ED8;line-height:1.55">On the next screen you'll see the exact questions Cove will send. They're written for <strong id="bridge-biz-name">your business</strong> by AI — you can edit or rewrite any of them.</div>
+        </div>
+
+        <div class="ob-actions">
+          <button class="btn btn--ghost" id="step2a-back" type="button">← Back</button>
+          <button class="btn btn--primary btn--lg" id="step2a-next" type="button">
+            See my questions
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
@@ -508,8 +569,8 @@
       <!-- Step 2: AI flow -->
       <div id="step-2" class="ob-form-inner hidden">
         <div class="ob-step-label">Step 2 of 4</div>
-        <h1 class="ob-heading">Your lead questions.</h1>
-        <p class="ob-sub">AI wrote these for your business. Every missed caller gets asked these by SMS — edit any line directly.</p>
+        <h1 class="ob-heading">Your SMS questions.</h1>
+        <p class="ob-sub">These get sent word-for-word to every missed caller. Edit any question — or toggle to free text for open-ended replies.</p>
 
         <!-- Loading state -->
         <div id="flow-loading">
@@ -942,8 +1003,8 @@
       const el = document.getElementById('step-' + n);
       if (el) el.classList.remove('hidden');
 
-      // Update dots
-      const stepNum = typeof n === 'number' ? n : 5;
+      // Update dots — treat '2a' as step 2
+      const stepNum = n === '2a' ? 2 : (typeof n === 'number' ? n : 5);
       document.querySelectorAll('.ob-step-dot').forEach((dot, i) => {
         dot.classList.remove('active', 'done');
         const s = i + 1;
@@ -1213,8 +1274,8 @@
       });
     }
 
-    // ─── Step 1 → 2 ───
-    document.getElementById('step1-next').addEventListener('click', async () => {
+    // ─── Step 1 → 2a (bridge) ───
+    document.getElementById('step1-next').addEventListener('click', () => {
       const name = document.getElementById('biz-name').value.trim();
       const desc = document.getElementById('biz-desc').value.trim();
       const err = document.getElementById('step1-error');
@@ -1225,9 +1286,19 @@
 
       bizData = { ...bizData, businessName: name, description: desc, bookingLink: document.getElementById('biz-booking').value.trim() };
 
-      const btn = document.getElementById('step1-next');
+      // Update bridge screen with business name
+      const bridgeName = document.getElementById('bridge-biz-name');
+      if (bridgeName) bridgeName.textContent = name;
+
+      showStep('2a');
+    });
+
+    // ─── Step 2a → 2 (trigger AI generation) ───
+    document.getElementById('step2a-back').addEventListener('click', () => showStep(1));
+    document.getElementById('step2a-next').addEventListener('click', async () => {
+      const btn = document.getElementById('step2a-next');
       btn.disabled = true;
-      btn.textContent = 'Generating…';
+      btn.innerHTML = 'Writing questions… <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
 
       showStep(2);
       document.getElementById('flow-loading').classList.remove('hidden');
@@ -1237,11 +1308,11 @@
       const res = await fetch('/api/onboarding/generate-flow', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessName: name, description: desc }),
+        body: JSON.stringify({ businessName: bizData.businessName, description: bizData.description }),
       }).then(r => r.json());
 
       btn.disabled = false;
-      btn.innerHTML = 'Generate my questions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+      btn.innerHTML = 'See my questions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
 
       document.getElementById('flow-loading').classList.add('hidden');
 
@@ -1277,7 +1348,7 @@
     });
 
     // ─── Step 2 → 3 ───
-    document.getElementById('step2-back').addEventListener('click', () => showStep(1));
+    document.getElementById('step2-back').addEventListener('click', () => showStep('2a'));
     document.getElementById('step2-next').addEventListener('click', () => {
       if (flowConfig) {
         document.querySelectorAll('.ob-q-card').forEach((card, i) => {
