@@ -683,40 +683,50 @@
           </div>
         </div>
 
-        <!-- Conversation builder -->
+        <!-- One-at-a-time question builder -->
         <div id="flow-content" class="hidden">
 
-          <!-- Intro message card -->
-          <div class="cv-row" id="cv-intro-row">
-            <div class="cv-label">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              Intro — sent immediately when they miss your call
+          <!-- Completed questions (stack) -->
+          <div id="qb-done-list"></div>
+
+          <!-- Active question editor -->
+          <div id="qb-active" style="display:none">
+            <div class="cv-label" style="margin-bottom:.5rem">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span id="qb-active-label">Question 1</span>
             </div>
-            <div class="cv-bubble cv-bubble--out">
-              <textarea class="cv-textarea" id="cv-intro-text" rows="2" placeholder="Hi {firstName}, this is {businessName}. Quick question…"></textarea>
-              <div class="cv-bubble-hint">{firstName} and {businessName} are filled in automatically</div>
+            <div class="cv-bubble cv-bubble--q" style="margin-bottom:.75rem">
+              <textarea class="cv-textarea" id="qb-active-text" rows="2" placeholder="Type your question here…"></textarea>
+              <div class="cv-bubble-footer">
+                <div class="cv-chips" id="qb-active-chips"></div>
+                <button type="button" class="cv-mode-btn" id="qb-mode-btn">⊞ A/B/C</button>
+              </div>
             </div>
+            <!-- Add another / Done -->
+            <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap">
+              <button class="btn btn--primary" id="qb-add-btn" type="button" style="gap:.4rem">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Add another question
+              </button>
+              <button class="btn btn--ghost" id="qb-done-btn" type="button">
+                That's all →
+              </button>
+            </div>
+            <div style="font-size:.72rem;color:#A1A1AA;margin-top:.6rem" id="qb-count-hint"></div>
           </div>
 
-          <!-- Questions container -->
-          <div id="flow-questions"></div>
-
-          <!-- Add / regen row -->
-          <div class="cv-add-row">
-            <button class="cv-add-btn" id="cv-add-btn" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-              Add a question
-            </button>
+          <!-- Regen link -->
+          <div style="margin-top:1.25rem">
             <button class="ob-regen-btn" id="regen-btn" type="button">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-              Regenerate all
+              Start over with AI
             </button>
           </div>
         </div>
 
         <div id="step2-error" class="ob-error"></div>
 
-        <div class="ob-actions" style="margin-top:1.5rem">
+        <div class="ob-actions" style="margin-top:1.5rem" id="step2-final-actions" style="display:none">
           <button class="btn btn--ghost" id="step2-back" type="button">← Back</button>
           <button class="btn btn--primary btn--lg" id="step2-next" type="button">
             Looks good
@@ -1296,140 +1306,12 @@
       setTimeout(advance, 400);
     }
 
-    // ─── Render flow questions ───
-    // Sample customer replies shown below each question
-    const SAMPLE_REPLIES = [
-      'A', 'B', 'A', 'C', '1', '2'
-    ];
+    // ─── One-at-a-time Question Builder ───
+    // qbSteps: array of committed step objects
+    // qbActiveIdx: index being edited right now
+    let qbSteps = [];
+    let qbActiveIdx = 0;
 
-    function makeQuestionRow(step, i, totalSteps) {
-      const isFree = !!step.free_text;
-      const chips = step.options.map(o =>
-        `<span class="cv-chip">${o.value}) ${o.label}</span>`
-      ).join('');
-      const sampleReply = isFree ? (step.options[0]?.label || 'Yes please') : (step.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A');
-
-      const wrapper = document.createElement('div');
-      wrapper.dataset.qindex = i;
-
-      wrapper.innerHTML = `
-        <div class="cv-connector-line" style="margin-left:10px;margin-bottom:4px"></div>
-        <div class="cv-row" data-qrow="${i}">
-          <div class="cv-row-header">
-            <div class="cv-label">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              Question ${i + 1}
-            </div>
-            <button type="button" class="cv-del-btn" data-del="${i}">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              Remove
-            </button>
-          </div>
-          <div class="cv-bubble cv-bubble--q">
-            <textarea class="cv-textarea" rows="2" data-qstep="${i}">${step.question}</textarea>
-            <div class="cv-bubble-footer">
-              <div class="cv-chips" data-chips="${i}">${isFree ? '<span style="font-size:.7rem;color:#A1A1AA">Open answer — customer types freely</span>' : chips}</div>
-              <button type="button" class="cv-mode-btn${isFree ? ' free' : ''}" data-modefree="${isFree}" data-qidx="${i}">${isFree ? '✎ Free text' : '⊞ A/B/C'}</button>
-            </div>
-          </div>
-        </div>
-        <div class="cv-reply-row" data-replyrow="${i}">
-          <div class="cv-reply-pill" data-replypill="${i}">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 10h10a8 8 0 0 1 8 8v2M3 10l6 6M3 10l6-6"/></svg>
-            <span data-replytext="${i}">${sampleReply}</span>
-          </div>
-        </div>
-      `;
-
-      // Auto-resize textarea
-      const ta = wrapper.querySelector('textarea');
-      const resize = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
-      ta.addEventListener('input', () => { resize(); updateSampleReply(wrapper, i); updateSidebarPreview(); });
-      requestAnimationFrame(resize);
-
-      // Free-text toggle
-      wrapper.querySelector('.cv-mode-btn').addEventListener('click', function() {
-        const nowFree = this.dataset.modefree !== 'true';
-        this.dataset.modefree = nowFree;
-        this.classList.toggle('free', nowFree);
-        this.textContent = nowFree ? '✎ Free text' : '⊞ A/B/C';
-        const chipsEl = wrapper.querySelector(`[data-chips="${i}"]`);
-        const stepData = flowConfig.steps[i];
-        if (nowFree) {
-          chipsEl.innerHTML = '<span style="font-size:.7rem;color:#A1A1AA">Open answer — customer types freely</span>';
-        } else {
-          chipsEl.innerHTML = stepData.options.map(o => `<span class="cv-chip">${o.value}) ${o.label}</span>`).join('');
-        }
-        updateSampleReply(wrapper, i);
-        updateSidebarPreview();
-      });
-
-      // Delete button
-      wrapper.querySelector('.cv-del-btn').addEventListener('click', () => {
-        flowConfig.steps.splice(i, 1);
-        renderFlow(flowConfig);
-      });
-
-      return wrapper;
-    }
-
-    function updateSampleReply(wrapper, i) {
-      const step = flowConfig?.steps[i];
-      if (!step) return;
-      const isFree = wrapper.querySelector('.cv-mode-btn')?.dataset.modefree === 'true';
-      const replyText = wrapper.querySelector(`[data-replytext="${i}"]`);
-      if (!replyText) return;
-      replyText.textContent = isFree
-        ? (step.options[0]?.label || 'Sounds good')
-        : (step.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A');
-    }
-
-    function renderFlow(flow) {
-      // Set intro text
-      const introEl = document.getElementById('cv-intro-text');
-      if (introEl && flow.intro) {
-        introEl.value = flow.intro;
-        introEl.style.height = 'auto';
-        introEl.style.height = introEl.scrollHeight + 'px';
-      }
-
-      const container = document.getElementById('flow-questions');
-      container.innerHTML = '';
-      flow.steps.forEach((step, i) => {
-        container.appendChild(makeQuestionRow(step, i, flow.steps.length));
-      });
-      updateSidebarPreview();
-    }
-
-    // Intro textarea — live resize + preview update
-    const cvIntroEl = document.getElementById('cv-intro-text');
-    if (cvIntroEl) {
-      const resizeIntro = () => { cvIntroEl.style.height = 'auto'; cvIntroEl.style.height = cvIntroEl.scrollHeight + 'px'; };
-      cvIntroEl.addEventListener('input', () => { resizeIntro(); updateSidebarPreview(); });
-    }
-
-    // Add question button
-    document.getElementById('cv-add-btn').addEventListener('click', () => {
-      if (!flowConfig) return;
-      flowConfig.steps.push({
-        id: 'custom_' + Date.now(),
-        key: 'custom_' + Date.now(),
-        question: '',
-        invalid_text: 'Please reply A, B or C.',
-        options: [
-          { value: 'A', label: 'Option A' },
-          { value: 'B', label: 'Option B' },
-        ],
-        urgent_values: [],
-        free_text: false,
-      });
-      renderFlow(flowConfig);
-      // Focus the new textarea
-      const rows = document.querySelectorAll('[data-qstep]');
-      if (rows.length) rows[rows.length - 1].focus();
-    });
-
-    // ─── Live phone preview in sidebar for step 2 ───
     function mkBubble(text, sent) {
       const d = document.createElement('div');
       d.style.cssText = sent
@@ -1439,35 +1321,218 @@
       return d;
     }
 
+    // Render the "done" stack above the active question
+    function qbRenderDoneList() {
+      const list = document.getElementById('qb-done-list');
+      list.innerHTML = '';
+      qbSteps.forEach((step, i) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'margin-bottom:.75rem';
+        const isFree = !!step.free_text;
+        const replyText = isFree
+          ? (step.options[0]?.label || 'Sure')
+          : (step.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A');
+
+        row.innerHTML = `
+          <div class="cv-label" style="margin-bottom:.3rem;justify-content:space-between">
+            <span style="display:flex;align-items:center;gap:.4rem">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Question ${i + 1}
+            </span>
+            <button type="button" style="font-size:.68rem;font-weight:600;color:#2563EB;background:none;border:none;cursor:pointer;font-family:inherit;padding:0" data-edit="${i}">Edit</button>
+          </div>
+          <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px 12px 4px 12px;padding:.6rem .85rem;font-size:.85rem;color:#18181B;line-height:1.5;margin-bottom:.3rem">${step.question || '<em style="color:#A1A1AA">Empty question</em>'}</div>
+          <div style="display:flex;justify-content:flex-end">
+            <div class="cv-reply-pill" style="font-size:.7rem">${replyText}</div>
+          </div>
+        `;
+        row.querySelector('[data-edit]').addEventListener('click', () => qbEditStep(i));
+        list.appendChild(row);
+      });
+
+      // Connector line to active question
+      if (qbSteps.length > 0) {
+        const line = document.createElement('div');
+        line.className = 'cv-connector-line';
+        line.style.marginBottom = '8px';
+        list.appendChild(line);
+      }
+    }
+
+    // Load a step into the active editor
+    function qbLoadActive(idx) {
+      qbActiveIdx = idx;
+      const step = flowConfig.steps[idx];
+      const activeEl = document.getElementById('qb-active');
+      const labelEl  = document.getElementById('qb-active-label');
+      const ta       = document.getElementById('qb-active-text');
+      const chipsEl  = document.getElementById('qb-active-chips');
+      const modeBtn  = document.getElementById('qb-mode-btn');
+      const hint     = document.getElementById('qb-count-hint');
+
+      activeEl.style.display = 'block';
+      labelEl.textContent = `Question ${idx + 1}`;
+
+      ta.value = step.question || '';
+      ta.style.height = 'auto';
+      ta.style.height = (ta.scrollHeight || 56) + 'px';
+
+      const isFree = !!step.free_text;
+      modeBtn.dataset.modefree = isFree;
+      modeBtn.classList.toggle('free', isFree);
+      modeBtn.textContent = isFree ? '✎ Free text' : '⊞ A/B/C';
+
+      chipsEl.innerHTML = isFree
+        ? '<span style="font-size:.7rem;color:#A1A1AA">Customer types freely</span>'
+        : step.options.map(o => `<span class="cv-chip">${o.value}) ${o.label}</span>`).join('');
+
+      const total = flowConfig.steps.length;
+      hint.textContent = idx === 0
+        ? 'You can add up to 5 questions. Most businesses use 3.'
+        : `${total} question${total !== 1 ? 's' : ''} so far. Add more or finish.`;
+
+      updateSidebarPreview();
+      ta.focus();
+    }
+
+    // Commit current active question and optionally advance
+    function qbCommitActive() {
+      const ta = document.getElementById('qb-active-text');
+      const modeBtn = document.getElementById('qb-mode-btn');
+      const q = ta.value.trim();
+      if (!q) return false;
+      if (!flowConfig.steps[qbActiveIdx]) return false;
+      flowConfig.steps[qbActiveIdx].question = q;
+      flowConfig.steps[qbActiveIdx].free_text = modeBtn.dataset.modefree === 'true';
+      return true;
+    }
+
+    // Edit a committed step
+    function qbEditStep(idx) {
+      // Commit current if valid
+      qbCommitActive();
+      // Remove steps after idx from committed list
+      qbSteps = flowConfig.steps.slice(0, idx);
+      qbRenderDoneList();
+      qbLoadActive(idx);
+      // Hide final actions
+      document.getElementById('step2-final-actions').style.display = 'none';
+      document.getElementById('qb-active').style.display = 'block';
+    }
+
+    // Add another question button
+    document.getElementById('qb-add-btn').addEventListener('click', () => {
+      if (!qbCommitActive()) return;
+      qbSteps = flowConfig.steps.slice(0, qbActiveIdx + 1);
+
+      // Add a new blank step after current if not already there
+      const nextIdx = qbActiveIdx + 1;
+      if (!flowConfig.steps[nextIdx]) {
+        flowConfig.steps.push({
+          id: 'q_' + Date.now(), key: 'q_' + Date.now(),
+          question: '', invalid_text: 'Please reply A, B or C.',
+          options: [{ value: 'A', label: 'Option A' }, { value: 'B', label: 'Option B' }],
+          urgent_values: [], free_text: false,
+        });
+      }
+
+      qbRenderDoneList();
+      qbLoadActive(nextIdx);
+    });
+
+    // I'm done button
+    document.getElementById('qb-done-btn').addEventListener('click', () => {
+      if (!qbCommitActive()) {
+        document.getElementById('qb-active-text').style.outline = '2px solid #EF4444';
+        setTimeout(() => document.getElementById('qb-active-text').style.outline = '', 1200);
+        return;
+      }
+      qbSteps = flowConfig.steps.slice(0, qbActiveIdx + 1);
+      // Trim any trailing empty steps
+      flowConfig.steps = qbSteps;
+      qbRenderDoneList();
+      document.getElementById('qb-active').style.display = 'none';
+      document.getElementById('step2-final-actions').style.display = 'flex';
+      updateSidebarPreview();
+    });
+
+    // Mode toggle (A/B/C ↔ free text) on active question
+    document.getElementById('qb-mode-btn').addEventListener('click', function() {
+      const nowFree = this.dataset.modefree !== 'true';
+      this.dataset.modefree = nowFree;
+      this.classList.toggle('free', nowFree);
+      this.textContent = nowFree ? '✎ Free text' : '⊞ A/B/C';
+      const step = flowConfig.steps[qbActiveIdx];
+      const chipsEl = document.getElementById('qb-active-chips');
+      if (nowFree) {
+        chipsEl.innerHTML = '<span style="font-size:.7rem;color:#A1A1AA">Customer types freely</span>';
+      } else {
+        chipsEl.innerHTML = step.options.map(o => `<span class="cv-chip">${o.value}) ${o.label}</span>`).join('');
+      }
+      updateSidebarPreview();
+    });
+
+    // Active textarea — live resize + preview
+    document.getElementById('qb-active-text').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = this.scrollHeight + 'px';
+      if (flowConfig?.steps[qbActiveIdx]) flowConfig.steps[qbActiveIdx].question = this.value;
+      updateSidebarPreview();
+    });
+
+    function renderFlow(flow) {
+      qbSteps = [];
+      qbActiveIdx = 0;
+      document.getElementById('qb-done-list').innerHTML = '';
+      document.getElementById('step2-final-actions').style.display = 'none';
+      qbLoadActive(0);
+      updateSidebarPreview();
+    }
+
+    // ─── Live sidebar preview (iPhone) ───
     function updateSidebarPreview() {
       const msgs = document.getElementById('sidebar-step2-msgs');
       if (!msgs) return;
       msgs.innerHTML = '';
-
       const bizName = bizData.businessName || 'Your Business';
 
-      // Intro bubble
-      const introEl = document.getElementById('cv-intro-text');
-      const introText = introEl ? introEl.value.trim() : '';
-      if (introText) {
-        const rendered = introText.replace(/{firstName}/g, 'Sam').replace(/{businessName}/g, bizName);
+      // Intro from flowConfig
+      if (flowConfig?.intro) {
+        const rendered = flowConfig.intro.replace(/{firstName}/g, 'Sam').replace(/{businessName}/g, bizName);
         msgs.appendChild(mkBubble(rendered, false));
       }
 
-      // Each question + sample reply
-      document.querySelectorAll('[data-qstep]').forEach((ta, i) => {
-        const q = ta.value.trim();
-        if (!q) return;
-        msgs.appendChild(mkBubble(q, false));
+      // Committed questions + replies
+      const allDone = [...qbSteps];
+      // Also include the current active if it has content
+      const activeTa = document.getElementById('qb-active-text');
+      const activeQ = activeTa?.value.trim();
+      const modeBtn = document.getElementById('qb-mode-btn');
 
-        // Sample reply
-        const replyEl = msgs.closest('#sidebar-step2')?.querySelector(`[data-replypill="${i}"]`) ||
-          document.querySelector(`[data-replypill="${i}"]`);
-        const replyText = document.querySelector(`[data-replytext="${i}"]`)?.textContent || 'A';
-        msgs.appendChild(mkBubble(replyText, true));
+      allDone.forEach((step, i) => {
+        if (!step.question?.trim()) return;
+        msgs.appendChild(mkBubble(step.question, false));
+        const reply = step.free_text
+          ? (step.options[0]?.label || 'Sure')
+          : (step.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A');
+        msgs.appendChild(mkBubble(reply, true));
       });
 
-      // Scroll to bottom
+      // Current active question being typed
+      if (activeQ && document.getElementById('qb-active')?.style.display !== 'none') {
+        msgs.appendChild(mkBubble(activeQ, false));
+        const isFree = modeBtn?.dataset.modefree === 'true';
+        const step = flowConfig?.steps[qbActiveIdx];
+        const reply = isFree
+          ? (step?.options[0]?.label || 'Sure')
+          : (step?.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A');
+        // Show reply as greyed "typing" indicator
+        const typing = document.createElement('div');
+        typing.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:.25rem';
+        typing.innerHTML = `<div style="background:#0a84ff;opacity:.4;color:#fff;font-size:.6rem;padding:.3rem .55rem;border-radius:12px;border-bottom-right-radius:3px">${reply}</div>`;
+        msgs.appendChild(typing);
+      }
+
       msgs.scrollTop = msgs.scrollHeight;
     }
 
@@ -1548,16 +1613,7 @@
     document.getElementById('step2-back').addEventListener('click', () => showStep('2a'));
     document.getElementById('step2-next').addEventListener('click', () => {
       if (flowConfig) {
-        // Save intro
-        const introEl = document.getElementById('cv-intro-text');
-        if (introEl) flowConfig.intro = introEl.value.trim();
-        // Save questions
-        document.querySelectorAll('[data-qstep]').forEach((ta, i) => {
-          if (!flowConfig.steps[i]) return;
-          flowConfig.steps[i].question = ta.value.trim();
-          const modeBtn = ta.closest('[data-qrow]')?.querySelector('.cv-mode-btn');
-          if (modeBtn) flowConfig.steps[i].free_text = modeBtn.dataset.modefree === 'true';
-        });
+        // flowConfig.steps is kept up-to-date by the qb state machine
         bizData.flowConfig = flowConfig;
       }
       showStep(3);
