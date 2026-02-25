@@ -1442,6 +1442,16 @@
     // Start animation once page is ready
     window.addEventListener('load', () => setTimeout(runObIphoneAnim, 800));
 
+    // Update iPhone header live as user types business name
+    document.getElementById('biz-name').addEventListener('input', function() {
+      const name = this.value.trim();
+      const initials = name.split(' ').map(w => w[0]).filter(Boolean).join('').slice(0,2).toUpperCase() || 'BP';
+      const av = document.getElementById('ob-iphone-avatar');
+      const nm = document.getElementById('ob-iphone-name');
+      if (av) av.textContent = initials;
+      if (nm) nm.textContent = name || 'Bay Plumbing';
+    });
+
     // ─── Sidebar demo widget ───
     async function obSendDemo() {
       const input = document.getElementById('ob-demo-phone');
