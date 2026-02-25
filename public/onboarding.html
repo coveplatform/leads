@@ -1330,7 +1330,7 @@
         row.style.cssText = 'margin-bottom:.75rem';
         const isFree = !!step.free_text;
         const replyText = isFree
-          ? (step.options[0]?.label || 'Sure')
+          ? smartSampleReply(step.question, true)
           : (step.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A');
 
         row.innerHTML = `
@@ -1489,6 +1489,24 @@
       updateSidebarPreview();
     }
 
+    // ─── Smart sample reply based on question content ───
+    function smartSampleReply(question, isFree) {
+      if (!isFree) return null; // caller handles A/B/C
+      const q = (question || '').toLowerCase();
+      if (/urgent|emergency|asap|priority|how soon|how quick/.test(q)) return 'It\'s pretty urgent, ASAP if possible';
+      if (/when.*avail|best time|callback|call.*back|schedule/.test(q)) return 'Tomorrow morning works for me';
+      if (/name|who.*are|your name/.test(q)) return 'Sam Johnson';
+      if (/address|location|suburb|where/.test(q)) return '42 Elm St, Surry Hills';
+      if (/phone|number|contact|reach/.test(q)) return '0412 345 678';
+      if (/what.*need|what.*issue|problem|describe|tell.*more|detail/.test(q)) return 'My hot water system stopped working this morning';
+      if (/type.*job|kind.*work|service|what.*for/.test(q)) return 'Blocked drain in the kitchen';
+      if (/budget|price|cost|how much/.test(q)) return 'Around $300–400 is fine';
+      if (/how many|number of|size|how big/.test(q)) return 'Just the one';
+      if (/email/.test(q)) return 'sam@email.com';
+      // fallback — generic natural reply
+      return 'Yes, that works for me';
+    }
+
     // ─── Live sidebar preview (iPhone) ───
     function updateSidebarPreview() {
       const msgs = document.getElementById('sidebar-step2-msgs');
@@ -1513,7 +1531,7 @@
         if (!step.question?.trim()) return;
         msgs.appendChild(mkBubble(step.question, false));
         const reply = step.free_text
-          ? (step.options[0]?.label || 'Sure')
+          ? smartSampleReply(step.question, true)
           : (step.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A');
         msgs.appendChild(mkBubble(reply, true));
       });
@@ -1524,12 +1542,12 @@
         const isFree = modeBtn?.dataset.modefree === 'true';
         const step = flowConfig?.steps[qbActiveIdx];
         const reply = isFree
-          ? (step?.options[0]?.label || 'Sure')
+          ? smartSampleReply(activeQ, true)
           : (step?.options[0] ? step.options[0].value + ') ' + step.options[0].label : 'A');
-        // Show reply as greyed "typing" indicator
+        // Show reply as faded "pending" bubble
         const typing = document.createElement('div');
         typing.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:.25rem';
-        typing.innerHTML = `<div style="background:#0a84ff;opacity:.4;color:#fff;font-size:.6rem;padding:.3rem .55rem;border-radius:12px;border-bottom-right-radius:3px">${reply}</div>`;
+        typing.innerHTML = `<div style="background:#0a84ff;opacity:.35;color:#fff;font-size:.6rem;padding:.3rem .55rem;border-radius:12px;border-bottom-right-radius:3px;max-width:75%;line-height:1.4">${reply}</div>`;
         msgs.appendChild(typing);
       }
 
