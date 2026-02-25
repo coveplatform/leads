@@ -31,29 +31,32 @@
 
     .ob-split {
       flex: 1; display: grid;
-      grid-template-columns: 1fr 480px;
+      grid-template-columns: 1fr 460px;
       min-height: calc(100vh - 64px);
     }
 
     /* ── Left: form content ── */
     .ob-content {
-      padding: 3.5rem 4.5rem;
       display: flex; flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
       overflow-y: auto;
+      background: #fff;
     }
-    .ob-content > * { max-width: 480px; width: 100%; }
+    .ob-form-inner { width: 100%; max-width: 440px; }
+    .ob-content > * { max-width: 440px; width: 100%; }
     .ob-step-label {
-      font-size: .7rem; font-weight: 700; letter-spacing: .12em;
-      text-transform: uppercase; color: #2563EB; margin-bottom: 1rem;
+      font-size: .68rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: #2563EB; margin-bottom: .85rem;
     }
     .ob-heading {
-      font-size: 2.2rem; font-weight: 800; letter-spacing: -.04em;
-      color: #18181B; line-height: 1.15; margin-bottom: .75rem;
+      font-size: 2rem; font-weight: 800; letter-spacing: -.04em;
+      color: #18181B; line-height: 1.15; margin-bottom: .6rem;
     }
     .ob-sub {
-      font-size: .95rem; color: #71717A; line-height: 1.7;
-      margin-bottom: 2rem;
+      font-size: .9rem; color: #71717A; line-height: 1.65;
+      margin-bottom: 1.75rem;
     }
 
     .ob-fields { display: flex; flex-direction: column; gap: 1.25rem; }
@@ -79,7 +82,7 @@
 
     .ob-actions {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 1rem; margin-top: 2.5rem;
+      gap: 1rem; margin-top: 2rem;
     }
     .ob-actions--right { justify-content: flex-end; }
 
@@ -95,56 +98,56 @@
     .ob-sidebar {
       background: #0F172A;
       display: flex; flex-direction: column;
-      padding: 3rem 2.75rem;
+      padding: 3rem 3rem;
       position: sticky; top: 64px;
       height: calc(100vh - 64px);
       overflow-y: auto;
     }
     .ob-sidebar-badge {
-      display: inline-flex; align-items: center; gap: .5rem;
-      font-size: .7rem; font-weight: 700; letter-spacing: .1em;
+      display: inline-flex; align-items: center; gap: .45rem;
+      font-size: .65rem; font-weight: 700; letter-spacing: .12em;
       text-transform: uppercase; color: #06B6D4;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
     }
     .ob-sidebar-badge-dot {
-      width: 6px; height: 6px; border-radius: 50%;
+      width: 5px; height: 5px; border-radius: 50%;
       background: #06B6D4; box-shadow: 0 0 6px #06B6D4;
       animation: pulse-dot 2s ease-in-out infinite;
     }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.7)} }
 
     .ob-sidebar h2 {
-      font-size: 1.75rem; font-weight: 800; letter-spacing: -.04em;
-      color: #fff; line-height: 1.2; margin-bottom: .85rem;
+      font-size: 1.6rem; font-weight: 800; letter-spacing: -.04em;
+      color: #fff; line-height: 1.2; margin-bottom: .65rem;
     }
-    .ob-sidebar > p, .ob-sidebar #sidebar-default > p {
-      font-size: .88rem; color: rgba(255,255,255,.4);
-      line-height: 1.65; margin-bottom: 1.75rem;
+    .ob-sidebar-sub {
+      font-size: .85rem; color: rgba(255,255,255,.38);
+      line-height: 1.6; margin-bottom: 1.5rem;
     }
 
     .ob-stat-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: .75rem;
-      margin-bottom: 1.75rem;
+      display: grid; grid-template-columns: 1fr 1fr; gap: .6rem;
+      margin-bottom: 1.5rem;
     }
     .ob-stat {
       background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 12px; padding: 1rem 1.1rem;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 10px; padding: .85rem 1rem;
     }
     .ob-stat strong {
-      display: block; font-size: 2rem; font-weight: 900;
+      display: block; font-size: 1.65rem; font-weight: 900;
       letter-spacing: -.05em; color: #fff; line-height: 1;
-      margin-bottom: .25rem;
+      margin-bottom: .2rem;
     }
-    .ob-stat span { font-size: .7rem; color: rgba(255,255,255,.3); line-height: 1.4; text-transform: uppercase; letter-spacing: .06em; }
+    .ob-stat span { font-size: .65rem; color: rgba(255,255,255,.28); line-height: 1.4; text-transform: uppercase; letter-spacing: .07em; }
 
-    .ob-bullets { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.75rem; }
+    .ob-bullets { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1.5rem; }
     .ob-bullet {
-      display: flex; align-items: center; gap: .7rem;
-      font-size: .85rem; color: rgba(255,255,255,.5); line-height: 1.5;
+      display: flex; align-items: center; gap: .65rem;
+      font-size: .82rem; color: rgba(255,255,255,.45); line-height: 1.45;
     }
     .ob-bullet-icon {
-      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
       display: grid; place-items: center;
       background: rgba(16,185,129,.15); color: #10B981;
     }
@@ -152,32 +155,32 @@
 
     .ob-sms-preview {
       background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 14px; padding: 1rem 1.15rem;
-      margin-top: auto; display: flex; flex-direction: column; gap: .55rem;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px; padding: .9rem 1rem;
+      margin-top: auto; display: flex; flex-direction: column; gap: .5rem;
     }
     .ob-sms-label {
-      font-size: .62rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: rgba(255,255,255,.2);
-      margin-bottom: .1rem;
+      font-size: .6rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: rgba(255,255,255,.18);
+      margin-bottom: .05rem;
     }
     .ob-bubble {
-      font-size: .82rem; line-height: 1.5; padding: .5rem .75rem;
-      border-radius: 14px; width: fit-content; max-width: 90%;
+      font-size: .8rem; line-height: 1.5; padding: .45rem .7rem;
+      border-radius: 12px; width: fit-content; max-width: 92%;
     }
     .ob-bubble--recv {
-      background: rgba(255,255,255,.08); color: rgba(255,255,255,.8);
-      border-bottom-left-radius: 4px; margin-right: auto;
+      background: rgba(255,255,255,.07); color: rgba(255,255,255,.75);
+      border-bottom-left-radius: 3px; margin-right: auto;
     }
     .ob-bubble--sent {
       background: #2563EB; color: #fff; font-weight: 600;
-      border-bottom-right-radius: 4px; margin-left: auto;
+      border-bottom-right-radius: 3px; margin-left: auto;
     }
 
     .ob-guarantee {
-      display: flex; align-items: center; gap: .6rem;
-      margin-top: 1.25rem; padding-top: 1.25rem;
-      font-size: .78rem; color: rgba(255,255,255,.25);
+      display: flex; align-items: center; gap: .55rem;
+      margin-top: 1rem; padding-top: 1rem;
+      font-size: .75rem; color: rgba(255,255,255,.22);
       border-top: 1px solid rgba(255,255,255,.06);
     }
     .ob-guarantee svg { color: rgba(255,255,255,.15); flex-shrink: 0; }
@@ -364,16 +367,15 @@
     .ob-info-banner svg { flex-shrink: 0; margin-top: 1px; color: #A1A1AA; }
 
     /* ── Responsive ── */
-    @media (max-width: 1024px) {
-      .ob-split { grid-template-columns: 1fr 380px; }
-      .ob-content { padding: 3rem 3rem; }
-      .ob-sidebar { padding: 2.5rem 2rem; }
+    @media (max-width: 1100px) {
+      .ob-split { grid-template-columns: 1fr 400px; }
+      .ob-sidebar { padding: 2.5rem 2.25rem; }
     }
     @media (max-width: 768px) {
       .ob-split { grid-template-columns: 1fr; }
       .ob-sidebar { display: none; }
-      .ob-content { padding: 2rem 1.5rem; }
-      .ob-heading { font-size: 1.85rem; }
+      .ob-content { padding: 2rem 1.25rem; }
+      .ob-heading { font-size: 1.7rem; }
     }
   </style>
 </head>
@@ -403,7 +405,7 @@
     <main class="ob-content" id="ob-content">
 
       <!-- Step 1: Business info -->
-      <div id="step-1">
+      <div id="step-1" class="ob-form-inner">
         <div class="ob-step-label">Step 1 of 4</div>
         <h1 class="ob-heading">Tell us about your business.</h1>
         <p class="ob-sub">The more specific you are, the better Cove's AI can write your qualification questions.</p>
@@ -435,7 +437,7 @@
       </div>
 
       <!-- Step 2: AI flow -->
-      <div id="step-2" class="hidden">
+      <div id="step-2" class="ob-form-inner hidden">
         <div class="ob-step-label">Step 2 of 4</div>
         <h1 class="ob-heading">Your SMS questions.</h1>
         <p class="ob-sub">These are what every lead gets asked. We wrote them for your business — edit anything that doesn't feel right, or click to customise.</p>
@@ -491,7 +493,7 @@
       </div>
 
       <!-- Step 3: Notifications -->
-      <div id="step-3" class="hidden">
+      <div id="step-3" class="ob-form-inner hidden">
         <div class="ob-step-label">Step 3 of 4</div>
         <h1 class="ob-heading">Where do lead summaries go?</h1>
         <p class="ob-sub">When someone completes the flow you'll get a summary — their name, what they need, and how urgent. Where should we send it?</p>
@@ -521,7 +523,7 @@
       </div>
 
       <!-- Step 4: Payment -->
-      <div id="step-4" class="hidden">
+      <div id="step-4" class="ob-form-inner hidden">
         <div class="ob-step-label">Last step</div>
         <h1 class="ob-heading">Activate your account.</h1>
         <p class="ob-sub">Add your card to go live. If Cove doesn't pay for itself in 30 days, we'll refund you in full — no questions.</p>
@@ -555,7 +557,7 @@
       </div>
 
       <!-- Complete: call forwarding -->
-      <div id="step-complete" class="hidden">
+      <div id="step-complete" class="ob-form-inner hidden">
         <div class="ob-complete-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
@@ -689,98 +691,104 @@
     <aside class="ob-sidebar" id="ob-sidebar">
 
       <!-- Default sidebar (steps 1-3) -->
-      <div id="sidebar-default">
+      <div id="sidebar-default" style="display:flex;flex-direction:column;height:100%">
         <div class="ob-sidebar-badge">
           <span class="ob-sidebar-badge-dot"></span>
-          Live in minutes
-        </div>
-        <h2>Stop losing jobs to voicemail.</h2>
-        <p>Miss a call, lose the job. Cove texts every missed caller back within 10 seconds — automatically.</p>
-
-        <div class="ob-stat-row">
-          <div class="ob-stat"><strong>10s</strong><span>text-back</span></div>
-          <div class="ob-stat"><strong>24/7</strong><span>always on</span></div>
-          <div class="ob-stat"><strong>$49</strong><span>/ month</span></div>
-          <div class="ob-stat"><strong>30d</strong><span>money-back</span></div>
+          Always on
         </div>
 
-        <div class="ob-bullets">
-          <div class="ob-bullet">
-            <div class="ob-bullet-icon">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <div style="font-size:2.4rem;font-weight:900;letter-spacing:-.05em;color:#fff;line-height:1.1;margin-bottom:1rem">
+          Every missed call,<br/>texted back<br/><span style="color:#06B6D4">in 10 seconds.</span>
+        </div>
+
+        <div style="font-size:.85rem;color:rgba(255,255,255,.35);line-height:1.6;margin-bottom:2rem">
+          While you're on the job, Cove handles every missed caller automatically.
+        </div>
+
+        <!-- Phone mockup -->
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end">
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem">
+            <div style="font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:.9rem">What your customer receives</div>
+
+            <div style="display:flex;flex-direction:column;gap:.6rem">
+              <div style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);font-size:.82rem;line-height:1.55;padding:.6rem .85rem;border-radius:14px;border-bottom-left-radius:3px;max-width:88%">
+                Hi Sam — thanks for calling Bay Plumbing. How urgent is your issue?<br/><br/>A) Emergency &nbsp; B) Same day &nbsp; C) Not urgent
+              </div>
+              <div style="background:#2563EB;color:#fff;font-weight:600;font-size:.82rem;padding:.5rem .85rem;border-radius:14px;border-bottom-right-radius:3px;margin-left:auto">
+                A
+              </div>
+              <div style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);font-size:.82rem;line-height:1.55;padding:.6rem .85rem;border-radius:14px;border-bottom-left-radius:3px;max-width:88%">
+                Got it — emergency. We'll have someone call you back within the hour.
+              </div>
             </div>
-            <span>Dedicated AU number, set up instantly</span>
           </div>
-          <div class="ob-bullet">
-            <div class="ob-bullet-icon">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <span>Questions written by AI for your trade</span>
-          </div>
-          <div class="ob-bullet">
-            <div class="ob-bullet-icon">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <span>Lead summary to your phone, no app needed</span>
-          </div>
-        </div>
 
-        <div class="ob-sms-preview">
-          <div class="ob-sms-label">What your customer receives</div>
-          <div class="ob-bubble ob-bubble--recv">Hi Sam — thanks for calling Bay Plumbing. How urgent is your issue?<br/><br/>A) Emergency &nbsp; B) Same day &nbsp; C) Can wait</div>
-          <div class="ob-bubble ob-bubble--sent">A</div>
-          <div class="ob-bubble ob-bubble--recv">Got it. We'll call you back within the hour.</div>
-        </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:1.5rem">
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.75rem .6rem;text-align:center">
+              <div style="font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1">10s</div>
+              <div style="font-size:.6rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-top:.2rem">text-back</div>
+            </div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.75rem .6rem;text-align:center">
+              <div style="font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1">24/7</div>
+              <div style="font-size:.6rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-top:.2rem">always on</div>
+            </div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.75rem .6rem;text-align:center">
+              <div style="font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1">$49</div>
+              <div style="font-size:.6rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-top:.2rem">/ month</div>
+            </div>
+          </div>
 
-        <div class="ob-guarantee">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          30-day money-back · no questions asked
+          <div style="display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.2);padding-top:1rem;border-top:1px solid rgba(255,255,255,.06)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            30-day money-back guarantee
+          </div>
         </div>
       </div>
 
       <!-- Sidebar for payment step -->
-      <div id="sidebar-payment" class="hidden">
+      <div id="sidebar-payment" class="hidden" style="display:none;flex-direction:column;height:100%">
         <div class="ob-sidebar-badge">
           <span class="ob-sidebar-badge-dot"></span>
-          Almost live
-        </div>
-        <h2>One job pays for six months.</h2>
-        <p>Average trade job is $400+. Cove costs $49/mo. The maths is easy.</p>
-
-        <div class="ob-stat-row">
-          <div class="ob-stat"><strong>$49</strong><span>/ month</span></div>
-          <div class="ob-stat"><strong>30d</strong><span>money-back</span></div>
+          Last step
         </div>
 
-        <div class="ob-bullets">
-          <div class="ob-bullet">
-            <div class="ob-bullet-icon ob-bullet-icon--blue">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <div style="font-size:2.2rem;font-weight:900;letter-spacing:-.05em;color:#fff;line-height:1.1;margin-bottom:1rem">
+          One job covers<br/><span style="color:#06B6D4">6 months.</span>
+        </div>
+
+        <div style="font-size:.85rem;color:rgba(255,255,255,.35);line-height:1.6;margin-bottom:2rem">
+          Average trade job is $400+. Cove is $49/mo. The maths is simple.
+        </div>
+
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end">
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem">
+            <div style="font-size:3rem;font-weight:900;letter-spacing:-.06em;color:#fff;line-height:1">$49</div>
+            <div style="font-size:.8rem;color:rgba(255,255,255,.35);margin-top:.3rem;margin-bottom:1.5rem">per month · cancel anytime</div>
+            <div style="display:flex;flex-direction:column;gap:.6rem">
+              <div style="display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:rgba(255,255,255,.55)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                AU number activated immediately
+              </div>
+              <div style="display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:rgba(255,255,255,.55)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                No setup fee, no contracts
+              </div>
+              <div style="display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:rgba(255,255,255,.55)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                30-day money-back guarantee
+              </div>
             </div>
-            <span>AU number activated immediately after payment</span>
           </div>
-          <div class="ob-bullet">
-            <div class="ob-bullet-icon ob-bullet-icon--blue">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <span>No setup fee, no lock-in, cancel any time</span>
-          </div>
-          <div class="ob-bullet">
-            <div class="ob-bullet-icon ob-bullet-icon--blue">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <span>Full refund if it doesn't pay for itself in 30 days</span>
-          </div>
-        </div>
 
-        <div style="margin-top:1.5rem;padding:1.25rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px">
-          <p style="font-size:.88rem;color:rgba(255,255,255,.65);font-style:italic;line-height:1.6;margin-bottom:.6rem">"Qualified before I finish the current job."</p>
-          <div style="font-size:.75rem;font-weight:600;color:rgba(255,255,255,.3)">Mark T. — Bay Area Plumbing</div>
-        </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1.1rem 1.25rem">
+            <div style="font-size:.82rem;color:rgba(255,255,255,.6);font-style:italic;line-height:1.6;margin-bottom:.5rem">"Leads are qualified before I finish the current job."</div>
+            <div style="font-size:.72rem;font-weight:600;color:rgba(255,255,255,.25)">Mark T. — Bay Area Plumbing</div>
+          </div>
 
-        <div class="ob-guarantee" style="margin-top:1.5rem">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Secured by Stripe · SSL encrypted
+          <div style="display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.2);padding-top:1rem;margin-top:1rem;border-top:1px solid rgba(255,255,255,.06)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Secured by Stripe · SSL encrypted
+          </div>
         </div>
       </div>
 
