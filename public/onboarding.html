@@ -814,7 +814,12 @@
     const params = new URLSearchParams(location.search);
     if (params.get('step') === 'complete') {
       showStep('complete');
-      loadNumber();
+      // Try to fill number immediately from session, then fall back to polling
+      fetch('/api/auth/me').then(r => r.json()).then(data => {
+        const num = data.business?.twilio_from_number;
+        if (num) { fillNumber(num); }
+        else { loadNumber(); }
+      }).catch(() => loadNumber());
     } else if (params.get('step') === 'billing') {
       showStep(4);
     } else {
