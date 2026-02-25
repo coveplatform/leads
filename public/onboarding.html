@@ -1781,6 +1781,22 @@
       showStep('2a');
     });
 
+    // Fallback flow used when AI is unavailable
+    function makeFallbackFlow() {
+      const biz = bizData.businessName || 'our team';
+      return {
+        intro: `Hi {firstName}! Thanks for calling ${biz} — we missed you. Mind if we ask a couple of quick questions so we can help you faster?`,
+        steps: [
+          { id: 'q1', key: 'service', question: 'What do you need help with?', free_text: false,
+            options: [{ value: 'A', label: 'General enquiry' }, { value: 'B', label: 'Urgent issue' }, { value: 'C', label: 'Get a quote' }],
+            invalid_text: 'Please reply A, B or C.', urgent_values: ['B'] },
+          { id: 'q2', key: 'timing', question: 'When would you like us to get back to you?', free_text: false,
+            options: [{ value: 'A', label: 'ASAP' }, { value: 'B', label: 'Today' }, { value: 'C', label: 'This week' }],
+            invalid_text: 'Please reply A, B or C.', urgent_values: ['A'] },
+        ],
+      };
+    }
+
     // ─── Step 2a → 2 (trigger AI generation) ───
     document.getElementById('step2a-back').addEventListener('click', () => showStep(1));
     document.getElementById('step2a-next').addEventListener('click', async () => {
@@ -1793,25 +1809,31 @@
       document.getElementById('flow-content').classList.add('hidden');
       animateAISteps();
 
-      const res = await fetch('/api/onboarding/generate-flow', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessName: bizData.businessName, description: bizData.description }),
-      }).then(r => r.json());
+      try {
+        const r = await fetch('/api/onboarding/generate-flow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ businessName: bizData.businessName, description: bizData.description }),
+        });
+        const res = await r.json();
 
-      btn.disabled = false;
-      btn.innerHTML = 'See my questions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-
-      document.getElementById('flow-loading').classList.add('hidden');
-
-      if (res.ok) {
-        flowConfig = res.flow;
-        renderFlow(flowConfig);
-        document.getElementById('flow-content').classList.remove('hidden');
-      } else {
+        if (res.ok && res.flow) {
+          flowConfig = res.flow;
+        } else {
+          flowConfig = makeFallbackFlow();
+          const stepErr = document.getElementById('step2-error');
+          if (stepErr) { stepErr.textContent = res.error || 'AI unavailable — using a starter template. Edit the questions below.'; stepErr.classList.add('visible'); }
+        }
+      } catch (e) {
+        console.error('generate-flow error', e);
+        flowConfig = makeFallbackFlow();
         const stepErr = document.getElementById('step2-error');
-        stepErr.textContent = res.error || 'Could not generate questions. Please check your OpenAI key.';
-        stepErr.classList.add('visible');
+        if (stepErr) { stepErr.textContent = 'Could not reach AI — using a starter template. Edit the questions below.'; stepErr.classList.add('visible'); }
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'See my questions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+        document.getElementById('flow-loading').classList.add('hidden');
+        renderFlow(flowConfig);
         document.getElementById('flow-content').classList.remove('hidden');
       }
     });
@@ -1821,18 +1843,26 @@
       document.getElementById('flow-content').classList.add('hidden');
       animateAISteps();
 
-      const res = await fetch('/api/onboarding/generate-flow', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessName: bizData.businessName, description: bizData.description }),
-      }).then(r => r.json());
-
-      document.getElementById('flow-loading').classList.add('hidden');
-      if (res.ok) {
-        flowConfig = res.flow;
+      try {
+        const r = await fetch('/api/onboarding/generate-flow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ businessName: bizData.businessName, description: bizData.description }),
+        });
+        const res = await r.json();
+        if (res.ok && res.flow) {
+          flowConfig = res.flow;
+        } else {
+          flowConfig = makeFallbackFlow();
+        }
+      } catch (e) {
+        console.error('regen-flow error', e);
+        flowConfig = makeFallbackFlow();
+      } finally {
+        document.getElementById('flow-loading').classList.add('hidden');
         renderFlow(flowConfig);
+        document.getElementById('flow-content').classList.remove('hidden');
       }
-      document.getElementById('flow-content').classList.remove('hidden');
     });
 
     // ─── Step 2 → 3 ───
