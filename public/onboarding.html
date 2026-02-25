@@ -211,61 +211,62 @@
     .ob-ai-loading-step svg { display: none; }
 
     /* ── Flow question cards ── */
-    .ob-flow-questions { display: flex; flex-direction: column; gap: .85rem; margin-bottom: 1.25rem; }
+    .ob-flow-questions { display: flex; flex-direction: column; gap: .65rem; margin-bottom: 1rem; }
 
     .ob-q-card {
-      background: #fff; border: 1.5px solid #E4E4E7; border-radius: 14px;
+      background: #fff; border: 1.5px solid #E4E4E7; border-radius: 12px;
       overflow: hidden; transition: border-color .15s, box-shadow .15s;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
     }
     .ob-q-card:focus-within { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
-    .ob-q-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .65rem 1.1rem .55rem; border-bottom: 1px solid #F4F4F5; background: #FAFAFA;
-    }
-    .ob-q-num {
-      font-size: .68rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: #A1A1AA; display: flex; align-items: center; gap: .5rem;
+
+    .ob-q-card-top {
+      display: flex; align-items: flex-start; gap: .75rem;
+      padding: .85rem 1rem .85rem;
     }
     .ob-q-num-badge {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 18px; height: 18px; border-radius: 50%;
-      background: #E4E4E7; color: #71717A; font-size: .65rem; font-weight: 800;
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;
+      background: #E4E4E7; color: #71717A; font-size: .7rem; font-weight: 800;
+      display: grid; place-items: center;
     }
     .ob-q-card:focus-within .ob-q-num-badge { background: #DBEAFE; color: #2563EB; }
-    .ob-q-edit-hint { font-size: .7rem; color: #C4C4C8; display: flex; align-items: center; gap: .3rem; }
-    .ob-q-card:focus-within .ob-q-edit-hint { color: #93C5FD; }
-
     .ob-q-textarea {
-      width: 100%; border: none; outline: none;
-      padding: 1rem 1.1rem; font-size: 1rem; font-family: inherit;
+      flex: 1; border: none; outline: none;
+      font-size: .9rem; font-family: inherit;
       color: #18181B; line-height: 1.6; resize: none;
-      background: transparent; min-height: 64px;
+      background: transparent; overflow: hidden;
+      padding: 0; min-height: unset;
     }
     .ob-q-textarea::placeholder { color: #C4C4C8; }
 
     .ob-q-options {
-      display: flex; flex-wrap: wrap; gap: .4rem;
-      padding: .55rem 1.1rem .8rem; border-top: 1px solid #F4F4F5;
+      display: flex; flex-wrap: wrap; gap: .35rem;
+      padding: 0 1rem .75rem 3.1rem;
     }
     .ob-q-chip {
-      display: inline-flex; align-items: center; gap: .3rem;
-      font-size: .75rem; font-weight: 500; padding: .28rem .65rem;
-      border-radius: 99px; background: #F4F4F5; color: #52525B; border: 1px solid #E4E4E7;
+      display: inline-flex; align-items: center; gap: .25rem;
+      font-size: .73rem; font-weight: 600; padding: .2rem .55rem;
+      border-radius: 6px; background: #F4F4F5; color: #52525B; border: 1px solid #E4E4E7;
+      font-family: 'SF Mono','Fira Code',monospace;
     }
-    .ob-q-chip strong { font-weight: 700; color: #2563EB; }
-    .ob-q-chip--free { background: #F0FDF4; border-color: #BBF7D0; color: #16A34A; }
+    .ob-q-chip--free { background: #F0FDF4; border-color: #BBF7D0; color: #16A34A; font-family: inherit; font-weight: 500; }
 
-    .ob-regen-row { display: flex; align-items: center; gap: .85rem; margin-top: .25rem; }
+    .ob-step2-hint {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .78rem; color: #A1A1AA; margin-bottom: .85rem;
+      background: #F8F8FA; border-radius: 8px; padding: .5rem .75rem;
+    }
+    .ob-step2-hint svg { color: #2563EB; flex-shrink: 0; }
+
+    .ob-regen-row { display: flex; align-items: center; gap: .75rem; margin-top: .75rem; }
     .ob-regen-btn {
-      display: inline-flex; align-items: center; gap: .45rem;
-      font-size: .82rem; font-weight: 600; color: #2563EB;
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-size: .8rem; font-weight: 600; color: #2563EB;
       background: #EFF6FF; border: 1.5px solid #BFDBFE;
-      border-radius: 8px; padding: .5rem .9rem; cursor: pointer;
+      border-radius: 8px; padding: .45rem .85rem; cursor: pointer;
       font-family: inherit; transition: background .15s;
     }
     .ob-regen-btn:hover { background: #DBEAFE; }
-    .ob-regen-note { font-size: .8rem; color: #A1A1AA; }
+    .ob-regen-note { font-size: .78rem; color: #A1A1AA; }
 
     /* ── Payment card ── */
     .ob-plan-card {
@@ -443,8 +444,8 @@
       <!-- Step 2: AI flow -->
       <div id="step-2" class="ob-form-inner hidden">
         <div class="ob-step-label">Step 2 of 4</div>
-        <h1 class="ob-heading">Your SMS questions.</h1>
-        <p class="ob-sub">These are what every lead gets asked. We wrote them for your business — edit anything that doesn't feel right, or click to customise.</p>
+        <h1 class="ob-heading">Your lead questions.</h1>
+        <p class="ob-sub">AI wrote these for your business. Every missed caller gets asked these by SMS — edit any line directly.</p>
 
         <!-- Loading state -->
         <div id="flow-loading">
@@ -453,7 +454,7 @@
               <div class="ob-ai-spinner"></div>
               <div>
                 <div class="ob-ai-loading-text">Writing your questions…</div>
-                <div class="ob-ai-loading-sub">This takes about 10 seconds</div>
+                <div class="ob-ai-loading-sub">Takes about 10 seconds</div>
               </div>
             </div>
             <div class="ob-ai-loading-steps">
@@ -475,19 +476,23 @@
 
         <!-- Generated flow -->
         <div id="flow-content" class="hidden">
+          <div class="ob-step2-hint">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Click any question to edit the text. The options (A / B / C) are sent to your customer as reply choices.
+          </div>
           <div class="ob-flow-questions" id="flow-questions"></div>
           <div class="ob-regen-row">
             <button class="ob-regen-btn" id="regen-btn" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-              Regenerate with AI
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+              Regenerate
             </button>
-            <span class="ob-regen-note">Click any question above to edit it directly</span>
+            <span class="ob-regen-note">Not happy with these? Rewrite with AI.</span>
           </div>
         </div>
 
         <div id="step2-error" class="ob-error"></div>
 
-        <div class="ob-actions" style="margin-top:1.75rem">
+        <div class="ob-actions" style="margin-top:1.5rem">
           <button class="btn btn--ghost" id="step2-back" type="button">← Back</button>
           <button class="btn btn--primary btn--lg" id="step2-next" type="button">
             Looks good
@@ -757,6 +762,45 @@
         </div>
       </div>
 
+      <!-- Sidebar for step 2: live phone preview -->
+      <div id="sidebar-step2" class="hidden" style="display:none;flex-direction:column;height:100%">
+        <div class="ob-sidebar-badge">
+          <span class="ob-sidebar-badge-dot"></span>
+          Live preview
+        </div>
+
+        <div style="font-size:1.6rem;font-weight:900;letter-spacing:-.04em;color:#fff;line-height:1.15;margin-bottom:.6rem">
+          What your customer sees.
+        </div>
+        <div style="font-size:.85rem;color:rgba(255,255,255,.35);line-height:1.6;margin-bottom:1.75rem">
+          This is the exact SMS conversation they receive within 10 seconds of a missed call.
+        </div>
+
+        <!-- Phone shell -->
+        <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:1.25rem;display:flex;flex-direction:column;overflow:hidden">
+          <!-- Fake SMS header -->
+          <div style="display:flex;align-items:center;gap:.65rem;padding-bottom:.85rem;margin-bottom:.85rem;border-bottom:1px solid rgba(255,255,255,.07)">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#06b6d4);display:grid;place-items:center;font-size:.7rem;font-weight:800;color:#fff" id="sidebar-step2-avatar">BP</div>
+            <div>
+              <div style="font-size:.82rem;font-weight:700;color:#fff" id="sidebar-step2-name">Bay Plumbing</div>
+              <div style="font-size:.68rem;color:rgba(255,255,255,.3)">SMS · Delivered instantly</div>
+            </div>
+          </div>
+
+          <!-- Messages — populated by JS -->
+          <div id="sidebar-step2-msgs" style="display:flex;flex-direction:column;gap:.5rem;overflow-y:auto;flex:1">
+            <div style="background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);font-size:.78rem;padding:.65rem .85rem;border-radius:10px;text-align:center">
+              Your questions will appear here as they load…
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.18);padding-top:1.1rem;margin-top:1.1rem;border-top:1px solid rgba(255,255,255,.06)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Updates live as you edit questions above
+        </div>
+      </div>
+
       <!-- Sidebar for payment step -->
       <div id="sidebar-payment" class="hidden" style="display:none;flex-direction:column;height:100%">
         <div class="ob-sidebar-badge">
@@ -828,14 +872,25 @@
       currentStep = n;
 
       // Swap sidebar
-      const sidebarDefault = document.getElementById('sidebar-default');
-      const sidebarPayment = document.getElementById('sidebar-payment');
-      if (n === 4) {
-        sidebarDefault.classList.add('hidden');
-        sidebarPayment.classList.remove('hidden');
+      const sidebarDefault  = document.getElementById('sidebar-default');
+      const sidebarStep2    = document.getElementById('sidebar-step2');
+      const sidebarPayment  = document.getElementById('sidebar-payment');
+      sidebarDefault.style.display  = 'none';
+      sidebarStep2.style.display    = 'none';
+      sidebarPayment.style.display  = 'none';
+      if (n === 2) {
+        sidebarStep2.style.display = 'flex';
+        // Update avatar initials and name
+        const name = bizData.businessName || '';
+        const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || 'BP';
+        const av = document.getElementById('sidebar-step2-avatar');
+        const nm = document.getElementById('sidebar-step2-name');
+        if (av) av.textContent = initials;
+        if (nm) nm.textContent = name || 'Your business';
+      } else if (n === 4) {
+        sidebarPayment.style.display = 'flex';
       } else {
-        sidebarDefault.classList.remove('hidden');
-        sidebarPayment.classList.add('hidden');
+        sidebarDefault.style.display = 'flex';
       }
 
       // Scroll form to top
@@ -1008,29 +1063,40 @@
         const div = document.createElement('div');
         div.className = 'ob-q-card';
         const opts = step.options.map(o =>
-          `<span class="ob-q-chip"><strong>${o.value}</strong> ${o.label}</span>`
+          `<span class="ob-q-chip">${o.value}) ${o.label}</span>`
         ).join('');
         div.innerHTML = `
-          <div class="ob-q-header">
-            <span class="ob-q-num">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              Question ${i + 1}
-            </span>
-            <span class="ob-q-edit-hint">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Click to edit
-            </span>
+          <div class="ob-q-card-top">
+            <span class="ob-q-num-badge">${i + 1}</span>
+            <textarea class="ob-q-textarea" rows="1" data-step="${i}">${step.question}</textarea>
           </div>
-          <textarea class="ob-q-textarea" rows="2" data-step="${i}">${step.question}</textarea>
           <div class="ob-q-options">${opts}</div>
         `;
-        // Auto-resize textarea
         const ta = div.querySelector('textarea');
-        ta.addEventListener('input', () => {
-          ta.style.height = 'auto';
-          ta.style.height = ta.scrollHeight + 'px';
-        });
+        // Auto-height on load and on input
+        const resize = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
+        ta.addEventListener('input', () => { resize(); updateSidebarPreview(); });
+        requestAnimationFrame(resize);
         container.appendChild(div);
+      });
+      updateSidebarPreview();
+    }
+
+    // ─── Live phone preview in sidebar for step 2 ───
+    function updateSidebarPreview() {
+      const msgs = document.getElementById('sidebar-step2-msgs');
+      if (!msgs) return;
+      msgs.innerHTML = '';
+      document.querySelectorAll('.ob-q-textarea').forEach(ta => {
+        const q = ta.value.trim();
+        if (!q) return;
+        const card = ta.closest('.ob-q-card');
+        const chips = [...card.querySelectorAll('.ob-q-chip')].map(c => c.textContent.trim()).join(' · ');
+        const bubble = document.createElement('div');
+        bubble.style.cssText = 'background:rgba(255,255,255,.08);color:rgba(255,255,255,.82);font-size:.78rem;line-height:1.55;padding:.5rem .75rem;border-radius:12px;border-bottom-left-radius:3px;margin-bottom:.5rem';
+        bubble.textContent = chips ? `${q}\n${chips}` : q;
+        bubble.style.whiteSpace = 'pre-line';
+        msgs.appendChild(bubble);
       });
     }
 
