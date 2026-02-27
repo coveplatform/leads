@@ -233,7 +233,10 @@ app.post("/api/auth/logout", (req, res) => {
 app.get("/api/auth/me", requireAuth, async (req, res) => {
   try {
     const user = await getUserById(req.userId);
-    if (!user) return res.status(404).json({ ok: false, error: "User not found" });
+    if (!user) {
+      clearAuthCookie(res);
+      return res.status(404).json({ ok: false, error: "User not found" });
+    }
     const business = await getBusinessByUserId(req.userId);
     return res.json({ ok: true, user, business: business || null });
   } catch (err) {
@@ -800,25 +803,34 @@ app.post("/api/voice/inbound", async (req, res) => {
     const from = normalizePhone(fromRaw, config.defaultCountryCode);
     const to   = normalizePhone(toRaw,   config.defaultCountryCode);
 
+    console.log(`[voice/inbound] from=${from} to=${to}`);
+
     // Always respond with TwiML — Twilio requires a valid XML response
     res.set("Content-Type", "text/xml");
 
     if (!from || !to) {
-      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response></Response>`);
+      console.log("[voice/inbound] invalid from/to, skipping");
+      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say>Thanks for calling. We'll be in touch shortly.</Say></Response>`);
     }
 
     const business = await getBusinessByTwilioNumber(to);
     if (!business) {
-      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response></Response>`);
+      console.log(`[voice/inbound] no active business found for ${to}`);
+      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say>Thanks for calling. We'll be in touch shortly.</Say></Response>`);
     }
+
+    console.log(`[voice/inbound] business=${business.name} id=${business.id}`);
 
     // Fire-and-forget: create lead and send first SMS
     (async () => {
       try {
         const existing = await checkDuplicateLead(from, 30);
-        if (existing) return; // already active lead within 30 min
+        if (existing) {
+          console.log(`[voice/inbound] duplicate lead for ${from}, skipping`);
+          return;
+        }
 
-        const lead = await createLead({
+        await createLead({
           businessId: business.id,
           name: null,
           phone: from,
@@ -829,23 +841,26 @@ app.post("/api/voice/inbound", async (req, res) => {
         const flowConfig = getFlowConfig(business);
 
         if (!isWithinOperatingHours(business)) {
+          console.log(`[voice/inbound] outside operating hours, sending after-hours SMS to ${from}`);
           await sendSms({ from: business.twilio_from_number, to: from, body: buildAfterHoursMessage(business) });
           return;
         }
 
         const firstMessage = buildIntro(flowConfig, null, business.name);
+        console.log(`[voice/inbound] sending first SMS to ${from}`);
         await sendSms({ from: business.twilio_from_number, to: from, body: firstMessage });
+        console.log(`[voice/inbound] SMS sent to ${from}`);
       } catch (err) {
-        console.error("/api/voice/inbound async error:", err);
+        console.error("[voice/inbound] async error:", err);
       }
     })();
 
     // Respond immediately so Twilio doesn't timeout
-    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response></Response>`);
+    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say>Thanks for calling. We'll text you shortly.</Say></Response>`);
   } catch (err) {
-    console.error("/api/voice/inbound error:", err);
+    console.error("[voice/inbound] error:", err);
     res.set("Content-Type", "text/xml");
-    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response></Response>`);
+    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say>Thanks for calling. We'll be in touch shortly.</Say></Response>`);
   }
 });
 
