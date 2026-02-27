@@ -100,6 +100,11 @@
           <input type="password" id="signup-password" placeholder="At least 8 characters" autocomplete="new-password" />
         </div>
 
+        <label class="auth-terms-label">
+          <input type="checkbox" id="signup-terms" />
+          <span>I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a></span>
+        </label>
+
         <button class="btn btn--primary btn--full btn--lg" id="signup-btn" type="button">Create account</button>
       </div>
 
@@ -194,6 +199,8 @@
       const password = document.getElementById('signup-password').value;
       signupError.classList.remove('visible');
 
+      const termsChecked = document.getElementById('signup-terms').checked;
+
       if (!name || !email || !password) {
         signupError.textContent = 'Please fill in all fields.';
         signupError.classList.add('visible');
@@ -201,6 +208,11 @@
       }
       if (password.length < 8) {
         signupError.textContent = 'Password must be at least 8 characters.';
+        signupError.classList.add('visible');
+        return;
+      }
+      if (!termsChecked) {
+        signupError.textContent = 'Please agree to the Terms of Service and Privacy Policy to continue.';
         signupError.classList.add('visible');
         return;
       }

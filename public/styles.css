@@ -1123,8 +1123,11 @@ em { font-style: italic; }
 .footer__links a { font-size: .88rem; color: rgba(255,255,255,.42); text-decoration: none; transition: color .2s; }
 .footer__links a:hover { color: rgba(255,255,255,.8); }
 .footer__bottom { border-top: 1px solid rgba(255,255,255,.06); padding: 1.25rem 0; }
-.footer__bottom .container { display: flex; justify-content: center; }
+.footer__bottom .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; }
 .footer__bottom span { font-size: .82rem; color: rgba(255,255,255,.2); }
+.footer__legal-links { display: flex; gap: 1.5rem; }
+.footer__legal-links a { font-size: .82rem; color: rgba(255,255,255,.2); text-decoration: none; transition: color .2s; }
+.footer__legal-links a:hover { color: rgba(255,255,255,.55); }
 
 /* ── STICKY CTA ── */
 .sticky-cta {

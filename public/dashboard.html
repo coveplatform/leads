@@ -26,6 +26,12 @@
       </a>
     </div>
 
+    <!-- Business name -->
+    <div class="sidebar__biz">
+      <div class="sidebar__biz-label">Business</div>
+      <div class="sidebar__biz-name" id="sidebar-biz-name">—</div>
+    </div>
+
     <nav class="sidebar__nav">
       <button class="sidebar__item active" data-view="overview">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -72,6 +78,50 @@
           <span id="live-badge"></span>
         </div>
         <div class="page-header__number" id="biz-number-sub"></div>
+      </div>
+
+      <!-- Getting started panel (hidden once dismissed or all done) -->
+      <div class="gs-panel" id="gs-panel" style="display:none">
+        <div class="gs-panel__header">
+          <div>
+            <div class="gs-panel__eyebrow">Setup checklist</div>
+            <div class="gs-panel__title">Get Cove running in minutes</div>
+            <div class="gs-panel__progress"><span id="gs-done-count">1</span> of 4 steps complete</div>
+          </div>
+          <button class="gs-panel__dismiss" id="gs-dismiss" type="button">Dismiss</button>
+        </div>
+        <div class="gs-steps">
+          <div class="gs-step gs-step--done">
+            <div class="gs-step__icon">✓</div>
+            <div class="gs-step__content">
+              <div class="gs-step__title">Create your account</div>
+            </div>
+          </div>
+          <div class="gs-step" id="gs-step-flow">
+            <div class="gs-step__icon"></div>
+            <div class="gs-step__content">
+              <div class="gs-step__title">Review your qualification questions</div>
+              <div class="gs-step__sub">Check the SMS flow your leads will receive and customise it to your business.</div>
+            </div>
+            <button class="gs-step__action" data-view="flow" type="button">Review &rarr;</button>
+          </div>
+          <div class="gs-step" id="gs-step-notif">
+            <div class="gs-step__icon"></div>
+            <div class="gs-step__content">
+              <div class="gs-step__title">Set up your notification number</div>
+              <div class="gs-step__sub">Add your mobile so you get a lead summary the moment someone qualifies.</div>
+            </div>
+            <button class="gs-step__action" data-view="notifications" type="button">Set up &rarr;</button>
+          </div>
+          <div class="gs-step" id="gs-step-forward">
+            <div class="gs-step__icon"></div>
+            <div class="gs-step__content">
+              <div class="gs-step__title">Set up call forwarding</div>
+              <div class="gs-step__sub">Forward missed calls to your Cove number so leads get texted back automatically.</div>
+            </div>
+            <button class="gs-step__action" data-view="integrations" type="button">Set up &rarr;</button>
+          </div>
+        </div>
       </div>
 
       <!-- Setup: number provisioning -->
@@ -523,10 +573,15 @@
         // Sidebar
         document.getElementById('sidebar-name').textContent = user.name || user.email;
         document.getElementById('sidebar-email').textContent = user.email;
+        if (business?.name) {
+          const bizEl = document.getElementById('sidebar-biz-name');
+          if (bizEl) bizEl.textContent = business.name;
+        }
 
         // Overview
         fillOverview();
         await loadLeads();
+        updateGetStartedPanel();
       } catch (e) {
         console.error(e);
         location.href = '/login';
@@ -585,6 +640,43 @@
           refreshBtn.disabled = false; refreshBtn.textContent = '↻ Refresh';
         });
       }
+    }
+
+    function updateGetStartedPanel() {
+      const panel = document.getElementById('gs-panel');
+      if (!panel) return;
+      if (localStorage.getItem('gs_dismissed')) return;
+
+      let doneCount = 1; // Account always done
+
+      // Step: notifications — owner_notify_phone set
+      const hasNotif = !!(business.owner_notify_phone || business.integrations?.notifications?.sms?.numbers?.length);
+      if (hasNotif) { document.getElementById('gs-step-notif')?.classList.add('gs-step--done'); doneCount++; }
+
+      // Step: flow reviewed — tracked in localStorage
+      if (localStorage.getItem('gs_flow_done')) { document.getElementById('gs-step-flow')?.classList.add('gs-step--done'); doneCount++; }
+
+      // Step: call forwarding — at least one lead has come in
+      if (leadsData.length > 0) { document.getElementById('gs-step-forward')?.classList.add('gs-step--done'); doneCount++; }
+
+      const countEl = document.getElementById('gs-done-count');
+      if (countEl) countEl.textContent = doneCount;
+
+      if (doneCount >= 4) { localStorage.setItem('gs_dismissed', '1'); return; }
+
+      panel.style.display = 'block';
+
+      document.getElementById('gs-dismiss')?.addEventListener('click', () => {
+        panel.style.display = 'none';
+        localStorage.setItem('gs_dismissed', '1');
+      });
+
+      panel.querySelectorAll('.gs-step__action[data-view]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          showView(btn.dataset.view);
+          if (btn.dataset.view === 'flow') localStorage.setItem('gs_flow_done', '1');
+        });
+      });
     }
 
     async function tryProvision() {
