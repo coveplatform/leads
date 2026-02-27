@@ -228,3 +228,24 @@ export async function checkDuplicateLead(phone, minutesWindow) {
   `;
   return rows[0] || null;
 }
+
+export async function saveMessage({ leadId, direction, body }) {
+  try {
+    await sql`
+      INSERT INTO messages (lead_id, direction, body)
+      VALUES (${leadId}, ${direction}, ${body})
+    `;
+  } catch (err) {
+    console.error("saveMessage error:", err);
+  }
+}
+
+export async function getMessagesByLeadId(leadId) {
+  const rows = await sql`
+    SELECT id, direction, body, created_at
+    FROM messages
+    WHERE lead_id = ${leadId}
+    ORDER BY created_at ASC
+  `;
+  return rows;
+}

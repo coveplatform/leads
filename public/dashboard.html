@@ -922,7 +922,7 @@
     // ─── Integrations ───
     function fillIntegrations() {
       const bizId = business.id;
-      const base = 'https://leads-rho-six.vercel.app';
+      const base = window.location.origin;
 
       const snippet = `<script src="${base}/cove.js" data-business="${bizId}"><\/script>`;
       document.getElementById('embed-snippet').textContent = snippet;
@@ -1035,6 +1035,137 @@
 
     // ─── Init ───
     init();
+
+    // ─── Conversation Thread ───
+
+    let threadLeadId = null;
+
+    function openThread(lead) {
+      threadLeadId = lead.id;
+      const panel = document.getElementById('thread-panel');
+      const overlay = document.getElementById('thread-overlay');
+
+      // Header
+      const name = lead.name || lead.phone || '—';
+      const phone = lead.name ? lead.phone : '';
+      const { label, cls } = getLeadStatus(lead);
+      document.getElementById('thread-name').textContent = name;
+      document.getElementById('thread-phone').textContent = phone;
+      document.getElementById('thread-badge').textContent = label;
+      document.getElementById('thread-badge').className = 'lead-badge ' + cls;
+
+      // Show panel
+      panel.classList.add('open');
+      overlay.classList.add('show');
+      document.body.style.overflow = 'hidden';
+
+      loadMessages(lead.id);
+    }
+
+    function closeThread() {
+      document.getElementById('thread-panel').classList.remove('open');
+      document.getElementById('thread-overlay').classList.remove('show');
+      document.body.style.overflow = '';
+      threadLeadId = null;
+    }
+
+    async function loadMessages(leadId) {
+      const body = document.getElementById('thread-body');
+      body.innerHTML = '<div class="thread-loading">Loading…</div>';
+      try {
+        const res = await fetch(`/api/me/leads/${leadId}/messages`);
+        const data = await res.json();
+        if (!data.ok || !data.messages.length) {
+          body.innerHTML = '<div class="thread-empty">No messages recorded yet.<br><span>Messages from new leads will appear here.</span></div>';
+          return;
+        }
+        renderMessages(data.messages);
+      } catch {
+        body.innerHTML = '<div class="thread-empty">Could not load messages.</div>';
+      }
+    }
+
+    function renderMessages(messages) {
+      const body = document.getElementById('thread-body');
+      body.innerHTML = messages.map(m => {
+        const time = new Date(m.created_at).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+        const date = new Date(m.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+        if (m.direction === 'system') {
+          return `<div class="thread-system">${esc(m.body)}</div>`;
+        }
+        const side = m.direction === 'outbound' ? 'out' : 'in';
+        return `<div class="thread-row thread-row--${side}">
+          <div class="thread-bubble thread-bubble--${side}">${esc(m.body).replace(/\n/g, '<br>')}</div>
+          <div class="thread-time">${date} ${time}</div>
+        </div>`;
+      }).join('');
+      body.scrollTop = body.scrollHeight;
+    }
+
+    // Make rows clickable — patch into renderLeads
+    const _origRenderLeads = renderLeads;
+    // Override renderLeads to attach click handlers after render
+    function renderLeads(leads) {
+      const container = document.getElementById('leads-container');
+      if (!leads.length) {
+        container.innerHTML = '<div class="leads-empty"><span>📭</span>No leads yet this week. Once Cove is live and call forwarding is set up, leads will appear here.</div>';
+        return;
+      }
+      const rows = leads.map((lead, i) => {
+        const { label, cls } = getLeadStatus(lead);
+        const need = getLeadNeed(lead);
+        const name = lead.name || lead.phone || '—';
+        return `<tr class="lead-row" data-index="${i}">
+          <td class="name">${esc(name)}</td>
+          <td class="need">${esc(need)}</td>
+          <td><span class="lead-badge ${cls}">${label}</span></td>
+          <td class="time">${timeAgo(lead.created_at)}</td>
+          <td class="thread-cell"><span class="thread-open-btn">View →</span></td>
+        </tr>`;
+      }).join('');
+      container.innerHTML = `
+        <table class="leads-table">
+          <thead>
+            <tr>
+              <th>Name / Phone</th>
+              <th>What they need</th>
+              <th>Status</th>
+              <th style="text-align:right">Time</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+      container.querySelectorAll('.lead-row').forEach(row => {
+        row.addEventListener('click', () => openThread(leads[Number(row.dataset.index)]));
+      });
+    }
+
+    document.getElementById('thread-close').addEventListener('click', closeThread);
+    document.getElementById('thread-overlay').addEventListener('click', closeThread);
+
   </script>
+
+  <!-- Thread overlay -->
+  <div id="thread-overlay" class="thread-overlay"></div>
+
+  <!-- Thread panel -->
+  <div id="thread-panel" class="thread-panel">
+    <div class="thread-header">
+      <div class="thread-header__info">
+        <div class="thread-header__name" id="thread-name"></div>
+        <div class="thread-header__meta">
+          <span id="thread-phone" class="thread-header__phone"></span>
+          <span id="thread-badge" class="lead-badge"></span>
+        </div>
+      </div>
+      <button class="thread-close-btn" id="thread-close" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="thread-body" id="thread-body"></div>
+  </div>
+
 </body>
 </html>

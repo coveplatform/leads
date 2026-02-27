@@ -57,6 +57,8 @@ import {
   checkDemoRateLimit,
   recordDemoSend,
   checkDuplicateLead,
+  saveMessage,
+  getMessagesByLeadId,
   createUser,
   getUserById,
   getUserByEmail,
@@ -106,7 +108,7 @@ app.get("/onboarding", requireAuthRedirect, (_req, res) => {
   res.sendFile(path.join(publicDir, "onboarding.html"));
 });
 
-app.get("/dashboard", requireAuthRedirect, (_req, res) => {
+app.get("/dashboard", (_req, res) => {
   res.sendFile(path.join(publicDir, "dashboard.html"));
 });
 
@@ -405,6 +407,18 @@ app.get("/api/me/leads", requireAuth, async (req, res) => {
   } catch (err) {
     console.error("Get leads error:", err);
     return res.status(500).json({ ok: false, error: "Could not fetch leads" });
+  }
+});
+
+app.get("/api/me/leads/:leadId/messages", requireAuth, async (req, res) => {
+  try {
+    const business = await getBusinessByUserId(req.userId);
+    if (!business) return res.status(404).json({ ok: false, error: "No business" });
+    const messages = await getMessagesByLeadId(req.params.leadId);
+    return res.json({ ok: true, messages });
+  } catch (err) {
+    console.error("Get messages error:", err);
+    return res.status(500).json({ ok: false, error: "Could not fetch messages" });
   }
 });
 
@@ -810,13 +824,13 @@ app.post("/api/voice/inbound", async (req, res) => {
 
     if (!from || !to) {
       console.log("[voice/inbound] invalid from/to, skipping");
-      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say>Thanks for calling. We'll be in touch shortly.</Say></Response>`);
+      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="Polly.Olivia" language="en-AU">Thanks for calling. We will send you a text message shortly.</Say></Response>`);
     }
 
     const business = await getBusinessByTwilioNumber(to);
     if (!business) {
       console.log(`[voice/inbound] no active business found for ${to}`);
-      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say>Thanks for calling. We'll be in touch shortly.</Say></Response>`);
+      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="Polly.Olivia" language="en-AU">Thanks for calling. We will send you a text message shortly.</Say></Response>`);
     }
 
     console.log(`[voice/inbound] business=${business.name} id=${business.id}`);
@@ -827,7 +841,7 @@ app.post("/api/voice/inbound", async (req, res) => {
       if (existing) {
         console.log(`[voice/inbound] duplicate lead for ${from}, skipping`);
       } else {
-        await createLead({
+        const lead = await createLead({
           businessId: business.id,
           name: null,
           phone: from,
@@ -835,15 +849,20 @@ app.post("/api/voice/inbound", async (req, res) => {
           message: "Missed call",
         });
 
+        await saveMessage({ leadId: lead.id, direction: "system", body: "📞 Missed call" });
+
         const flowConfig = getFlowConfig(business);
 
         if (!isWithinOperatingHours(business)) {
           console.log(`[voice/inbound] outside operating hours, sending after-hours SMS to ${from}`);
-          await sendSms({ from: business.twilio_from_number, to: from, body: buildAfterHoursMessage(business) });
+          const body = buildAfterHoursMessage(business);
+          await sendSms({ from: business.twilio_from_number, to: from, body });
+          await saveMessage({ leadId: lead.id, direction: "outbound", body });
         } else {
           const firstMessage = buildIntro(flowConfig, null, business.name);
           console.log(`[voice/inbound] sending first SMS to ${from}`);
           await sendSms({ from: business.twilio_from_number, to: from, body: firstMessage });
+          await saveMessage({ leadId: lead.id, direction: "outbound", body: firstMessage });
           console.log(`[voice/inbound] SMS sent to ${from}`);
         }
       }
@@ -851,11 +870,11 @@ app.post("/api/voice/inbound", async (req, res) => {
       console.error("[voice/inbound] SMS flow error:", err);
     }
 
-    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say>Thanks for calling. We'll text you shortly.</Say></Response>`);
+    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="Polly.Olivia" language="en-AU">Thanks for calling. We will send you a text message shortly.</Say></Response>`);
   } catch (err) {
     console.error("[voice/inbound] error:", err);
     res.set("Content-Type", "text/xml");
-    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say>Thanks for calling. We'll be in touch shortly.</Say></Response>`);
+    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="Polly.Olivia" language="en-AU">Thanks for calling. We will send you a text message shortly.</Say></Response>`);
   }
 });
 
@@ -878,9 +897,14 @@ app.post("/api/sms/inbound", async (req, res) => {
     const lead = await getLatestActiveLeadByBusinessAndPhone({ businessId: business.id, phone: from });
     if (!lead) return res.status(200).send("OK");
 
+    // Record inbound message
+    await saveMessage({ leadId: lead.id, direction: "inbound", body: bodyRaw });
+
     if (isStopKeyword(bodyRaw)) {
       await updateLead(lead.id, { status: "stopped", last_inbound_text: bodyRaw, finished_at: new Date().toISOString() });
-      await sendSms({ from: business.twilio_from_number, to: lead.phone, body: buildStoppedMessage(business.name) });
+      const stopBody = buildStoppedMessage(business.name);
+      await sendSms({ from: business.twilio_from_number, to: lead.phone, body: stopBody });
+      await saveMessage({ leadId: lead.id, direction: "outbound", body: stopBody });
       return res.status(200).send("OK");
     }
 
@@ -901,6 +925,7 @@ app.post("/api/sms/inbound", async (req, res) => {
     if (!valid) {
       const invalidMsg = step.invalid_text ? `${step.invalid_text}\n${step.question}` : step.question;
       await sendSms({ from: business.twilio_from_number, to: lead.phone, body: invalidMsg });
+      await saveMessage({ leadId: lead.id, direction: "outbound", body: invalidMsg });
       return res.status(200).send("OK");
     }
 
@@ -930,7 +955,9 @@ app.post("/api/sms/inbound", async (req, res) => {
         finished_at: new Date().toISOString(),
       });
 
-      await sendSms({ from: business.twilio_from_number, to: lead.phone, body: buildCompletion(flowConfig, business) });
+      const completionBody = buildCompletion(flowConfig, business);
+      await sendSms({ from: business.twilio_from_number, to: lead.phone, body: completionBody });
+      await saveMessage({ leadId: lead.id, direction: "outbound", body: completionBody });
 
       const summary = buildSummary(completedLead, business, flowConfig);
       await sendLeadNotifications({
@@ -946,6 +973,7 @@ app.post("/api/sms/inbound", async (req, res) => {
 
     await updateLead(lead.id, { answers: nextAnswers, last_inbound_text: bodyRaw, current_step: nextStepNumber });
     await sendSms({ from: business.twilio_from_number, to: lead.phone, body: nextStep.question });
+    await saveMessage({ leadId: lead.id, direction: "outbound", body: nextStep.question });
 
     return res.status(200).send("OK");
   } catch (error) {
