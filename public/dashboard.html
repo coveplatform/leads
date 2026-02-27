@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/dash.css" />
 </head>
 <body class="dash-root">
@@ -17,11 +17,10 @@
     <div class="sidebar__top">
       <a href="/" class="cove-logo">
         <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-          <rect width="28" height="28" rx="7" fill="#0f0f1a"/>
-          <circle cx="8.5" cy="19.5" r="1.9" fill="#4f8eff"/>
-          <path d="M8.5 14.5a5 5 0 0 1 5 5" stroke="#4f8eff" stroke-width="2" stroke-linecap="round"/>
-          <path d="M8.5 9.5a10 10 0 0 1 10 10" stroke="url(#d-lg)" stroke-width="2" stroke-linecap="round"/>
-          <defs><linearGradient id="d-lg" x1="8.5" y1="9.5" x2="18.5" y2="19.5" gradientUnits="userSpaceOnUse"><stop stop-color="#4f8eff"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+          <path d="M5 19.5 Q9 17 14 19.5 Q19 22 23 19.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" fill="none"/>
+          <path d="M5 14.5 Q9 12 14 14.5 Q19 17 23 14.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" fill="none" opacity="0.65"/>
+          <path d="M5 9.5 Q9 7 14 9.5 Q19 12 23 9.5" stroke="url(#d-lg)" stroke-width="2.3" stroke-linecap="round" fill="none" opacity="0.4"/>
+          <defs><linearGradient id="d-lg" x1="5" y1="9.5" x2="23" y2="9.5" gradientUnits="userSpaceOnUse"><stop stop-color="#e8540a"/><stop offset="1" stop-color="#ff7240"/></linearGradient></defs>
         </svg>
         <span>cove</span>
       </a>
@@ -55,7 +54,7 @@
         <div class="sidebar__user-name" id="sidebar-name">—</div>
         <div class="sidebar__user-email" id="sidebar-email">—</div>
       </div>
-      <button class="sidebar__item btn--ghost" id="logout-btn" style="color:var(--text-faint)">
+      <button class="sidebar__item sidebar__item--signout" id="logout-btn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign out
       </button>
@@ -65,26 +64,26 @@
   <!-- ─── Main ─── -->
   <main class="dash-main">
 
-    <!-- ─── OVERVIEW ─── -->
+    <!-- ═══ OVERVIEW ═══ -->
     <div id="view-overview">
       <div class="page-header">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+        <div class="page-header__title-row">
           <h1 class="page-header__title" id="biz-name-header">Your business</h1>
           <span id="live-badge"></span>
         </div>
-        <div class="page-header__sub" id="biz-number-sub" style="font-family:'SF Mono','Fira Code',monospace;font-size:13px;letter-spacing:.02em"></div>
+        <div class="page-header__number" id="biz-number-sub"></div>
       </div>
 
-      <!-- Alert if setup incomplete -->
-      <div id="setup-alert" class="hidden" style="margin-bottom:24px">
-        <div class="setup-card">
-          <div class="setup-card__icon">
+      <!-- Setup: number provisioning -->
+      <div id="setup-alert" class="banner-wrap hidden">
+        <div class="alert-card alert-card--amber">
+          <div class="alert-card__icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
           </div>
-          <div class="setup-card__body">
-            <div class="setup-card__title">Your Cove number is being provisioned</div>
-            <p class="setup-card__sub">This usually takes 1–2 minutes. Refresh the page and it should appear. If it's been more than 5 minutes, something may have gone wrong.</p>
-            <div class="setup-card__actions">
+          <div class="alert-card__body">
+            <div class="alert-card__title">Your Cove number is being provisioned</div>
+            <p class="alert-card__sub">This usually takes 1–2 minutes. Refresh the page and it should appear. If it's been more than 5 minutes, something may have gone wrong.</p>
+            <div class="alert-card__actions">
               <button class="btn btn--secondary btn--sm" onclick="location.reload()">↻ Refresh</button>
               <button class="btn btn--ghost btn--sm" id="reset-setup-btn">Start setup again</button>
               <a href="mailto:hello@coveplatform.com?subject=Number+not+provisioned" class="btn btn--ghost btn--sm">Contact support</a>
@@ -107,16 +106,16 @@
         </div>
       </div>
 
-      <!-- Call forwarding reminder — shown when live but no leads yet -->
-      <div id="forwarding-banner" class="hidden" style="margin-bottom:24px">
-        <div class="setup-card" style="border-color:#DBEAFE;background:#EFF6FF">
-          <div class="setup-card__icon" style="background:#DBEAFE;color:#2563EB">
+      <!-- Forwarding reminder -->
+      <div id="forwarding-banner" class="banner-wrap hidden">
+        <div class="alert-card alert-card--coral">
+          <div class="alert-card__icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 14.9a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.14 4h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 14.92z"/></svg>
           </div>
-          <div class="setup-card__body">
-            <div class="setup-card__title" style="color:#1E40AF">One step left — set up call forwarding</div>
-            <p class="setup-card__sub">Your Cove number is live. Forward missed calls to it and every missed call will trigger the SMS flow automatically.</p>
-            <div class="setup-card__actions">
+          <div class="alert-card__body">
+            <div class="alert-card__title">One step left — set up call forwarding</div>
+            <p class="alert-card__sub">Your Cove number is live. Forward missed calls to it and every missed call will trigger the SMS flow automatically.</p>
+            <div class="alert-card__actions">
               <a href="/onboarding?step=complete" class="btn btn--primary btn--sm">View forwarding instructions</a>
               <button class="btn btn--ghost btn--sm" id="dismiss-forwarding-btn">Dismiss</button>
             </div>
@@ -124,98 +123,89 @@
         </div>
       </div>
 
+      <!-- Stats -->
       <div class="stats-strip" id="stats-strip">
         <div class="stat-item">
           <div class="stat-item__val" id="stat-week">—</div>
           <div class="stat-item__key">Leads this week</div>
         </div>
         <div class="stat-item">
-          <div class="stat-item__val" id="stat-done">—</div>
+          <div class="stat-item__val stat-item__val--green" id="stat-done">—</div>
           <div class="stat-item__key">Completed flows</div>
         </div>
         <div class="stat-item">
-          <div class="stat-item__val" id="stat-abandoned">—</div>
+          <div class="stat-item__val stat-item__val--muted" id="stat-abandoned">—</div>
           <div class="stat-item__key">No reply</div>
         </div>
       </div>
 
+      <!-- Recent leads -->
       <div class="section">
         <div class="section__title">Recent activity — last 7 days</div>
-        <div id="leads-container">
-          <div style="padding:24px 0;color:var(--text-faint);font-size:13.5px">Loading…</div>
+        <div class="card leads-card">
+          <div id="leads-container">
+            <div class="leads-loading">Loading…</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ─── FLOW ─── -->
+    <!-- ═══ MY FLOW ═══ -->
     <div id="view-flow" class="hidden">
       <div class="page-header">
         <h1 class="page-header__title">My Flow</h1>
-        <p class="page-header__sub">Cove texts these questions to every lead automatically — missed calls and form submissions. Edit them any time. Changes go live instantly.</p>
+        <p class="page-header__sub">Edit the questions Cove texts to every lead. Changes go live instantly.</p>
       </div>
 
-      <div class="flow-explainer">
-        <div class="flow-explainer__item">
-          <div class="flow-explainer__icon">📲</div>
-          <div><strong>Lead misses you</strong><br><span>Missed call or form submission triggers Cove instantly</span></div>
-        </div>
-        <div class="flow-explainer__arrow">→</div>
-        <div class="flow-explainer__item">
-          <div class="flow-explainer__icon">💬</div>
-          <div><strong>Cove texts them</strong><br><span>Sends your questions below via SMS within 10 seconds</span></div>
-        </div>
-        <div class="flow-explainer__arrow">→</div>
-        <div class="flow-explainer__item">
-          <div class="flow-explainer__icon">📋</div>
-          <div><strong>You get a summary</strong><br><span>Name, what they need, urgency — sent to your phone</span></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section__title">Business details</div>
-        <div class="form-section">
-          <div class="form-group">
-            <label for="flow-biz-name">Business name</label>
-            <input type="text" id="flow-biz-name" />
+      <!-- Business details + welcome message -->
+      <div class="card card--mb">
+        <div class="card__section">
+          <div class="section__title">Business details</div>
+          <div class="form-section">
+            <div class="form-group">
+              <label for="flow-biz-name">Business name</label>
+              <input type="text" id="flow-biz-name" />
+            </div>
+            <div class="form-group">
+              <label for="flow-booking">Booking link <span class="label-optional">(optional)</span></label>
+              <input type="url" id="flow-booking" placeholder="https://book.yourbusiness.com.au" />
+              <span class="hint">Added to the completion message when a lead finishes the flow.</span>
+            </div>
           </div>
+        </div>
+
+        <div class="card__divider"></div>
+
+        <div class="card__section">
+          <div class="section__title">Welcome message</div>
+          <p class="section__hint">Sent immediately when someone misses a call. <code class="inline-code">{firstName}</code> and <code class="inline-code">{businessName}</code> are filled in automatically.</p>
           <div class="form-group">
-            <label for="flow-booking">Booking link <span style="font-weight:400;color:var(--text-faint)">(optional)</span></label>
-            <input type="url" id="flow-booking" placeholder="https://book.yourbusiness.com.au" />
-            <span class="hint">Added to the completion message when a lead finishes the flow.</span>
+            <textarea id="flow-intro" rows="2" placeholder="Hi {firstName}, this is {businessName}. Quick question…" class="textarea--noresize"></textarea>
           </div>
         </div>
       </div>
 
+      <!-- SMS Questions -->
       <div class="section">
-        <div class="section__title">Welcome message</div>
-        <div class="flow-hint">Sent immediately when someone misses a call. <code style="font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px">{firstName}</code> and <code style="font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px">{businessName}</code> are filled in automatically.</div>
-        <div class="form-section">
-          <div class="form-group">
-            <textarea id="flow-intro" rows="2" placeholder="Hi {firstName}, this is {businessName}. Quick question…" style="resize:none;overflow:hidden"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section__title" style="display:flex;align-items:center;justify-content:space-between">
-          <span>SMS Questions</span>
+        <div class="section__title-row">
+          <span class="section__title section__title--flush">SMS Questions</span>
           <button class="flow-ai-btn" id="flow-regen-btn" type="button">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
             Regenerate with AI
           </button>
         </div>
-        <div class="flow-hint">Each question is sent as a separate SMS. Leads reply with a letter (A, B, C…) or free text. Keep them short — they’re read on a phone screen.</div>
+        <p class="section__sub">Each question is sent as a separate SMS. Leads reply with a letter (A, B, C…) or free text.</p>
         <div class="flow-section" id="flow-cards"></div>
       </div>
 
-      <!-- Regen modal -->
-      <div id="regen-modal" class="hidden" style="background:rgba(0,0,0,.3);position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;max-width:420px;width:100%">
-          <h2 style="font-size:16px;font-weight:700;margin-bottom:6px">Regenerate questions</h2>
-          <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:16px">Describe your business and we'll rewrite the questions. This will replace your current questions.</p>
-          <textarea id="regen-desc" rows="3" placeholder="e.g. We're a residential plumbing business in Sydney…" style="width:100%;margin-bottom:14px"></textarea>
-          <div id="regen-error" class="auth-error" style="margin-bottom:12px"></div>
-          <div style="display:flex;gap:8px;justify-content:flex-end">
+      <!-- AI Regenerate modal -->
+      <div id="regen-modal" class="modal-overlay hidden">
+        <div class="modal">
+          <h2 class="modal__title">Regenerate with AI</h2>
+          <p class="modal__sub">Describe your business and we'll rewrite the flow. This replaces your current questions.</p>
+          <textarea id="regen-desc" rows="3" placeholder="e.g. We're a residential plumbing business in Sydney…" class="modal__textarea"></textarea>
+          <div id="regen-error" class="auth-error"></div>
+          <div class="modal__actions">
             <button class="btn btn--secondary" id="regen-cancel">Cancel</button>
             <button class="btn btn--primary" id="regen-confirm">Regenerate</button>
           </div>
@@ -229,87 +219,90 @@
       </div>
     </div>
 
-    <!-- ─── NOTIFICATIONS ─── -->
+    <!-- ═══ NOTIFICATIONS ═══ -->
     <div id="view-notifications" class="hidden">
       <div class="page-header">
         <h1 class="page-header__title">Notifications</h1>
-        <p class="page-header__sub">Where Cove sends lead summaries when someone completes the flow. You’ll get their name, what they need, and how urgent.</p>
+        <p class="page-header__sub">Where Cove sends lead summaries when someone completes the flow.</p>
       </div>
 
-      <div class="section">
-        <div class="section__title">Lead summaries</div>
-        <div class="form-section">
-          <div class="form-group">
-            <label for="notif-phone">SMS — your mobile number</label>
-            <input type="tel" id="notif-phone" placeholder="+61 412 345 678" />
-            <span class="hint">You'll get a text with their name, what they need, and urgency.</span>
-          </div>
-          <div class="form-group">
-            <label for="notif-email">Email <span style="font-weight:400;color:var(--text-faint)">(optional)</span></label>
-            <input type="email" id="notif-email" placeholder="you@yourbusiness.com.au" />
-          </div>
-          <div class="form-group">
-            <label for="notif-webhook">Webhook URL <span style="font-weight:400;color:var(--text-faint)">(optional)</span></label>
-            <input type="url" id="notif-webhook" placeholder="https://hooks.zapier.com/…" />
-            <span class="hint">Connect to Zapier, CRMs like Jobber or ServiceTitan, or any webhook.</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section__title">Operating hours</div>
-        <div class="toggle-row">
-          <div class="toggle-row__info">
-            <div class="toggle-row__label">Enable operating hours</div>
-            <div class="toggle-row__sub">Leads outside these hours get an "after hours" message instead.</div>
-          </div>
-          <label class="toggle" aria-label="Enable operating hours">
-            <input type="checkbox" id="hours-enabled" />
-            <div class="toggle__track"></div>
-            <div class="toggle__thumb"></div>
-          </label>
-        </div>
-
-        <div id="hours-config" class="hidden" style="margin-top:16px">
-          <div class="form-group" style="margin-bottom:14px">
-            <label for="hours-tz">Timezone</label>
-            <select id="hours-tz">
-              <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
-              <option value="Australia/Melbourne">Australia/Melbourne</option>
-              <option value="Australia/Brisbane">Australia/Brisbane (AEST)</option>
-              <option value="Australia/Perth">Australia/Perth (AWST)</option>
-              <option value="Australia/Adelaide">Australia/Adelaide (ACST)</option>
-              <option value="Australia/Darwin">Australia/Darwin</option>
-              <option value="Australia/Hobart">Australia/Hobart</option>
-            </select>
-          </div>
-          <div class="hours-grid">
+      <div class="card">
+        <div class="card__section">
+          <div class="section__title">Lead summaries</div>
+          <div class="form-section">
             <div class="form-group">
-              <label for="hours-open">Open from</label>
-              <select id="hours-open"></select>
+              <label for="notif-phone">SMS — your mobile number</label>
+              <input type="tel" id="notif-phone" placeholder="+61 412 345 678" />
+              <span class="hint">You'll get a text with their name, what they need, and urgency.</span>
             </div>
             <div class="form-group">
-              <label for="hours-close">Until</label>
-              <select id="hours-close"></select>
+              <label for="notif-email">Email <span class="label-optional">(optional)</span></label>
+              <input type="email" id="notif-email" placeholder="you@yourbusiness.com.au" />
+            </div>
+            <div class="form-group">
+              <label for="notif-webhook">Webhook URL <span class="label-optional">(optional)</span></label>
+              <input type="url" id="notif-webhook" placeholder="https://hooks.zapier.com/…" />
+              <span class="hint">Connect to Zapier, CRMs like Jobber or ServiceTitan, or any webhook.</span>
             </div>
           </div>
-          <div class="form-group" style="margin-top:14px">
-            <label>Closed days</label>
-            <div class="days-row" id="days-row">
-              <span class="day-chip" data-day="0">Sun</span>
-              <span class="day-chip" data-day="1">Mon</span>
-              <span class="day-chip" data-day="2">Tue</span>
-              <span class="day-chip" data-day="3">Wed</span>
-              <span class="day-chip" data-day="4">Thu</span>
-              <span class="day-chip" data-day="5">Fri</span>
-              <span class="day-chip" data-day="6">Sat</span>
+        </div>
+
+        <div class="card__divider"></div>
+
+        <div class="card__section">
+          <div class="toggle-row toggle-row--flush">
+            <div class="toggle-row__info">
+              <div class="toggle-row__label">Operating hours</div>
+              <div class="toggle-row__sub">Leads outside these hours get an "after hours" message instead.</div>
             </div>
-            <span class="hint" style="margin-top:6px">Highlighted = closed that day.</span>
+            <label class="toggle" aria-label="Enable operating hours">
+              <input type="checkbox" id="hours-enabled" />
+              <div class="toggle__track"></div>
+              <div class="toggle__thumb"></div>
+            </label>
+          </div>
+
+          <div id="hours-config" class="hours-config hidden">
+            <div class="form-group">
+              <label for="hours-tz">Timezone</label>
+              <select id="hours-tz">
+                <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                <option value="Australia/Melbourne">Australia/Melbourne</option>
+                <option value="Australia/Brisbane">Australia/Brisbane (AEST)</option>
+                <option value="Australia/Perth">Australia/Perth (AWST)</option>
+                <option value="Australia/Adelaide">Australia/Adelaide (ACST)</option>
+                <option value="Australia/Darwin">Australia/Darwin</option>
+                <option value="Australia/Hobart">Australia/Hobart</option>
+              </select>
+            </div>
+            <div class="hours-grid">
+              <div class="form-group">
+                <label for="hours-open">Open from</label>
+                <select id="hours-open"></select>
+              </div>
+              <div class="form-group">
+                <label for="hours-close">Until</label>
+                <select id="hours-close"></select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Closed days</label>
+              <div class="days-row" id="days-row">
+                <span class="day-chip" data-day="0">Sun</span>
+                <span class="day-chip" data-day="1">Mon</span>
+                <span class="day-chip" data-day="2">Tue</span>
+                <span class="day-chip" data-day="3">Wed</span>
+                <span class="day-chip" data-day="4">Thu</span>
+                <span class="day-chip" data-day="5">Fri</span>
+                <span class="day-chip" data-day="6">Sat</span>
+              </div>
+              <span class="hint">Highlighted = closed that day.</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div id="notif-success" class="alert alert--success hidden" style="margin-bottom:12px">
+      <div id="notif-success" class="alert alert--success alert--mt hidden">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
         <span>Settings saved.</span>
       </div>
@@ -319,126 +312,168 @@
       </div>
     </div>
 
-    <!-- ─── INTEGRATIONS ─── -->
+    <!-- ═══ INTEGRATIONS ═══ -->
     <div id="view-integrations" class="hidden">
       <div class="page-header">
         <h1 class="page-header__title">Integrations</h1>
-        <p class="page-header__sub">Three ways to get leads into Cove — pick whichever fits your setup. They all do the same thing: trigger the SMS flow to your lead.</p>
+        <p class="page-header__sub">Three ways to get leads into Cove — pick whichever fits your setup. They all do the same thing: trigger the SMS flow automatically.</p>
       </div>
 
       <!-- Method 1: Call forwarding -->
-      <div class="section">
-        <div class="section__title">Method 1 — Missed calls (call forwarding)</div>
-        <div class="form-section" style="padding:1.25rem">
-          <p style="font-size:13.5px;color:var(--text-muted);line-height:1.7;margin-bottom:1rem">
-            The simplest setup. You forward unanswered calls on <strong>your own mobile</strong> to your Cove number. When a customer calls and you don't answer, Cove automatically texts them within 10 seconds.
-          </p>
-          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;font-size:13px;line-height:1.9;color:var(--text-muted)">
-            Customer calls your mobile → you don't answer → carrier forwards to your Cove number → <strong style="color:var(--text)">Cove texts them instantly</strong>
+      <div class="int-card">
+        <div class="int-card__header">
+          <span class="int-card__num">01</span>
+          <div>
+            <div class="int-card__title">Missed calls — call forwarding</div>
+            <div class="int-card__desc">The simplest setup. Forward unanswered calls on your mobile to your Cove number.</div>
           </div>
-          <div style="margin-top:1rem">
-            <a href="/onboarding?step=complete" class="btn btn--primary btn--sm">View call forwarding setup</a>
+        </div>
+        <div class="int-card__body">
+          <div class="int-flow">
+            <span>Customer calls you</span>
+            <span class="int-flow__arrow">→</span>
+            <span>You don't answer</span>
+            <span class="int-flow__arrow">→</span>
+            <span>Carrier forwards to Cove</span>
+            <span class="int-flow__arrow">→</span>
+            <span class="int-flow__step--highlight">Cove texts them instantly</span>
+          </div>
+          <div>
+            <a href="/onboarding?step=complete" class="btn btn--primary btn--sm">View setup instructions</a>
           </div>
         </div>
       </div>
 
       <!-- Method 2: Website embed -->
-      <div class="section">
-        <div class="section__title">Method 2 — Website contact/enquiry form</div>
-        <div class="form-section" style="padding:1.25rem">
-          <p style="font-size:13.5px;color:var(--text-muted);line-height:1.7;margin-bottom:1rem">
-            Add a snippet to your website. When someone submits your contact form, Cove receives their phone number and starts the SMS flow immediately — even if they filled in the form at midnight.
-          </p>
-          <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.06em">Paste this into your website's &lt;head&gt; or just before &lt;/body&gt;</div>
-          <div style="position:relative">
-            <pre id="embed-snippet" style="background:#0F172A;color:#E2E8F0;padding:1rem 1.25rem;border-radius:8px;font-size:12px;line-height:1.7;overflow-x:auto;margin:0;white-space:pre-wrap;word-break:break-all">Loading…</pre>
-            <button onclick="copySnippet()" style="position:absolute;top:8px;right:8px;background:#1E293B;color:#94A3B8;border:1px solid #334155;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer" id="copy-snippet-btn">Copy</button>
+      <div class="int-card">
+        <div class="int-card__header">
+          <span class="int-card__num">02</span>
+          <div>
+            <div class="int-card__title">Website contact form</div>
+            <div class="int-card__desc">Add a snippet to your site. Form submissions trigger the SMS flow immediately — even at midnight.</div>
           </div>
-          <p style="font-size:12.5px;color:var(--text-muted);margin-top:.75rem;line-height:1.6">
-            Then on your form's submit button, call <code style="background:var(--bg);padding:2px 6px;border-radius:4px">Cove.send({ phone: '...', name: '...' })</code>. Works with any form builder — Wix, Squarespace, Webflow, WordPress, custom HTML.
-          </p>
-          <div style="margin-top:1rem;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:.75rem 1rem;font-size:13px;color:#92400E">
-            <strong>Full example</strong> — replace <code>YOUR_FORM_SUBMIT</code> with your form's submit handler:
+        </div>
+        <div class="int-card__body">
+          <div>
+            <div class="snippet-label">Paste into your website's &lt;head&gt; or just before &lt;/body&gt;</div>
+            <div class="snippet-wrap">
+              <pre id="embed-snippet" class="snippet">Loading…</pre>
+              <button onclick="copySnippet()" class="snippet-copy" id="copy-snippet-btn">Copy</button>
+            </div>
           </div>
-          <pre style="background:#0F172A;color:#E2E8F0;padding:1rem 1.25rem;border-radius:8px;font-size:12px;line-height:1.7;overflow-x:auto;margin:.5rem 0 0;white-space:pre-wrap;word-break:break-all" id="embed-example">Loading…</pre>
+          <p class="int-note">On your form's submit button, call <code class="inline-code">Cove.send({ phone: '...', name: '...' })</code>. Works with Wix, Squarespace, Webflow, WordPress, and custom HTML.</p>
+          <div>
+            <div class="int-example-label">Full example — replace with your form's submit handler:</div>
+            <pre class="snippet" id="embed-example">Loading…</pre>
+          </div>
         </div>
       </div>
 
-      <!-- Method 3: One-click CRM integrations -->
-      <div class="section">
-        <div class="section__title">Method 3 — Connect your CRM or booking software</div>
-        <div class="form-section" style="padding:1.25rem">
-          <p style="font-size:13.5px;color:var(--text-muted);line-height:1.7;margin-bottom:1.25rem">
-            Connect Cove to your existing software in one click via Zapier. When a new lead or booking comes in, Cove automatically texts them.
-          </p>
+      <!-- Method 3: CRM / Zapier -->
+      <div class="int-card">
+        <div class="int-card__header">
+          <span class="int-card__num">03</span>
+          <div>
+            <div class="int-card__title">CRM or booking software</div>
+            <div class="int-card__desc">Connect any tool to Cove via Zapier or Make — takes about 5 minutes.</div>
+          </div>
+        </div>
+        <div class="int-card__body">
 
-          <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em">One-click connect</div>
-          <div id="zapier-buttons" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem"></div>
-
-          <details style="margin-top:.5rem">
-            <summary style="font-size:12.5px;font-weight:600;color:var(--text-muted);cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:.4rem">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
-              Advanced — raw webhook URL
-            </summary>
-            <div style="margin-top:.75rem">
-              <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.06em">Your webhook URL</div>
-              <div style="display:flex;gap:8px;align-items:center;margin-bottom:.75rem">
-                <code id="webhook-url" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.55rem .9rem;font-size:12.5px;color:var(--text);word-break:break-all">Loading…</code>
-                <button onclick="copyWebhook()" class="btn btn--secondary btn--sm" id="copy-webhook-btn">Copy</button>
-              </div>
-              <pre style="background:#0F172A;color:#E2E8F0;padding:.9rem 1.1rem;border-radius:8px;font-size:12px;line-height:1.7;overflow-x:auto;margin:0;white-space:pre-wrap">POST  (application/json)
-{
-  "phone":  "+61412345678",  // required
-  "name":   "Sam Jones",     // optional
-  "email":  "sam@email.com", // optional
-  "source": "hubspot"        // optional label
-}</pre>
+          <!-- Step 1: Webhook URL -->
+          <div>
+            <div class="snippet-label">Step 1 — Copy your Cove webhook URL</div>
+            <div class="webhook-row">
+              <code id="webhook-url" class="webhook-code">Loading…</code>
+              <button onclick="copyWebhook()" class="btn btn--secondary btn--sm" id="copy-webhook-btn">Copy</button>
             </div>
-          </details>
+          </div>
+
+          <!-- Step 2: Create automation -->
+          <div>
+            <div class="snippet-label">Step 2 — Create an automation in Zapier or Make</div>
+            <div class="int-steps-guide">
+              <div class="int-guide-row">
+                <span class="int-guide-dot">A</span>
+                <span>Go to <a href="https://zapier.com" target="_blank" rel="noopener" class="text-link">Zapier</a> or <a href="https://www.make.com" target="_blank" rel="noopener" class="text-link">Make</a> and create a new automation</span>
+              </div>
+              <div class="int-guide-row">
+                <span class="int-guide-dot">B</span>
+                <span><strong>Trigger:</strong> your app — e.g. "HubSpot — New Contact" or "Jobber — New Request"</span>
+              </div>
+              <div class="int-guide-row">
+                <span class="int-guide-dot">C</span>
+                <span><strong>Action:</strong> "Webhooks by Zapier → POST request" — paste your Cove URL as the endpoint</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Map fields -->
+          <div>
+            <div class="snippet-label">Step 3 — Map these fields in the request body</div>
+            <pre class="snippet">POST  (application/json)
+{
+  "phone":  "{{contact phone}}",  // required
+  "name":   "{{contact name}}",   // optional
+  "source": "hubspot"             // optional label
+}</pre>
+            <p class="int-note" style="margin-top:8px">Only <code class="inline-code">phone</code> is required. Cove uses it to send the qualification SMS.</p>
+          </div>
+
+          <!-- App shortcuts -->
+          <div>
+            <div class="snippet-label">Open the right Zapier integration page</div>
+            <div id="zapier-buttons" class="zapier-grid"></div>
+          </div>
+
         </div>
       </div>
     </div>
 
-    <!-- ─── BILLING ─── -->
+    <!-- ═══ BILLING ═══ -->
     <div id="view-billing" class="hidden">
       <div class="page-header">
         <h1 class="page-header__title">Billing</h1>
         <p class="page-header__sub">Manage your subscription and payment details.</p>
       </div>
 
-      <div class="section">
-        <div class="section__title">Current plan</div>
-        <div class="billing-card">
-          <div class="billing-plan-name">Cove Standard</div>
-          <div class="billing-plan-price"><strong>$49</strong>/month · Cancel anytime</div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <span id="billing-status-badge"></span>
-            <span id="billing-status-text" style="font-size:13px;color:var(--text-muted)"></span>
+      <div class="card">
+        <div class="card__section">
+          <div class="section__title">Current plan</div>
+          <div class="plan-display">
+            <div class="plan-display__name">Cove Standard</div>
+            <div class="plan-display__price"><strong>$49</strong>/month · Cancel anytime</div>
+            <div class="plan-display__status">
+              <span id="billing-status-badge"></span>
+              <span id="billing-status-text" class="plan-display__status-text"></span>
+            </div>
           </div>
-          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-            <button class="btn btn--secondary" id="billing-portal-btn">
-              Manage billing
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </button>
-          </div>
+          <button class="btn btn--secondary" id="billing-portal-btn">
+            Manage billing
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
+        </div>
+
+        <div class="card__divider"></div>
+
+        <div class="card__section">
+          <div class="section__title">Your Cove number</div>
+          <p class="section__sub section__sub--flush">Calls forwarded to this number trigger the SMS flow</p>
+          <div id="billing-number" class="cove-number-display">—</div>
         </div>
       </div>
 
-      <div class="section">
-        <div class="section__title">Your Cove number</div>
-        <div style="padding:16px 0">
-          <div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">Calls forwarded to this number trigger the SMS flow</div>
-          <div id="billing-number" style="font-size:20px;font-weight:700;letter-spacing:.01em;color:var(--text)">—</div>
+      <div class="card card--faint">
+        <div class="card__section">
+          <div class="guarantee-header">
+            <div class="guarantee-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="guarantee-title">30-day money-back guarantee</div>
+          </div>
+          <p class="section__sub">If Cove doesn't pay for itself within 30 days of activation, contact us and we'll give you a full refund — no questions asked.</p>
+          <a href="mailto:hello@coveplatform.com" class="text-link">hello@coveplatform.com</a>
         </div>
-      </div>
-
-      <div class="section">
-        <div class="section__title">30-day money-back guarantee</div>
-        <p style="font-size:13.5px;color:var(--text-muted);line-height:1.7">
-          If Cove doesn't pay for itself within 30 days of activation, contact us and we'll give you a full refund — no questions asked.
-          <br><br>
-          <a href="mailto:hello@coveplatform.com" style="color:var(--accent);font-weight:500">hello@coveplatform.com</a>
-        </p>
       </div>
     </div>
 
@@ -558,20 +593,17 @@
         if (res.ok && res.number) {
           business.twilio_from_number = res.number;
           business.is_active = true;
-          // Update UI to live state
           document.getElementById('live-badge').innerHTML = '<span class="badge badge--live badge--dot">Live</span>';
           document.getElementById('biz-number-sub').textContent = res.number;
           document.getElementById('setup-alert').classList.add('hidden');
           document.getElementById('billing-number').textContent = res.number;
-          // Advance step 2 to done, step 3 to active
           const s2dot = document.querySelector('#sstep-2 .setup-step__dot');
           if (s2dot) { s2dot.classList.remove('setup-step__dot--spin'); s2dot.classList.add('setup-step__dot--done'); }
           const s3dot = document.querySelector('#sstep-3 .setup-step__dot');
           if (s3dot) s3dot.classList.add('setup-step__dot--spin');
-          // Show forwarding reminder
           setTimeout(() => location.href = '/onboarding?step=complete', 800);
         }
-      } catch (e) { /* silent — user can manually refresh */ }
+      } catch (e) { /* silent */ }
     }
 
     async function loadLeads() {
@@ -611,7 +643,6 @@
 
     function getLeadNeed(lead) {
       const answers = lead.answers || {};
-      // Try to find the first answered step label
       const keys = Object.keys(answers).filter(k => k.endsWith('_label') && !k.startsWith('_'));
       if (keys.length) return answers[keys[0]];
       if (lead.message) return lead.message.replace(/^\[(.*?)\]\s*/, '').slice(0, 50);
@@ -689,14 +720,12 @@
       container.innerHTML = flow.steps.map((step, i) => `
         <div class="flow-card">
           <div class="flow-card__header">
-            <span class="flow-card__num">Question ${i + 1} of ${flow.steps.length}</span>
-            ${step.free_text ? '<span class="flow-card__badge flow-card__badge--free">Free text reply</span>' : '<span class="flow-card__badge">Multiple choice</span>'}
+            <span class="flow-card__num">Question ${i + 1}</span>
+            ${step.free_text ? '<span class="flow-card__badge flow-card__badge--free">Free text</span>' : '<span class="flow-card__badge">Multiple choice</span>'}
           </div>
           <div class="flow-card__body">
-            <div class="flow-card__label">SMS message sent to lead</div>
             <textarea class="flow-question-input" data-step="${i}">${esc(step.question)}</textarea>
             ${!step.free_text ? `
-            <div class="flow-opts-label">Reply options <span style="color:var(--text-faint);font-weight:400">(lead replies with the letter)</span></div>
             <div class="flow-opts-row">
               ${step.options.map(o => `
                 <div class="flow-opt-chip">
@@ -704,11 +733,12 @@
                   <span>${esc(o.label)}</span>
                 </div>`).join('')}
             </div>` : `
-            <div class="flow-free-note">Lead can reply with anything — their full answer is captured and included in your summary.</div>`}
+            <div class="flow-free-note">Lead can reply with anything — captured in your summary.</div>`}
           </div>
         </div>
       `).join('');
-      // Auto-size all textareas to fit content
+
+      // Auto-size all textareas
       requestAnimationFrame(() => requestAnimationFrame(() => {
         container.querySelectorAll('.flow-question-input').forEach(ta => {
           ta.style.overflow = 'hidden';
@@ -764,7 +794,6 @@
     });
 
     document.getElementById('flow-save').addEventListener('click', async () => {
-      // Capture edits
       const flow = getFlowConfig();
       if (flow) {
         document.querySelectorAll('.flow-question-input').forEach((ta, i) => {
@@ -782,7 +811,6 @@
       const btn = document.getElementById('flow-save');
       btn.disabled = true; btn.textContent = 'Saving…';
 
-      // Save flow
       if (flowEdited) {
         await fetch('/api/me/flow', {
           method: 'PUT',
@@ -791,14 +819,12 @@
         });
       }
 
-      // Save business name + booking link
       await fetch('/api/me/business', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: bizName, bookingLink: booking || null }),
       });
 
-      // Update business name/booking locally
       business.name = bizName;
       business.booking_link = booking;
       if (flowEdited) { business.flow_config = flowEdited; flowEdited = null; }
@@ -826,7 +852,6 @@
         document.getElementById('hours-config').classList.remove('hidden');
       }
 
-      // Populate hour selects
       const openSel = document.getElementById('hours-open');
       const closeSel = document.getElementById('hours-close');
       if (!openSel.options.length) {
@@ -841,7 +866,6 @@
 
       if (hours.timezone) document.getElementById('hours-tz').value = hours.timezone;
 
-      // Days
       closedDays = hours.closed_days || [0, 6];
       document.querySelectorAll('.day-chip').forEach(chip => {
         const d = Number(chip.dataset.day);
@@ -930,31 +954,22 @@
       const webhookUrl = `${base}/api/webhook/generic/${bizId}`;
       document.getElementById('webhook-url').textContent = webhookUrl;
 
-      // One-click Zapier integration buttons
-      // Each links to a Zapier template with the webhook URL pre-filled via query param
-      const encoded = encodeURIComponent(webhookUrl);
       const integrations = [
-        { name: 'HubSpot',     icon: '🟠', desc: 'New contact → Cove',    url: `https://zapier.com/apps/hubspot/integrations/webhooks?utm_source=zapier&create=true&entry.1=webhooks&entry.2=${encoded}` },
-        { name: 'Jobber',      icon: '🔵', desc: 'New request → Cove',    url: `https://zapier.com/apps/jobber/integrations/webhooks?utm_source=zapier&create=true` },
-        { name: 'ServiceM8',   icon: '🟢', desc: 'New job → Cove',        url: `https://zapier.com/apps/servicem8/integrations/webhooks?utm_source=zapier&create=true` },
-        { name: 'Google Forms', icon: '📋', desc: 'Form submit → Cove',   url: `https://zapier.com/apps/google-forms/integrations/webhooks?utm_source=zapier&create=true` },
-        { name: 'Pipedrive',   icon: '🟣', desc: 'New lead → Cove',       url: `https://zapier.com/apps/pipedrive/integrations/webhooks?utm_source=zapier&create=true` },
-        { name: 'Make',        icon: '⚙️',  desc: 'Any app → Cove',        url: `https://www.make.com/en/integrations/webhooks` },
+        { name: 'HubSpot',      icon: '🟠', desc: 'New contact',    url: 'https://zapier.com/apps/hubspot/integrations/webhooks' },
+        { name: 'Jobber',       icon: '🔵', desc: 'New request',    url: 'https://zapier.com/apps/jobber/integrations/webhooks' },
+        { name: 'ServiceM8',    icon: '🟢', desc: 'New job',        url: 'https://zapier.com/apps/servicem8/integrations/webhooks' },
+        { name: 'Google Forms', icon: '📋', desc: 'Form response',  url: 'https://zapier.com/apps/google-forms/integrations/webhooks' },
+        { name: 'Pipedrive',    icon: '🟣', desc: 'New lead',       url: 'https://zapier.com/apps/pipedrive/integrations/webhooks' },
+        { name: 'Make',         icon: '⚙️',  desc: 'Any app',        url: 'https://www.make.com/en/integrations/webhooks' },
       ];
 
       const container = document.getElementById('zapier-buttons');
       container.innerHTML = integrations.map(i => `
-        <a href="${i.url}" target="_blank" rel="noopener" style="
-          display:flex;align-items:center;gap:10px;
-          border:1.5px solid var(--border);border-radius:10px;
-          padding:.7rem .9rem;text-decoration:none;
-          background:var(--surface);transition:border-color .15s,box-shadow .15s;
-        " onmouseover="this.style.borderColor='#2563EB';this.style.boxShadow='0 0 0 3px rgba(37,99,235,.08)'"
-           onmouseout="this.style.borderColor='';this.style.boxShadow=''">
-          <span style="font-size:1.1rem;line-height:1">${i.icon}</span>
+        <a href="${i.url}" target="_blank" rel="noopener" class="zapier-btn">
+          <span style="font-size:1.1rem;line-height:1;flex-shrink:0">${i.icon}</span>
           <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:600;color:var(--text)">${i.name}</div>
-            <div style="font-size:11.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i.desc}</div>
+            <div class="zapier-btn__name">${i.name}</div>
+            <div class="zapier-btn__desc">${i.desc}</div>
           </div>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         </a>
