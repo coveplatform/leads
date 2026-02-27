@@ -1,7 +1,7 @@
 // Integration utilities: after-hours, CRM webhooks, lead nudge/timeout
 
 // ─── Email via Resend ───
-async function sendEmailViaResend({ to, subject, text }) {
+export async function sendEmailViaResend({ to, subject, text }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
   try {

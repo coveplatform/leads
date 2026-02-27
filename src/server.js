@@ -74,6 +74,7 @@ import {
   shouldNudge,
   buildNudgeMessage,
   getIntegrationConfig,
+  sendEmailViaResend,
 } from "./integrations.js";
 import { normalizePhone } from "./phone.js";
 import { sendSms } from "./sms.js";
@@ -787,6 +788,21 @@ app.post("/api/website-inquiry", async (req, res) => {
       businessName, websiteUrl, message,
     });
 
+    // Email notification to hello@usecove.app
+    sendEmailViaResend({
+      to: "hello@usecove.app",
+      subject: `New enquiry from ${name} — ${businessName}`,
+      text: [
+        `Name: ${name}`,
+        `Email: ${email}`,
+        `Phone: ${phone || "—"}`,
+        `Business: ${businessName}`,
+        websiteUrl ? `Website: ${websiteUrl}` : null,
+        message ? `\nMessage: ${message}` : null,
+      ].filter(Boolean).join("\n"),
+    }).catch((err) => console.error("Inquiry email error:", err));
+
+    // SMS backup notification
     const ownerPhone = process.env.OWNER_NOTIFY_PHONE;
     const smsFrom = process.env.DEMO_TWILIO_NUMBER;
     if (ownerPhone && smsFrom && config.twilio.accountSid) {
