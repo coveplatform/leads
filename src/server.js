@@ -1013,9 +1013,13 @@ app.post("/api/demo", async (req, res) => {
       demoBusiness = await createBusiness({
         name: "Cove Demo",
         twilioFromNumber: normalizedDemoNumber,
-        ownerNotifyPhone: normalizedDemoNumber,
-        industry: "general",
+        ownerNotifyPhone: normalizedPhone,
+        industry: "dental",
       });
+    } else {
+      // Point the owner notification back to whoever is currently demoing
+      await updateBusiness(demoBusiness.id, { ownerNotifyPhone: normalizedPhone });
+      demoBusiness.owner_notify_phone = normalizedPhone;
     }
 
     const lead = await createLead({
