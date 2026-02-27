@@ -470,15 +470,11 @@ em { font-style: italic; }
   text-align: center;
 }
 .logo-banner__label {
-  font-size: .7rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .12em; color: var(--faint); margin-bottom: 1rem;
+  font-size: 1rem; font-weight: 500; color: var(--mid);
+  line-height: 1.6; max-width: 640px; margin: 0 auto;
 }
-.logo-banner__statement {
-  font-size: 1.3rem; font-weight: 500; color: var(--mid);
-  line-height: 1.6; max-width: 600px; margin: 0 auto;
-}
-.logo-banner__statement em {
-  font-style: italic; font-weight: 800; color: var(--ink);
+.logo-banner__label em {
+  font-style: italic; font-weight: 700; color: var(--ink-3);
 }
 
 /* ── PROBLEM ── */
@@ -1171,7 +1167,7 @@ em { font-style: italic; }
   .problem, .how, .features, .plays-well,
   .demo, .proof, .pricing, .faq, .contact { padding: 4.5rem 0; }
   .logo-banner { padding: 2rem 0; }
-  .logo-banner__statement { font-size: 1.1rem; }
+  .logo-banner__label { font-size: .92rem; }
 
   /* Hero */
   .hero__grid { grid-template-columns: 1fr; gap: 2rem; }
@@ -1220,7 +1216,7 @@ em { font-style: italic; }
   .problem__stat { grid-template-columns: 80px 1fr; }
   .problem__stat-num { font-size: 2.5rem; }
   .hero__tag { font-size: .68rem; }
-  .logo-banner__statement { font-size: 1rem; }
+  .logo-banner__label { font-size: .88rem; }
 }
 
 @media (max-width: 480px) {
@@ -1230,7 +1226,7 @@ em { font-style: italic; }
   .problem, .how, .features, .plays-well,
   .demo, .proof, .pricing, .faq, .contact { padding: 3rem 0; }
   .logo-banner { padding: 1.75rem 0; }
-  .logo-banner__statement { font-size: .95rem; }
+  .logo-banner__label { font-size: .84rem; }
   .hero__pills { gap: .35rem; }
   .hero__pill { font-size: .7rem; padding: .3rem .65rem; }
   .problem__stat { grid-template-columns: 70px 1fr; gap: 1rem; }
