@@ -31,7 +31,7 @@
 
     .ob-split {
       flex: 1; display: grid;
-      grid-template-columns: 1fr 520px;
+      grid-template-columns: 1fr 1fr;
       min-height: calc(100vh - 64px);
     }
 
@@ -267,6 +267,36 @@
     }
     .ob-regen-btn:hover { background: #fbcaaa; }
     .ob-regen-note { font-size: .78rem; color: #A1A1AA; }
+
+    /* ── Industry + Specialty selector ── */
+    .ob-industry-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; margin-top: .5rem;
+    }
+    .ob-industry-tile {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .85rem 1rem; border: 1.5px solid #E4E4E7; border-radius: 12px;
+      background: #fff; cursor: pointer; transition: all .15s; text-align: left;
+      font-family: inherit;
+    }
+    .ob-industry-tile--wide { grid-column: 1 / -1; }
+    .ob-industry-tile:hover { border-color: #fbcaaa; background: #fff8f4; }
+    .ob-industry-tile.selected { border-color: #e8540a; background: #fff2ea; box-shadow: 0 0 0 3px rgba(232,84,10,.09); }
+    .ob-industry-tile-icon { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+    .ob-industry-tile-name { font-size: .88rem; font-weight: 700; color: #18181B; }
+    .ob-industry-tile-sub { font-size: .72rem; color: #A1A1AA; margin-top: .1rem; }
+
+    .ob-specialty-wrap { display: none; }
+    .ob-specialty-wrap.visible { display: block; }
+    .ob-specialty-wrap > label { display: block; font-size: .83rem; font-weight: 600; color: #3F3F46; margin-bottom: .55rem; }
+    .ob-specialty-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .ob-spec-chip {
+      display: inline-flex; align-items: center;
+      padding: .4rem .85rem; border-radius: 999px; font-size: .82rem; font-weight: 600;
+      border: 1.5px solid #E4E4E7; background: #fff; color: #52525B;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .ob-spec-chip:hover { border-color: #fbcaaa; color: #e8540a; background: #fff8f4; }
+    .ob-spec-chip.selected { border-color: #e8540a; background: #fff2ea; color: #e8540a; }
 
     /* ── Payment card ── */
     .ob-plan-card {
@@ -598,11 +628,11 @@
 
     /* ── Responsive ── */
     @media (max-width: 1200px) {
-      .ob-split { grid-template-columns: 1fr 440px; }
+      .ob-split { grid-template-columns: 1fr 1fr; }
       .ob-sidebar { padding: 2.75rem 2.75rem; }
     }
     @media (max-width: 1024px) {
-      .ob-split { grid-template-columns: 1fr 380px; }
+      .ob-split { grid-template-columns: 1fr 1fr; }
       .ob-sidebar { padding: 2.25rem 2rem; }
     }
     /* Hide sidebar at 880px — form needs the space */
@@ -677,18 +707,68 @@
       <div id="step-1" class="ob-form-inner">
         <div class="ob-step-label">Step 1 of 4</div>
         <h1 class="ob-heading">Tell us about your business.</h1>
-        <p class="ob-sub">The more specific you are, the better Cove's AI can write your qualification questions.</p>
+        <p class="ob-sub">Takes 30 seconds &mdash; we&rsquo;ll use this to write your qualification questions.</p>
 
         <div class="ob-fields">
           <div class="ob-field">
             <label for="biz-name">Business name</label>
             <input type="text" id="biz-name" placeholder="Bay Plumbing" autocomplete="organization" />
           </div>
+
+          <!-- Industry selector -->
           <div class="ob-field">
-            <label for="biz-desc">What do you do?</label>
-            <textarea id="biz-desc" placeholder="e.g. We're a residential plumbing business in Sydney. We handle emergency call-outs, blocked drains, hot water systems and general repairs. Mostly homeowners and landlords." rows="4"></textarea>
-            <div class="ob-field-hint">Be specific — include what types of jobs you do and who your typical customer is.</div>
+            <label>What industry are you in?</label>
+            <div class="ob-industry-grid" id="ob-industry-grid">
+              <button class="ob-industry-tile" data-ind="trades" type="button">
+                <span class="ob-industry-tile-icon">🔧</span>
+                <div>
+                  <div class="ob-industry-tile-name">Trades &amp; Construction</div>
+                  <div class="ob-industry-tile-sub">Plumbing, electrical, building &amp; more</div>
+                </div>
+              </button>
+              <button class="ob-industry-tile" data-ind="health" type="button">
+                <span class="ob-industry-tile-icon">🏥</span>
+                <div>
+                  <div class="ob-industry-tile-name">Health &amp; Medical</div>
+                  <div class="ob-industry-tile-sub">Dental, physio, chiro &amp; more</div>
+                </div>
+              </button>
+              <button class="ob-industry-tile" data-ind="beauty" type="button">
+                <span class="ob-industry-tile-icon">✂️</span>
+                <div>
+                  <div class="ob-industry-tile-name">Beauty &amp; Wellness</div>
+                  <div class="ob-industry-tile-sub">Hair, beauty, massage &amp; more</div>
+                </div>
+              </button>
+              <button class="ob-industry-tile" data-ind="professional" type="button">
+                <span class="ob-industry-tile-icon">💼</span>
+                <div>
+                  <div class="ob-industry-tile-name">Professional Services</div>
+                  <div class="ob-industry-tile-sub">Accounting, legal, real estate &amp; more</div>
+                </div>
+              </button>
+              <button class="ob-industry-tile ob-industry-tile--wide" data-ind="other" type="button">
+                <span class="ob-industry-tile-icon">🏪</span>
+                <div>
+                  <div class="ob-industry-tile-name">Other</div>
+                  <div class="ob-industry-tile-sub">Retail, hospitality, or something else</div>
+                </div>
+              </button>
+            </div>
           </div>
+
+          <!-- Specialty picker -->
+          <div class="ob-specialty-wrap" id="ob-specialty-wrap">
+            <label>What type of <span id="ob-spec-industry-label">business</span>?</label>
+            <div class="ob-specialty-chips" id="ob-spec-chips"></div>
+          </div>
+
+          <!-- Free-text description (shown for Other industry or Other specialty) -->
+          <div class="ob-field" id="ob-other-wrap" style="display:none">
+            <label for="biz-desc">Describe what you do</label>
+            <textarea id="biz-desc" rows="3" placeholder="e.g. We run a mobile dog grooming service in Melbourne..."></textarea>
+          </div>
+
           <div class="ob-field">
             <label for="biz-booking">Online booking link <span class="optional">(optional)</span></label>
             <input type="url" id="biz-booking" placeholder="https://book.yoursite.com.au" autocomplete="url" />
@@ -1811,15 +1891,102 @@
       });
     }
 
+    // ─── Industry / Specialty selector ───
+    const INDUSTRY_SPECIALTIES = {
+      trades:       ['Plumbing','Electrical','Building & Construction','Painting','Roofing','Cleaning','Pest Control','Landscaping','HVAC & Air Con','Locksmith','Tiling','Other'],
+      health:       ['Dental','Physiotherapy','Chiropractic','Osteopathy','General Practice','Optometry','Psychology','Specialist','Other'],
+      beauty:       ['Hair Salon','Barber','Beauty Clinic','Spa & Massage','Nail Salon','Tattoo & Piercing','Personal Training','Other'],
+      professional: ['Accounting & Tax','Legal','Real Estate','Mortgage Broking','Financial Planning','IT & Tech','Consulting','Other'],
+      other:        [],
+    };
+    const INDUSTRY_LABELS = { trades:'trade or construction', health:'health or medical practice', beauty:'beauty or wellness', professional:'professional service', other:'business' };
+    const SPECIALTY_DESC = {
+      'Plumbing':'We are a residential and commercial plumbing business in Melbourne, Australia. We handle emergency callouts, blocked drains, hot water systems, and general repairs.',
+      'Electrical':'We are an electrical services business in Melbourne, Australia. We handle residential and commercial electrical work, safety inspections, and emergency callouts.',
+      'Building & Construction':'We are a building and construction business in Melbourne, Australia. We handle renovations, extensions, new builds, and general construction work.',
+      'Painting':'We are a painting and decorating business in Melbourne, Australia. We handle interior and exterior residential and commercial painting.',
+      'Roofing':'We are a roofing contractor in Melbourne, Australia. We handle roof repairs, replacements, guttering, and emergency leak repairs.',
+      'Cleaning':'We are a professional cleaning service in Melbourne, Australia. We handle domestic, commercial, and end of lease cleaning.',
+      'Pest Control':'We are a pest control business in Melbourne, Australia. We handle termite inspections, general pest treatments, and rodent control.',
+      'Landscaping':'We are a landscaping business in Melbourne, Australia. We handle garden design, lawn maintenance, and outdoor renovations.',
+      'HVAC & Air Con':'We are an HVAC and air conditioning business in Melbourne, Australia. We handle installation, servicing, and repairs for residential and commercial systems.',
+      'Locksmith':'We are a locksmith in Melbourne, Australia. We handle emergency lockouts, lock changes, key cutting, and security upgrades.',
+      'Tiling':'We are a tiling contractor in Melbourne, Australia. We handle floor and wall tiling for bathrooms, kitchens, and outdoor areas.',
+      'Dental':'We are a dental practice in Melbourne, Australia. We provide general dentistry, check-ups, fillings, extractions, cosmetic dentistry, and orthodontic consultations.',
+      'Physiotherapy':'We are a physiotherapy clinic in Melbourne, Australia. We treat musculoskeletal injuries, sports injuries, post-surgery rehabilitation, and chronic pain.',
+      'Chiropractic':'We are a chiropractic clinic in Melbourne, Australia. We treat back pain, neck pain, headaches, and musculoskeletal conditions.',
+      'Osteopathy':'We are an osteopathic practice in Melbourne, Australia. We treat musculoskeletal conditions, back pain, and sports injuries.',
+      'General Practice':'We are a general practice clinic in Melbourne, Australia. We provide GP consultations, health assessments, chronic disease management, and referrals.',
+      'Optometry':'We are an optometry practice in Melbourne, Australia. We provide eye tests, prescription glasses, contact lenses, and eye health assessments.',
+      'Psychology':'We are a psychology practice in Melbourne, Australia. We provide individual counselling and therapy for anxiety, depression, and trauma.',
+      'Hair Salon':'We are a hair salon in Melbourne, Australia. We provide cuts, colours, styling, treatments, and bridal hair.',
+      'Barber':'We are a barbershop in Melbourne, Australia. We provide haircuts, fades, beard trims, and hot towel shaves.',
+      'Beauty Clinic':'We are a beauty clinic in Melbourne, Australia. We provide facials, skin treatments, waxing, and cosmetic treatments.',
+      'Spa & Massage':'We are a spa and massage centre in Melbourne, Australia. We provide remedial massage, relaxation massage, and body treatments.',
+      'Nail Salon':'We are a nail salon in Melbourne, Australia. We provide manicures, pedicures, gel nails, and nail art.',
+      'Tattoo & Piercing':'We are a tattoo and piercing studio in Melbourne, Australia. We provide custom tattoos and body piercings.',
+      'Personal Training':'We are personal trainers in Melbourne, Australia. We provide one-on-one training, group sessions, and nutrition advice.',
+      'Accounting & Tax':'We are an accounting firm in Melbourne, Australia. We provide tax returns, bookkeeping, BAS preparation, and business advisory services.',
+      'Legal':'We are a law firm in Melbourne, Australia. We provide legal advice and representation.',
+      'Real Estate':'We are a real estate agency in Melbourne, Australia. We help clients buy, sell, and rent residential and commercial properties.',
+      'Mortgage Broking':'We are a mortgage broking business in Melbourne, Australia. We help clients find home loans, investment loans, and refinancing.',
+      'Financial Planning':'We are financial planners in Melbourne, Australia. We provide superannuation advice, investment planning, and retirement planning.',
+      'IT & Tech':'We are an IT services business in Melbourne, Australia. We provide tech support, managed services, and software solutions.',
+      'Consulting':'We are a consulting firm in Melbourne, Australia. We provide strategic advice and professional consulting services.',
+    };
+    let selectedIndustry = null;
+    let selectedSpecialty = null;
+
+    document.querySelectorAll('.ob-industry-tile').forEach(tile => {
+      tile.addEventListener('click', function() {
+        document.querySelectorAll('.ob-industry-tile').forEach(t => t.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedIndustry = this.dataset.ind;
+        selectedSpecialty = null;
+        const specWrap = document.getElementById('ob-specialty-wrap');
+        const otherWrap = document.getElementById('ob-other-wrap');
+        if (selectedIndustry === 'other') {
+          specWrap.classList.remove('visible');
+          otherWrap.style.display = 'block';
+          return;
+        }
+        otherWrap.style.display = 'none';
+        const specLabel = document.getElementById('ob-spec-industry-label');
+        if (specLabel) specLabel.textContent = INDUSTRY_LABELS[selectedIndustry] || 'business';
+        const chips = document.getElementById('ob-spec-chips');
+        chips.innerHTML = '';
+        (INDUSTRY_SPECIALTIES[selectedIndustry] || []).forEach(spec => {
+          const btn = document.createElement('button');
+          btn.type = 'button'; btn.className = 'ob-spec-chip'; btn.textContent = spec;
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('.ob-spec-chip').forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedSpecialty = spec;
+            document.getElementById('ob-other-wrap').style.display = spec === 'Other' ? 'block' : 'none';
+          });
+          chips.appendChild(btn);
+        });
+        specWrap.classList.add('visible');
+      });
+    });
+
     // ─── Step 1 → 2a (bridge) ───
     document.getElementById('step1-next').addEventListener('click', () => {
       const name = document.getElementById('biz-name').value.trim();
-      const desc = document.getElementById('biz-desc').value.trim();
       const err = document.getElementById('step1-error');
       err.classList.remove('visible');
 
       if (!name) { err.textContent = 'Please enter your business name.'; err.classList.add('visible'); return; }
-      if (!desc || desc.length < 20) { err.textContent = 'Please describe your business in a bit more detail (at least 20 characters).'; err.classList.add('visible'); return; }
+      if (!selectedIndustry) { err.textContent = 'Please select your industry.'; err.classList.add('visible'); return; }
+      if (selectedIndustry !== 'other' && !selectedSpecialty) { err.textContent = 'Please select your business type.'; err.classList.add('visible'); return; }
+
+      let desc;
+      if (selectedIndustry === 'other' || selectedSpecialty === 'Other') {
+        desc = (document.getElementById('biz-desc')?.value || '').trim();
+        if (!desc || desc.length < 10) { err.textContent = 'Please describe what your business does.'; err.classList.add('visible'); return; }
+      } else {
+        desc = SPECIALTY_DESC[selectedSpecialty] || `We are a ${selectedSpecialty} business in Melbourne, Australia.`;
+      }
 
       bizData = { ...bizData, businessName: name, description: desc, bookingLink: document.getElementById('biz-booking').value.trim() };
 
