@@ -821,15 +821,12 @@ app.post("/api/voice/inbound", async (req, res) => {
 
     console.log(`[voice/inbound] business=${business.name} id=${business.id}`);
 
-    // Fire-and-forget: create lead and send first SMS
-    (async () => {
-      try {
-        const existing = await checkDuplicateLead(from, 30);
-        if (existing) {
-          console.log(`[voice/inbound] duplicate lead for ${from}, skipping`);
-          return;
-        }
-
+    // Do SMS work before responding — serverless kills background async after res.send()
+    try {
+      const existing = await checkDuplicateLead(from, 30);
+      if (existing) {
+        console.log(`[voice/inbound] duplicate lead for ${from}, skipping`);
+      } else {
         await createLead({
           businessId: business.id,
           name: null,
@@ -843,19 +840,17 @@ app.post("/api/voice/inbound", async (req, res) => {
         if (!isWithinOperatingHours(business)) {
           console.log(`[voice/inbound] outside operating hours, sending after-hours SMS to ${from}`);
           await sendSms({ from: business.twilio_from_number, to: from, body: buildAfterHoursMessage(business) });
-          return;
+        } else {
+          const firstMessage = buildIntro(flowConfig, null, business.name);
+          console.log(`[voice/inbound] sending first SMS to ${from}`);
+          await sendSms({ from: business.twilio_from_number, to: from, body: firstMessage });
+          console.log(`[voice/inbound] SMS sent to ${from}`);
         }
-
-        const firstMessage = buildIntro(flowConfig, null, business.name);
-        console.log(`[voice/inbound] sending first SMS to ${from}`);
-        await sendSms({ from: business.twilio_from_number, to: from, body: firstMessage });
-        console.log(`[voice/inbound] SMS sent to ${from}`);
-      } catch (err) {
-        console.error("[voice/inbound] async error:", err);
       }
-    })();
+    } catch (err) {
+      console.error("[voice/inbound] SMS flow error:", err);
+    }
 
-    // Respond immediately so Twilio doesn't timeout
     return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say>Thanks for calling. We'll text you shortly.</Say></Response>`);
   } catch (err) {
     console.error("[voice/inbound] error:", err);
