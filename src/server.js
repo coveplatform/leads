@@ -828,86 +828,82 @@ async function syncSubscriptionStatus(stripeCustomerId, subscriptionId, status) 
 }
 
 async function provisionTwilioNumber(businessId) {
-  // TEST MODE: cycle through real Twilio numbers so new signups get a working number
-  const testNumbers = ["+61482097206", "+61468093667", "+61491570006"];
-  const { neon } = await import("@neondatabase/serverless");
-  const sql = neon(config.databaseUrl);
-  // Find numbers not taken by OTHER businesses (exclude self so re-provisioning works)
-  const taken = await sql`SELECT twilio_from_number FROM businesses WHERE twilio_from_number = ANY(${testNumbers}) AND id != ${businessId}`;
-  const takenSet = new Set(taken.map(r => r.twilio_from_number));
-  const available = testNumbers.find(n => !takenSet.has(n));
-  if (!available) return null;
-  await sql`UPDATE businesses SET twilio_from_number = ${available} WHERE id = ${businessId}`;
-  return available;
-
-  /* real provisioning — commented out during dev
   if (!config.twilio.accountSid || !config.twilio.authToken) return null;
 
   try {
     const client = twilio(config.twilio.accountSid, config.twilio.authToken);
+
+    // Always use the production URL for webhooks, even when running locally
     const rawBase = (config.baseUrl || "").trim();
     const baseUrl = (rawBase.startsWith("http://localhost") || rawBase.startsWith("http://127"))
-      ? (process.env.PRODUCTION_URL || "https://leads-rho-six.vercel.app").trim()
+      ? (process.env.PRODUCTION_URL || "https://usecove.app").trim()
       : rawBase;
-    const webhookUrl = `${baseUrl}/api/sms/inbound`;
 
-    const addressSid = process.env.TWILIO_ADDRESS_SID || null;
-    const bundleSid  = process.env.TWILIO_BUNDLE_SID  || null;
+    const smsUrl   = `${baseUrl}/api/sms/inbound`;
+    const voiceUrl = `${baseUrl}/api/voice/inbound`;
 
-    // Try AU mobile first (requires approved regulatory bundle), then AU local, then US local
+    const addressSid         = process.env.TWILIO_ADDRESS_SID          || null;
+    const bundleSid          = process.env.TWILIO_BUNDLE_SID           || null;
+    const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID || null;
+
+    // Try AU mobile first (needs regulatory bundle), then AU local
     let phoneNumber = null;
-    for (const [country, type] of [["AU", "mobile"], ["AU", "local"], ["US", "local"]]) {
+    for (const [country, type] of [["AU", "mobile"], ["AU", "local"]]) {
       try {
-        const list = await client.availablePhoneNumbers(country)[type].list({ smsEnabled: true, limit: 20 });
-        if (!list.length) { console.warn(`No ${country} ${type} numbers available`); continue; }
-
-        // For AU mobile we need an approved bundle — skip if missing
         if (country === "AU" && type === "mobile" && !bundleSid) {
-          console.warn("Skipping AU mobile — TWILIO_BUNDLE_SID not set");
+          console.warn("[provision] Skipping AU mobile — TWILIO_BUNDLE_SID not set");
           continue;
         }
-
+        const list = await client.availablePhoneNumbers(country)[type].list({ smsEnabled: true, limit: 20 });
+        if (!list.length) { console.warn(`[provision] No ${country} ${type} numbers available`); continue; }
         const pick = list.find(n => !n.beta) || list[0];
         phoneNumber = pick.phoneNumber;
-        console.log(`Provisioning ${country} ${type}: ${phoneNumber}`);
+        console.log(`[provision] Selected ${country} ${type}: ${phoneNumber}`);
         break;
-      } catch (e) { console.warn(`No ${country} ${type} numbers:`, e.message); }
+      } catch (e) { console.warn(`[provision] ${country} ${type} search failed:`, e.message); }
     }
 
     if (!phoneNumber) {
-      console.warn("No phone numbers available for provisioning");
+      console.error("[provision] No AU numbers available");
       return null;
     }
 
-    const voiceUrl = `${baseUrl}/api/voice/inbound`;
+    // Purchase the number with voice + SMS webhooks
     const createParams = {
       phoneNumber,
-      smsUrl: webhookUrl,
+      smsUrl,
       smsMethod: "POST",
       voiceUrl,
       voiceMethod: "POST",
     };
-    if (phoneNumber.startsWith("+61") && bundleSid) {
-      createParams.bundleSid  = bundleSid;
-      if (addressSid) createParams.addressSid = addressSid;
-    }
+    if (bundleSid)  createParams.bundleSid  = bundleSid;
+    if (addressSid) createParams.addressSid = addressSid;
 
     const purchased = await client.incomingPhoneNumbers.create(createParams);
+    console.log(`[provision] Purchased ${purchased.phoneNumber} (SID: ${purchased.sid})`);
 
+    // Add to Messaging Service Sender Pool for compliance + opt-out management
+    if (messagingServiceSid) {
+      try {
+        await client.messaging.v1.services(messagingServiceSid)
+          .phoneNumbers
+          .create({ phoneNumberSid: purchased.sid });
+        console.log(`[provision] Added to Messaging Service ${messagingServiceSid}`);
+      } catch (e) {
+        console.warn("[provision] Could not add to Messaging Service:", e.message);
+      }
+    }
+
+    // Save to DB
     const { neon } = await import("@neondatabase/serverless");
     const sql = neon(config.databaseUrl);
-    await sql`
-      UPDATE businesses
-      SET twilio_from_number = ${purchased.phoneNumber}
-      WHERE id = ${businessId}
-    `;
+    await sql`UPDATE businesses SET twilio_from_number = ${purchased.phoneNumber} WHERE id = ${businessId}`;
 
     return purchased.phoneNumber;
   } catch (err) {
-    console.error("Twilio provisioning error:", err);
+    console.error("[provision] Twilio provisioning error:", err);
     return null;
   }
-  */
 }
 
 // ─── Public lead API ───
