@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" cx="30%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#e8540a" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0e0c0a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="arcgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e8540a"/>
+      <stop offset="100%" stop-color="#ff7240"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0e0c0a"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Subtle dot grid -->
+  <pattern id="dots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="1" fill="#ffffff" opacity="0.04"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- Logo mark (coral bg) -->
+  <rect x="72" y="72" width="64" height="64" rx="14" fill="#e8540a"/>
+  <path d="M82 110 Q96 103 112 110 Q128 117 136 110" stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M85 97 Q98 90 112 97 Q126 104 135 97" stroke="white" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.75"/>
+  <path d="M91 84 Q102 77 112 84 Q122 91 133 84" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.45"/>
+
+  <!-- Logo text -->
+  <text x="152" y="116" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="36" font-weight="700" fill="white" letter-spacing="-0.5">cove</text>
+
+  <!-- Headline -->
+  <text x="72" y="260" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="72" font-weight="800" fill="white" letter-spacing="-2">Stop losing jobs</text>
+  <text x="72" y="348" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="72" font-weight="800" fill="#e8540a" letter-spacing="-2">while you're working.</text>
+
+  <!-- Subheading -->
+  <text x="72" y="416" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="28" fill="#a8a29e" letter-spacing="-0.3">Cove texts your missed calls back in 10 seconds — qualifies them,</text>
+  <text x="72" y="454" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="28" fill="#a8a29e" letter-spacing="-0.3">and sends you a ready-to-call summary.</text>
+
+  <!-- CTA pill -->
+  <rect x="72" y="498" width="310" height="60" rx="30" fill="#e8540a"/>
+  <text x="227" y="537" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="22" font-weight="700" fill="white" text-anchor="middle">Start free trial →</text>
+
+  <!-- Right side: phone mockup suggestion (decorative arcs) -->
+  <g opacity="0.12">
+    <path d="M820 150 Q960 80 1100 150 Q1200 200 1150 300 Q1100 400 960 430 Q820 460 760 380 Q700 300 820 150" stroke="#e8540a" stroke-width="1" fill="none"/>
+    <path d="M850 180 Q970 120 1080 180 Q1160 220 1120 310 Q1080 390 960 415 Q840 440 790 370 Q740 300 850 180" stroke="#e8540a" stroke-width="1" fill="none"/>
+  </g>
+
+  <!-- SMS bubble mockup -->
+  <rect x="780" y="180" width="360" height="80" rx="20" fill="#1c1917"/>
+  <rect x="780" y="180" width="360" height="80" rx="20" fill="white" fill-opacity="0.04"/>
+  <text x="800" y="212" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="16" fill="#a8a29e">Bay Plumbing</text>
+  <text x="800" y="236" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="17" fill="white">Hi Sam! We missed your call —</text>
+  <text x="800" y="254" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="17" fill="white">how urgent is this?</text>
+
+  <rect x="780" y="278" width="200" height="52" rx="16" fill="#e8540a" fill-opacity="0.15" x="980"/>
+  <rect x="980" y="278" width="160" height="52" rx="16" fill="#e8540a" fill-opacity="0.2"/>
+  <text x="1060" y="310" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="700" fill="#e8540a" text-anchor="middle">A — Emergency</text>
+
+  <rect x="780" y="348" width="380" height="80" rx="20" fill="#1c1917" fill-opacity="0.8"/>
+  <rect x="780" y="348" width="380" height="80" rx="20" fill="white" fill-opacity="0.04"/>
+  <text x="800" y="380" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="16" fill="#a8a29e">Bay Plumbing</text>
+  <text x="800" y="404" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="17" fill="white">Emergency — got it. What's the issue?</text>
+
+  <!-- Notification -->
+  <rect x="780" y="450" width="380" height="110" rx="16" fill="#1c1917"/>
+  <rect x="780" y="450" width="380" height="4" rx="2" fill="#e8540a"/>
+  <text x="800" y="482" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" fill="#a8a29e">🔔 Cove · now</text>
+  <text x="800" y="508" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="17" font-weight="700" fill="white">🚨 New Urgent Lead — Bay Plumbing</text>
+  <text x="800" y="530" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="15" fill="#a8a29e">Sam Thompson · Burst pipe · Emergency</text>
+  <text x="800" y="550" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="15" fill="#a8a29e">📞 0412 345 678 · Call back ASAP</text>
+
+  <!-- usecove.app URL -->
+  <text x="1128" y="590" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" fill="#78716c" text-anchor="end">usecove.app</text>
+</svg>
