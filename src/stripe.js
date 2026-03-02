@@ -28,6 +28,7 @@ export async function createCheckoutSession({ customerId, successUrl, cancelUrl 
     allow_promotion_codes: true,
     billing_address_collection: "auto",
     subscription_data: {
+      trial_period_days: 14,
       metadata: { source: "cove_self_serve" },
     },
   });

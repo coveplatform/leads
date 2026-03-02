@@ -8,6 +8,7 @@ import {
   hashPassword,
   verifyPassword,
   signToken,
+  verifyToken,
   setAuthCookie,
   clearAuthCookie,
   requireAuth,
@@ -115,9 +116,64 @@ app.use(cookieParser());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const publicDir = path.join(__dirname, "..", "public");
+
+// ─── Admin helpers ───
+
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "kris.engelhardt4@gmail.com")
+  .split(",").map((e) => e.trim().toLowerCase());
+
+async function requireAdmin(req, res, next) {
+  const token = req.cookies?.cove_token;
+  if (!token) return res.status(401).json({ ok: false, error: "Not authenticated" });
+  let userId;
+  try {
+    const payload = verifyToken(token);
+    userId = payload.userId;
+  } catch {
+    return res.status(401).json({ ok: false, error: "Invalid session" });
+  }
+  const user = await getUserById(userId);
+  if (!user || !ADMIN_EMAILS.includes(user.email?.toLowerCase())) {
+    return res.status(403).json({ ok: false, error: "Admin access required" });
+  }
+  req.userId = userId;
+  next();
+}
+
+async function requireAdminRedirect(req, res, next) {
+  const token = req.cookies?.cove_token;
+  if (!token) return res.redirect("/login");
+  let userId;
+  try {
+    const payload = verifyToken(token);
+    userId = payload.userId;
+  } catch {
+    return res.redirect("/login");
+  }
+  const user = await getUserById(userId);
+  if (!user || !ADMIN_EMAILS.includes(user.email?.toLowerCase())) {
+    return res.status(403).send("Access denied — admin only.");
+  }
+  req.userId = userId;
+  next();
+}
+
+// Protect admin.html before static middleware can serve it publicly
+app.get(["/admin", "/admin.html"], requireAdminRedirect, (_req, res) => {
+  res.sendFile(path.join(publicDir, "admin.html"));
+});
+
 app.use(express.static(publicDir));
 
 // ─── Page routes ───
+
+// Tappable dial link — included in the forwarding setup SMS so users tap instead of typing
+app.get("/dial/:code", (req, res) => {
+  const code = decodeURIComponent(req.params.code);
+  // Basic sanity check — only allow dial codes (digits, *, #, +)
+  if (!/^[\d*#+]+$/.test(code)) return res.status(400).send("Invalid code");
+  res.send(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Opening dialler…</title><meta http-equiv="refresh" content="0;url=tel:${encodeURIComponent(code)}"></head><body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#fafaf8"><div style="text-align:center"><div style="font-size:2rem;margin-bottom:.5rem">📞</div><p style="color:#3f3f46;font-size:.95rem">Opening your dialler…</p><p style="margin-top:.75rem"><a href="tel:${encodeURIComponent(code)}" style="color:#e8540a;font-weight:600">Tap here if it didn't open</a></p></div></body></html>`);
+});
 
 app.get("/login", redirectIfAuthed, (_req, res) => {
   res.sendFile(path.join(publicDir, "login.html"));
@@ -1510,14 +1566,7 @@ app.post("/api/webhook/generic/:businessId", async (req, res) => {
 
 // ─── Admin (your internal panel — kept separate from customer routes) ───
 
-app.post("/api/admin/auth", async (req, res) => {
-  const { password } = req.body || {};
-  const adminPassword = process.env.ADMIN_PASSWORD || "cove2024";
-  if (password === adminPassword) return res.json({ ok: true });
-  return res.status(401).json({ ok: false, error: "Invalid password" });
-});
-
-app.get("/api/admin/businesses", async (req, res) => {
+app.get("/api/admin/businesses", requireAdmin, async (req, res) => {
   try {
     const businesses = await getAllBusinesses();
     return res.json({ ok: true, businesses, count: businesses.length });
@@ -1526,7 +1575,7 @@ app.get("/api/admin/businesses", async (req, res) => {
   }
 });
 
-app.get("/api/admin/leads", async (req, res) => {
+app.get("/api/admin/leads", requireAdmin, async (req, res) => {
   try {
     const leads = await getAllLeadsWithBusiness();
     return res.json({ ok: true, leads, count: leads.length });
@@ -1535,7 +1584,7 @@ app.get("/api/admin/leads", async (req, res) => {
   }
 });
 
-app.post("/api/admin/nudge", async (req, res) => {
+app.post("/api/admin/nudge", requireAdmin, async (req, res) => {
   try {
     const businesses = await getAllBusinesses();
     let nudged = 0;

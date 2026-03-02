@@ -1108,7 +1108,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             Tap to activate forwarding
           </a>
-          <p style="text-align:center;font-size:.78rem;color:#A1A1AA;margin:.3rem 0 1.1rem;line-height:1.5">Opens your phone dialler with the code pre-filled. Just tap <strong style="color:#3F3F46">Call</strong> — done.</p>
+          <p id="cf-activate-sub" style="text-align:center;font-size:.78rem;color:#A1A1AA;margin:.3rem 0 1.1rem;line-height:1.5">Opens your phone dialler with the code pre-filled. Just tap <strong style="color:#3F3F46">Call</strong> — done.</p>
 
           <!-- Send to phone -->
           <button class="cf-send-phone-btn" id="cf-send-phone-btn" type="button">
@@ -1394,12 +1394,42 @@
       }
     }
 
+    const _isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
     function updateActivateLink() {
       if (!_coveNumber || !_selectedCarrier) return;
       const code = getDialCode(_selectedCarrier, _coveNumber);
       const link = document.getElementById('cf-activate-link');
-      if (link) link.href = 'tel:' + encodeURIComponent(code);
+      const sub = document.getElementById('cf-activate-sub');
+      if (!link) return;
+
+      if (_isDesktop) {
+        link.href = '#';
+        link.dataset.dialCode = code;
+        link.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy dial code`;
+        if (sub) sub.innerHTML = 'Paste it into your phone\'s dialler, then tap <strong style="color:#3F3F46">Call</strong> — done.';
+      } else {
+        link.href = 'tel:' + encodeURIComponent(code);
+        delete link.dataset.dialCode;
+        link.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Tap to activate forwarding`;
+        if (sub) sub.innerHTML = 'Opens your phone dialler with the code pre-filled. Just tap <strong style="color:#3F3F46">Call</strong> — done.';
+      }
     }
+
+    // Copy-to-clipboard handler for desktop
+    document.getElementById('cf-activate-link')?.addEventListener('click', async function(e) {
+      const code = this.dataset.dialCode;
+      if (!code) return; // mobile — let tel: link work normally
+      e.preventDefault();
+      try {
+        await navigator.clipboard.writeText(code);
+        const orig = this.innerHTML;
+        this.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+        setTimeout(() => { this.innerHTML = orig; }, 2000);
+      } catch {
+        window.prompt('Copy this dial code:', code);
+      }
+    });
 
     function fillNumber(num) {
       _coveNumber = num;
@@ -1437,7 +1467,8 @@
       }
       this.disabled = true; this.textContent = 'Sending…';
       const carrierNames = { telstra: 'Telstra', optus: 'Optus', vodafone: 'Vodafone', other: 'your carrier' };
-      const msg = `Cove — activate call forwarding (${carrierNames[_selectedCarrier]})\n\nTap the code below to open your dialler, then tap Call:\n\n${code}\n\nYou'll hear a tone confirming it worked.\n\n(Your Cove number: ${_coveNumber})`;
+      const dialLink = `${window.location.origin}/dial/${encodeURIComponent(code)}`;
+      const msg = `Cove — activate call forwarding (${carrierNames[_selectedCarrier]})\n\nTap this link to open your dialler:\n${dialLink}\n\nThen tap Call — done. You'll hear a tone confirming it worked.\n\n(Your Cove number: ${_coveNumber})`;
       try {
         const r = await fetch('/api/demo/send', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
