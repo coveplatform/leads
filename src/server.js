@@ -829,13 +829,14 @@ async function syncSubscriptionStatus(stripeCustomerId, subscriptionId, status) 
 
 async function provisionTwilioNumber(businessId) {
   // TEST MODE: cycle through real Twilio numbers so new signups get a working number
-  const testNumbers = ["+61482097206", "+61468093667"];
+  const testNumbers = ["+61482097206", "+61468093667", "+61491570006"];
   const { neon } = await import("@neondatabase/serverless");
   const sql = neon(config.databaseUrl);
-  // Pick whichever test number isn't already assigned to a business
-  const taken = await sql`SELECT twilio_from_number FROM businesses WHERE twilio_from_number = ANY(${testNumbers})`;
+  // Find numbers not taken by OTHER businesses (exclude self so re-provisioning works)
+  const taken = await sql`SELECT twilio_from_number FROM businesses WHERE twilio_from_number = ANY(${testNumbers}) AND id != ${businessId}`;
   const takenSet = new Set(taken.map(r => r.twilio_from_number));
-  const available = testNumbers.find(n => !takenSet.has(n)) || "+61491570006";
+  const available = testNumbers.find(n => !takenSet.has(n));
+  if (!available) return null;
   await sql`UPDATE businesses SET twilio_from_number = ${available} WHERE id = ${businessId}`;
   return available;
 
