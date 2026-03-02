@@ -24,6 +24,7 @@ export const config = {
   stripe: {
     get secretKey() { return process.env.STRIPE_SECRET_KEY || ""; },
     get priceId() { return process.env.STRIPE_PRICE_ID || ""; },
+    get priceIdAnnual() { return process.env.STRIPE_PRICE_ID_ANNUAL || ""; },
     get webhookSecret() { return process.env.STRIPE_WEBHOOK_SECRET || ""; },
   },
 
