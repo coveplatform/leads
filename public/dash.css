@@ -1596,8 +1596,11 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
   .int-card__body { padding: 16px 18px; }
 
   /* Getting-started panel */
-  .gs-panel { padding: 20px 18px; }
-  .gs-step { gap: 10px; padding: 12px 0; }
+  .gs-panel { padding: 18px 16px; }
+  .gs-panel__title { font-size: 17px; }
+  .gs-step { flex-wrap: wrap; gap: 8px 10px; padding: 12px 0; align-items: flex-start; }
+  .gs-step__content { flex: 1 1 calc(100% - 36px); }
+  .gs-step__action { flex: 0 0 auto; margin-left: 34px; font-size: 12px; padding: 5px 12px; }
 
   /* Flow cards */
   .flow-card__body { padding: 12px 14px 14px; }
@@ -2294,7 +2297,6 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 
 /* ─── Mobile top bar ─── */
 .mob-topbar {
-  display: none;
   position: fixed; top: 0; left: 0; right: 0; z-index: 110;
   height: 52px;
   background: var(--surface);
@@ -2302,6 +2304,10 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
   align-items: center;
   justify-content: space-between;
   padding: 0 14px;
+  display: none; /* shown via media query below */
+}
+@media (min-width: 769px) {
+  .mob-topbar { display: none !important; }
 }
 .mob-burger {
   width: 36px; height: 36px;
