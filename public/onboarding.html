@@ -689,8 +689,19 @@
       .cf-tab { font-size: .68rem; padding: .42rem .3rem; }
       /* Dial code wraps instead of overflowing */
       .cf-dial-btn { max-width: 100%; overflow-x: auto; word-break: break-all; white-space: normal; font-size: .75rem; }
-      /* Number display */
-      .cf-num-box-number { font-size: 1.1rem; }
+      /* Number display — tighter on mobile */
+      .cf-num-box { padding: .75rem .9rem; margin-bottom: 1rem; }
+      .cf-num-box-icon { width: 32px; height: 32px; border-radius: 8px; }
+      .cf-num-box-left { gap: .55rem; }
+      .cf-num-box-number { font-size: 1.05rem; }
+      /* Carrier tiles — tighter */
+      .cf-carrier-grid { gap: .45rem; margin-bottom: .75rem; }
+      .cf-carrier-tile { padding: .75rem .5rem; border-radius: 10px; }
+      .cf-carrier-name { font-size: .83rem; }
+      /* Activate button — less padding */
+      .cf-activate-btn { padding: .85rem 1rem; font-size: .93rem; border-radius: 12px; }
+      /* Tighten "account active" badge row */
+      .ob-complete-icon { width: 44px; height: 44px; }
       /* Step 2a info items — tighter gap on tiny screens */
       .ob-actions { margin-top: 1.25rem; }
       .cf-test-row { flex-direction: column; }
@@ -1049,7 +1060,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             </div>
             <div>
-              <div class="cf-num-box-label">Your Cove number — forward missed calls here</div>
+              <div class="cf-num-box-label">Your Cove number</div>
               <div class="cf-num-box-number" id="cf-number-text"><span class="cf-num-loading">Setting up…</span></div>
             </div>
           </div>

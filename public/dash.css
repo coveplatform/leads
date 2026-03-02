@@ -1555,7 +1555,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 /* ─── Mobile — Drawer layout (≤768px) ─── */
 @media (max-width: 768px) {
   /* Show mobile top bar */
-  .mob-topbar { display: flex; }
+  .mob-topbar { display: flex !important; }
 
   /* Push content below top bar */
   .dash-root { padding-top: 52px; }
