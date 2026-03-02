@@ -1465,7 +1465,7 @@
         if (numText) numText.textContent = `Setting up your number… (${secs}s)`;
         setTimeout(loadNumber, 3000);
       } else {
-        if (numText) numText.innerHTML = `Could not provision automatically — <a href="#" id="retry-provision" style="color:#e8540a;font-weight:600">try again</a> or <a href="mailto:hello@coveplatform.com" style="color:#e8540a">contact support</a>.`;
+        if (numText) numText.innerHTML = `Could not provision automatically — <a href="#" id="retry-provision" style="color:#e8540a;font-weight:600">try again</a> or <a href="mailto:hello@usecove.app" style="color:#e8540a">contact support</a>.`;
         document.getElementById('retry-provision')?.addEventListener('click', async (e) => {
           e.preventDefault();
           _loadNumberAttempts = 0; _provisionAttempted = false;
