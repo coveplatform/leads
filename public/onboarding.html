@@ -372,45 +372,51 @@
     /* Greeting card */
     .cv-greeting-card {
       background: #fff; border: 1.5px solid #E4E4E7; border-radius: 16px;
-      margin-bottom: 1.5rem; overflow: hidden; transition: border-color .15s;
+      margin-bottom: 1.75rem; overflow: hidden; transition: border-color .15s;
+      box-shadow: 0 1px 4px rgba(0,0,0,.04);
     }
     .cv-greeting-card:focus-within { border-color: #e8540a; box-shadow: 0 0 0 3px rgba(232,84,10,.08); }
     .cv-greeting-header {
       display: flex; align-items: center; gap: .65rem;
-      padding: .75rem 1rem .6rem; border-bottom: 1px solid #F4F4F5;
+      padding: .85rem 1rem .75rem; border-bottom: 1px solid #F0F0F2;
+      background: #FAFAFA;
     }
     .cv-greeting-icon {
-      width: 28px; height: 28px; border-radius: 8px;
+      width: 30px; height: 30px; border-radius: 8px;
       background: linear-gradient(135deg,#e8540a,#ff7240);
       display: grid; place-items: center; flex-shrink: 0;
     }
     .cv-greeting-title { font-size: .9rem; font-weight: 700; color: #18181B; }
-    .cv-greeting-sub { font-size: .75rem; color: #71717A; margin-top: .1rem; }
+    .cv-greeting-sub { font-size: .75rem; color: #71717A; margin-top: .15rem; }
     .cv-greeting-textarea {
-      width: 100%; box-sizing: border-box; background: transparent;
-      border: none; outline: none; font-size: .9rem; line-height: 1.65;
+      width: 100%; box-sizing: border-box; background: #fff;
+      border: none; outline: none; font-size: .9rem; line-height: 1.7;
       color: #18181B; font-family: inherit; resize: none; overflow: hidden;
-      padding: .75rem 1rem .85rem; min-height: 5.5rem;
+      padding: .9rem 1rem 1rem; min-height: 5rem;
     }
     .cv-greeting-hint {
-      padding: .4rem 1rem .65rem;
-      font-size: .7rem; color: #A1A1AA; line-height: 1.5;
+      padding: .55rem 1rem .7rem;
+      border-top: 1px solid #F4F4F5;
+      background: #FAFAFA;
+      font-size: .73rem; color: #A1A1AA; line-height: 1.55;
     }
     .cv-greeting-hint code {
-      background: #F4F4F5; border: 1px solid #E4E4E7;
-      border-radius: 4px; padding: 0 4px; font-size: .68rem;
-      font-family: monospace; color: #71717A;
+      background: #F0F0F2; border: 1px solid #E4E4E7;
+      border-radius: 4px; padding: 0 5px; font-size: .7rem;
+      font-family: monospace; color: #52525B;
     }
     /* Question card */
     .cv-q-card {
       background: #fff; border: 1.5px solid #E4E4E7; border-radius: 16px;
       margin-bottom: .65rem; overflow: hidden; transition: border-color .15s;
+      box-shadow: 0 1px 4px rgba(0,0,0,.04);
     }
     .cv-q-card:focus-within { border-color: #e8540a; box-shadow: 0 0 0 3px rgba(232,84,10,.08); }
     .cv-q-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: .65rem 1rem .55rem;
-      border-bottom: 1px solid #F4F4F5;
+      padding: .75rem 1rem .65rem;
+      border-bottom: 1px solid #F0F0F2;
+      background: #FAFAFA;
     }
     .cv-q-num {
       display: inline-flex; align-items: center; justify-content: center;
@@ -436,12 +442,13 @@
     }
     /* Reply type selector */
     .cv-reply-type {
-      padding: .65rem 1rem .75rem;
-      border-top: 1px solid #F4F4F5;
+      padding: .75rem 1rem .85rem;
+      border-top: 1px solid #F0F0F2;
+      background: #FAFAFA;
     }
     .cv-reply-type-label {
       font-size: .78rem; font-weight: 600; color: #71717A;
-      margin-bottom: .45rem;
+      margin-bottom: .5rem;
     }
     .cv-reply-type-btns { display: flex; gap: .45rem; }
     .cv-rt-btn {
