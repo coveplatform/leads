@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { randomBytes } from "node:crypto";
 import { config } from "./config.js";
 import {
   hashPassword,
@@ -33,6 +34,7 @@ import {
   buildCompletion,
   buildSummary,
   buildUrgentAlert,
+  buildExitSummary,
   isStopKeyword,
   buildStoppedMessage,
   getIndustryList,
@@ -41,14 +43,25 @@ import {
 import {
   generateFlowForIndustry,
   parseNaturalLanguageReply,
+  condenseFreeTextAnswers,
   isAIConfigured,
 } from "./ai.js";
+import {
+  detectSpecialIntent,
+  isMeaninglessReply,
+  extractLeadingOption,
+  getRetryCount,
+  incrementRetryAnswers,
+  MAX_RETRIES_MULTIPLE_CHOICE,
+  MAX_RETRIES_FREE_TEXT,
+} from "./reply-processor.js";
 import {
   createWebsiteInquiry,
   createLead,
   getBusinessById,
   getBusinessByTwilioNumber,
   getLatestActiveLeadByBusinessAndPhone,
+  hasPhoneOptedOut,
   updateLead,
   createBusiness,
   updateBusiness,
@@ -66,6 +79,10 @@ import {
   updateUser,
   getBusinessByUserId,
   getRecentLeadsByBusinessId,
+  setPasswordResetToken,
+  getUserByResetToken,
+  clearPasswordResetToken,
+  updatePassword,
 } from "./db.js";
 import {
   isWithinOperatingHours,
@@ -78,6 +95,7 @@ import {
 } from "./integrations.js";
 import { normalizePhone } from "./phone.js";
 import { sendSms } from "./sms.js";
+import { day1Email, day4Email, day11Email } from "./trial-emails.js";
 import twilio from "twilio";
 
 const app = express();
@@ -111,6 +129,18 @@ app.get("/onboarding", requireAuthRedirect, (_req, res) => {
 
 app.get("/dashboard", (_req, res) => {
   res.sendFile(path.join(publicDir, "dashboard.html"));
+});
+
+app.get("/privacy", (_req, res) => {
+  res.sendFile(path.join(publicDir, "privacy.html"));
+});
+
+app.get("/terms", (_req, res) => {
+  res.sendFile(path.join(publicDir, "terms.html"));
+});
+
+app.get("/reset-password", (_req, res) => {
+  res.sendFile(path.join(publicDir, "reset-password.html"));
 });
 
 // ─── Health ───
@@ -233,6 +263,64 @@ app.post("/api/auth/logout", (req, res) => {
   res.json({ ok: true });
 });
 
+app.post("/api/auth/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email) return res.status(400).json({ ok: false, error: "Email is required" });
+
+    const user = await getUserByEmail(email.toLowerCase().trim());
+    // Always return success — don't reveal whether the email exists
+    if (!user || !user.password_hash) return res.json({ ok: true });
+
+    const token = randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+    await setPasswordResetToken(user.id, token, expires);
+
+    const resetUrl = `${config.baseUrl}/reset-password?token=${token}`;
+    await sendEmailViaResend({
+      to: user.email,
+      subject: "Reset your Cove password",
+      html: `<p>Hi ${user.name || "there"},</p>
+<p>You requested a password reset for your Cove account. Click the button below to set a new password:</p>
+<p style="margin:24px 0"><a href="${resetUrl}" style="background:#e8540a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-family:sans-serif;display:inline-block">Reset password</a></p>
+<p style="color:#888;font-size:13px">This link expires in 1 hour. If you didn't request this, you can ignore this email.</p>
+<p style="color:#888;font-size:13px">— The Cove team</p>`,
+      text: `Reset your Cove password:\n\n${resetUrl}\n\nThis link expires in 1 hour.`,
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    return res.json({ ok: true }); // Don't expose errors
+  }
+});
+
+app.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body || {};
+    if (!token || !password) {
+      return res.status(400).json({ ok: false, error: "Token and password are required" });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ ok: false, error: "Password must be at least 8 characters" });
+    }
+
+    const user = await getUserByResetToken(token);
+    if (!user) {
+      return res.status(400).json({ ok: false, error: "This reset link has expired or is invalid. Please request a new one." });
+    }
+
+    const passwordHash = await hashPassword(password);
+    await updatePassword(user.id, passwordHash);
+    await clearPasswordResetToken(user.id);
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    return res.status(500).json({ ok: false, error: "Could not reset password. Please try again." });
+  }
+});
+
 app.get("/api/auth/me", requireAuth, async (req, res) => {
   try {
     const user = await getUserById(req.userId);
@@ -263,6 +351,34 @@ app.post("/api/auth/provision-number", requireAuth, async (req, res) => {
   } catch (err) {
     console.error("Provision number error:", err);
     return res.status(500).json({ ok: false, error: err.message || "Could not provision number" });
+  }
+});
+
+// ─── Update profile ───
+app.patch("/api/auth/update-profile", requireAuth, async (req, res) => {
+  try {
+    const { name, currentPassword, newPassword } = req.body;
+    const user = await getUserById(req.userId);
+    if (!user) return res.status(404).json({ ok: false, error: "User not found" });
+
+    if (newPassword) {
+      if (!currentPassword) return res.status(400).json({ ok: false, error: "Current password required." });
+      if (user.password_hash) {
+        const valid = await verifyPassword(currentPassword, user.password_hash);
+        if (!valid) return res.status(400).json({ ok: false, error: "Current password is incorrect." });
+      }
+      if (newPassword.length < 8) return res.status(400).json({ ok: false, error: "Password must be at least 8 characters." });
+      const { neon } = await import("@neondatabase/serverless");
+      const sql = neon(config.databaseUrl);
+      const hash = await hashPassword(newPassword);
+      await sql`UPDATE users SET password_hash = ${hash}, updated_at = now() WHERE id = ${req.userId}`;
+    }
+
+    const updated = await updateUser(req.userId, { name: name || user.name });
+    return res.json({ ok: true, user: updated });
+  } catch (err) {
+    console.error("Update profile error:", err);
+    return res.status(500).json({ ok: false, error: "Could not update profile." });
   }
 });
 
@@ -411,6 +527,47 @@ app.get("/api/me/leads", requireAuth, async (req, res) => {
   }
 });
 
+// ─── Trial email check (called from dashboard on load) ───
+app.post("/api/trial/check", requireAuth, async (req, res) => {
+  try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(config.databaseUrl);
+
+    const users = await sql`SELECT * FROM users WHERE id = ${req.userId} LIMIT 1`;
+    const user = users[0];
+    if (!user || !user.trial_started_at) return res.json({ ok: true, sent: [] });
+
+    const daysSince = (Date.now() - new Date(user.trial_started_at).getTime()) / 86400000;
+    const sent = user.trial_emails_sent || 0;
+    const dispatched = [];
+
+    const business = await getBusinessByUserId(req.userId);
+    const leads = business ? await getRecentLeadsByBusinessId(business.id, 30) : [];
+    const leadCount = leads.filter(l => l.status === "completed").length;
+
+    // Day 4 email (bit 1 = 2)
+    if (daysSince >= 3 && !(sent & 2) && leadCount === 0) {
+      const { subject, html, text } = day4Email({ name: user.name, bizName: business?.name });
+      await sendEmailViaResend({ to: user.email, subject, html, text });
+      await sql`UPDATE users SET trial_emails_sent = COALESCE(trial_emails_sent, 0) | 2 WHERE id = ${user.id}`;
+      dispatched.push("day4");
+    }
+
+    // Day 11 email (bit 2 = 4)
+    if (daysSince >= 10 && !(sent & 4)) {
+      const { subject, html, text } = day11Email({ name: user.name, bizName: business?.name, leadCount });
+      await sendEmailViaResend({ to: user.email, subject, html, text });
+      await sql`UPDATE users SET trial_emails_sent = COALESCE(trial_emails_sent, 0) | 4 WHERE id = ${user.id}`;
+      dispatched.push("day11");
+    }
+
+    return res.json({ ok: true, sent: dispatched });
+  } catch (err) {
+    console.error("Trial check error:", err);
+    return res.json({ ok: true, sent: [] }); // silent fail — never block dashboard load
+  }
+});
+
 app.get("/api/me/leads/:leadId/messages", requireAuth, async (req, res) => {
   try {
     const business = await getBusinessByUserId(req.userId);
@@ -511,19 +668,14 @@ app.get("/api/config/stripe-mode", (req, res) => {
 
 app.post("/api/billing/checkout", requireAuth, async (req, res) => {
   try {
-    // Dev mode: if Stripe not configured, auto-activate and provision number
+    // Dev mode: if Stripe not configured, auto-activate (number provisioned later at call forwarding step)
     if (!isStripeConfigured()) {
       const business = await getBusinessByUserId(req.userId);
-      let hasNumber = business?.twilio_from_number;
       if (business) {
         await updateBusiness(business.id, { isActive: true });
-        if (!hasNumber) {
-          hasNumber = await provisionTwilioNumber(business.id);
-        }
       }
       await updateUser(req.userId, { onboardingComplete: true, subscriptionStatus: "active" });
-      const dest = hasNumber ? `${config.baseUrl.trim()}/onboarding?step=complete` : `${config.baseUrl.trim()}/dashboard`;
-      return res.json({ ok: true, url: dest });
+      return res.json({ ok: true, url: `${config.baseUrl.trim()}/onboarding?step=complete` });
     }
 
     const user = await getUserById(req.userId);
@@ -632,9 +784,25 @@ async function activateSubscription(stripeCustomerId, subscriptionId) {
       stripe_subscription_id = ${subscriptionId},
       subscription_status = 'active',
       onboarding_complete = true,
+      trial_started_at = COALESCE(trial_started_at, now()),
       updated_at = now()
     WHERE id = ${user.id}
   `;
+
+  // Send day 1 activation email (call forwarding nudge)
+  try {
+    const businesses = await sql`SELECT * FROM businesses WHERE user_id = ${user.id} LIMIT 1`;
+    const biz = businesses[0];
+    const { subject, html, text } = day1Email({
+      name: user.name,
+      bizName: biz?.name,
+      coveNumber: biz?.twilio_from_number,
+    });
+    sendEmailViaResend({ to: user.email, subject, html, text }).catch(() => {});
+    await sql`UPDATE users SET trial_emails_sent = COALESCE(trial_emails_sent, 0) | 1 WHERE id = ${user.id}`;
+  } catch (e) {
+    console.error("Day 1 trial email error:", e);
+  }
 
   // Provision Twilio number if not already done
   const businesses = await sql`SELECT * FROM businesses WHERE user_id = ${user.id} LIMIT 1`;
@@ -660,6 +828,18 @@ async function syncSubscriptionStatus(stripeCustomerId, subscriptionId, status) 
 }
 
 async function provisionTwilioNumber(businessId) {
+  // TEST MODE: cycle through real Twilio numbers so new signups get a working number
+  const testNumbers = ["+61482097206", "+61468093667"];
+  const { neon } = await import("@neondatabase/serverless");
+  const sql = neon(config.databaseUrl);
+  // Pick whichever test number isn't already assigned to a business
+  const taken = await sql`SELECT twilio_from_number FROM businesses WHERE twilio_from_number = ANY(${testNumbers})`;
+  const takenSet = new Set(taken.map(r => r.twilio_from_number));
+  const available = testNumbers.find(n => !takenSet.has(n)) || "+61491570006";
+  await sql`UPDATE businesses SET twilio_from_number = ${available} WHERE id = ${businessId}`;
+  return available;
+
+  /* real provisioning — commented out during dev
   if (!config.twilio.accountSid || !config.twilio.authToken) return null;
 
   try {
@@ -726,6 +906,7 @@ async function provisionTwilioNumber(businessId) {
     console.error("Twilio provisioning error:", err);
     return null;
   }
+  */
 }
 
 // ─── Public lead API ───
@@ -746,6 +927,11 @@ app.post("/api/lead", async (req, res) => {
     const normalizedPhone = normalizePhone(phone, config.defaultCountryCode);
     if (!normalizedPhone) {
       return res.status(400).json({ ok: false, error: "Invalid phone format" });
+    }
+
+    const optedOut = await hasPhoneOptedOut(businessId, normalizedPhone);
+    if (optedOut) {
+      return res.status(403).json({ ok: false, error: "This number has opted out of SMS messages from this business" });
     }
 
     const existingLead = await checkDuplicateLead(normalizedPhone, 30);
@@ -827,13 +1013,15 @@ app.post("/api/website-inquiry", async (req, res) => {
 
 app.post("/api/voice/inbound", async (req, res) => {
   try {
-    const fromRaw = String(req.body?.From || "");
-    const toRaw   = String(req.body?.To   || "");
+    const fromRaw         = String(req.body?.From          || "");
+    const toRaw           = String(req.body?.To            || "");
+    const forwardedFromRaw= String(req.body?.ForwardedFrom || "");
 
-    const from = normalizePhone(fromRaw, config.defaultCountryCode);
-    const to   = normalizePhone(toRaw,   config.defaultCountryCode);
+    const from          = normalizePhone(fromRaw,          config.defaultCountryCode);
+    const to            = normalizePhone(toRaw,            config.defaultCountryCode);
+    const forwardedFrom = forwardedFromRaw ? normalizePhone(forwardedFromRaw, config.defaultCountryCode) : null;
 
-    console.log(`[voice/inbound] from=${from} to=${to}`);
+    console.log(`[voice/inbound] from=${from} to=${to} forwardedFrom=${forwardedFrom}`);
 
     // Always respond with TwiML — Twilio requires a valid XML response
     res.set("Content-Type", "text/xml");
@@ -851,8 +1039,39 @@ app.post("/api/voice/inbound", async (req, res) => {
 
     console.log(`[voice/inbound] business=${business.name} id=${business.id}`);
 
+    // ── Forwarding detection ──
+    // If ForwardedFrom matches the owner's registered number, forwarding is confirmed.
+    // Mark the business as verified (fire-and-forget is fine here).
+    if (forwardedFrom && !business.forwarding_verified) {
+      const ownerPhone = business.owner_notify_phone
+        ? normalizePhone(business.owner_notify_phone, config.defaultCountryCode)
+        : null;
+      if (ownerPhone && forwardedFrom === ownerPhone) {
+        console.log(`[voice/inbound] forwarding verified for business ${business.id}`);
+        updateBusiness(business.id, { forwardingVerified: true }).catch(err =>
+          console.error("[voice/inbound] forwarding verify update error:", err)
+        );
+        business.forwarding_verified = true;
+      }
+    }
+
+    // ── Test call detection ──
+    // When Cove places a test call (from the Twilio number to the owner's phone),
+    // if the owner doesn't answer it gets forwarded back here. Detect by:
+    // ForwardedFrom = owner's number AND From = our own Twilio number (calling itself).
+    const isTestCall = forwardedFrom &&
+      from === normalizePhone(business.twilio_from_number, config.defaultCountryCode);
+    if (isTestCall) {
+      console.log(`[voice/inbound] test call — skipping lead creation for business ${business.id}`);
+      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Hangup/></Response>`);
+    }
+
     // Do SMS work before responding — serverless kills background async after res.send()
     try {
+      const optedOut = await hasPhoneOptedOut(business.id, from);
+      if (optedOut) {
+        console.log(`[voice/inbound] ${from} has opted out, skipping SMS`);
+      } else {
       const existing = await checkDuplicateLead(from, 30);
       if (existing) {
         console.log(`[voice/inbound] duplicate lead for ${from}, skipping`);
@@ -882,6 +1101,7 @@ app.post("/api/voice/inbound", async (req, res) => {
           console.log(`[voice/inbound] SMS sent to ${from}`);
         }
       }
+      } // end opted-out else
     } catch (err) {
       console.error("[voice/inbound] SMS flow error:", err);
     }
@@ -891,6 +1111,52 @@ app.post("/api/voice/inbound", async (req, res) => {
     console.error("[voice/inbound] error:", err);
     res.set("Content-Type", "text/xml");
     return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="Polly.Olivia" language="en-AU">Thanks for calling. We will send you a text message shortly.</Say></Response>`);
+  }
+});
+
+// ─── Forwarding verification: start test call ───
+
+app.post("/api/me/verify-forwarding/start", requireAuth, async (req, res) => {
+  try {
+    if (!config.twilio.accountSid || !config.twilio.authToken) {
+      return res.status(503).json({ ok: false, error: "Twilio not configured" });
+    }
+    const business = await getBusinessByUserId(req.userId);
+    if (!business) return res.status(404).json({ ok: false, error: "No business found" });
+    if (!business.owner_notify_phone) {
+      return res.status(400).json({ ok: false, error: "No phone number on file — add one in Settings first" });
+    }
+    if (!business.twilio_from_number) {
+      return res.status(400).json({ ok: false, error: "Cove number not provisioned yet" });
+    }
+
+    const client = twilio(config.twilio.accountSid, config.twilio.authToken);
+    // Pass twiml inline so Twilio doesn't need to fetch a URL — avoids any localhost/deployment issues
+    await client.calls.create({
+      to:      business.owner_notify_phone,
+      from:    business.twilio_from_number,
+      twiml:   '<Response><Say voice="Polly.Olivia" language="en-AU">This is a Cove forwarding test. You can hang up — no need to answer next time.</Say><Hangup/></Response>',
+      timeout: 20, // ring 20s then hang up so carrier forwarding kicks in
+    });
+
+    console.log(`[verify-forwarding] test call placed to ${business.owner_notify_phone} for business ${business.id}`);
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("[verify-forwarding/start] error:", err);
+    return res.status(500).json({ ok: false, error: "Could not place test call — " + (err.message || "unknown error") });
+  }
+});
+
+// ─── Forwarding verification: check status ───
+
+app.get("/api/me/forwarding-status", requireAuth, async (req, res) => {
+  try {
+    const business = await getBusinessByUserId(req.userId);
+    if (!business) return res.status(404).json({ ok: false, error: "No business found" });
+    return res.json({ ok: true, forwarding_verified: !!business.forwarding_verified });
+  } catch (err) {
+    console.error("[forwarding-status] error:", err);
+    return res.status(500).json({ ok: false, error: "Could not check status" });
   }
 });
 
@@ -916,6 +1182,7 @@ app.post("/api/sms/inbound", async (req, res) => {
     // Record inbound message
     await saveMessage({ leadId: lead.id, direction: "inbound", body: bodyRaw });
 
+    // ─── STOP keyword ───
     if (isStopKeyword(bodyRaw)) {
       await updateLead(lead.id, { status: "stopped", last_inbound_text: bodyRaw, finished_at: new Date().toISOString() });
       const stopBody = buildStoppedMessage(business.name);
@@ -928,9 +1195,63 @@ app.post("/api/sms/inbound", async (req, res) => {
     const step = getFlowStep(flowConfig, lead.current_step);
     if (!step) return res.status(200).send("OK");
 
+    // ─── Helper: graceful exit (skip remaining questions, notify owner) ───
+    const gracefulExit = async (reason) => {
+      const msg = `No worries — someone from ${business.name || "the team"} will call you back shortly.`;
+      await sendSms({ from: business.twilio_from_number, to: lead.phone, body: msg });
+      await saveMessage({ leadId: lead.id, direction: "outbound", body: msg });
+
+      if (business.owner_notify_phone) {
+        const ownerPhone = normalizePhone(business.owner_notify_phone, config.defaultCountryCode);
+        const alert = buildExitSummary(lead, business, bodyRaw, reason);
+        await sendSms({ from: business.twilio_from_number, to: ownerPhone, body: alert });
+      }
+
+      await updateLead(lead.id, {
+        status: "completed",
+        last_inbound_text: bodyRaw,
+        finished_at: new Date().toISOString(),
+        answers: { ...(lead.answers || {}), _exit_reason: reason, _last_attempt: bodyRaw },
+      });
+    };
+
+    // ─── Pre-processor: special intent detection ───
+    const intent = detectSpecialIntent(bodyRaw);
+
+    if (intent === "call_me") {
+      await gracefulExit("call_requested");
+      return res.status(200).send("OK");
+    }
+
+    if (intent === "confused") {
+      const clarify = `This is ${business.name || "a local business"} — you missed a call from us earlier. We're just checking in.\n\n${step.question}`;
+      await sendSms({ from: business.twilio_from_number, to: lead.phone, body: clarify });
+      await saveMessage({ leadId: lead.id, direction: "outbound", body: clarify });
+      return res.status(200).send("OK");
+    }
+
+    if (intent === "price_question") {
+      const deflect = `Great question — we'll cover that when we call you. First:\n\n${step.question}`;
+      await sendSms({ from: business.twilio_from_number, to: lead.phone, body: deflect });
+      await saveMessage({ leadId: lead.id, direction: "outbound", body: deflect });
+      return res.status(200).send("OK");
+    }
+
+    // ─── Validate reply ───
     let valid = validateReply(step, bodyRaw);
     let effectiveReply = null;
 
+    // For A/B/C: try extracting a leading option letter before giving up
+    // e.g. "A please", "B - it's urgent", "1) yes"
+    if (!valid && !step.free_text && step.options?.length) {
+      const leading = extractLeadingOption(bodyRaw, step.options.map((o) => o.value));
+      if (leading) {
+        valid = true;
+        effectiveReply = leading;
+      }
+    }
+
+    // AI fallback for A/B/C — last resort before retry logic
     if (!valid && isAIConfigured() && !step.free_text) {
       try {
         const aiParsed = await parseNaturalLanguageReply(step, bodyRaw);
@@ -938,13 +1259,42 @@ app.post("/api/sms/inbound", async (req, res) => {
       } catch { /* fall through */ }
     }
 
+    // For free text: check if the reply is meaningful enough
+    if (valid && step.free_text && isMeaninglessReply(bodyRaw)) {
+      const retryCount = getRetryCount(lead.answers, lead.current_step);
+      if (retryCount < MAX_RETRIES_FREE_TEXT) {
+        // Prompt once for a better answer
+        const updatedAnswers = incrementRetryAnswers(lead.answers, lead.current_step);
+        await updateLead(lead.id, { answers: updatedAnswers });
+        const nudge = `Just a quick description is fine — what do you need help with?`;
+        await sendSms({ from: business.twilio_from_number, to: lead.phone, body: nudge });
+        await saveMessage({ leadId: lead.id, direction: "outbound", body: nudge });
+        return res.status(200).send("OK");
+      }
+      // retryCount >= MAX_RETRIES_FREE_TEXT: accept whatever they sent and continue
+    }
+
+    // For A/B/C: retry or graceful exit after too many failures
     if (!valid) {
-      const invalidMsg = step.invalid_text ? `${step.invalid_text}\n${step.question}` : step.question;
+      const retryCount = getRetryCount(lead.answers, lead.current_step);
+
+      if (retryCount >= MAX_RETRIES_MULTIPLE_CHOICE) {
+        await gracefulExit("max_retries");
+        return res.status(200).send("OK");
+      }
+
+      const updatedAnswers = incrementRetryAnswers(lead.answers, lead.current_step);
+      await updateLead(lead.id, { answers: updatedAnswers });
+
+      const invalidMsg = step.invalid_text
+        ? `${step.invalid_text}\n\n${step.question}`
+        : step.question;
       await sendSms({ from: business.twilio_from_number, to: lead.phone, body: invalidMsg });
       await saveMessage({ leadId: lead.id, direction: "outbound", body: invalidMsg });
       return res.status(200).send("OK");
     }
 
+    // ─── Valid reply — parse and advance ───
     const replyText = typeof effectiveReply === "string" ? effectiveReply : bodyRaw;
     const parsed = parseReply(step, replyText);
     const nextAnswers = { ...(lead.answers || {}), ...parsed };
@@ -963,8 +1313,14 @@ app.post("/api/sms/inbound", async (req, res) => {
     const isFinalStep = lead.current_step >= flowConfig.steps.length;
 
     if (isFinalStep) {
+      // Condense long free text answers for the owner summary
+      let finalAnswers = nextAnswers;
+      if (isAIConfigured()) {
+        try { finalAnswers = await condenseFreeTextAnswers(flowConfig, nextAnswers); } catch { /* keep originals */ }
+      }
+
       const completedLead = await updateLead(lead.id, {
-        answers: nextAnswers,
+        answers: finalAnswers,
         last_inbound_text: bodyRaw,
         current_step: lead.current_step + 1,
         status: "completed",
@@ -1066,6 +1422,9 @@ app.post("/api/demo/send", requireAuth, async (req, res) => {
     if (!phone) return res.status(400).json({ ok: false, error: "Phone number required" });
     const normalizedPhone = normalizePhone(phone, config.defaultCountryCode);
     if (!normalizedPhone) return res.status(400).json({ ok: false, error: "Invalid phone number" });
+    if (!config.twilio.accountSid || !config.twilio.authToken) {
+      return res.status(503).json({ ok: false, error: "SMS not available — Twilio not configured in dev mode." });
+    }
     const business = await getBusinessByUserId(req.userId);
     const fromNumber = business?.twilio_from_number || process.env.DEMO_TWILIO_NUMBER;
     if (!fromNumber) return res.status(503).json({ ok: false, error: "No number configured yet" });
@@ -1073,7 +1432,7 @@ app.post("/api/demo/send", requireAuth, async (req, res) => {
     return res.json({ ok: true });
   } catch (err) {
     console.error("Test SMS error:", err);
-    return res.status(500).json({ ok: false, error: "Could not send SMS" });
+    return res.status(500).json({ ok: false, error: "Could not send SMS — " + (err.message || "unknown error") });
   }
 });
 

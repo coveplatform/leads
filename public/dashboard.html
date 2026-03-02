@@ -12,6 +12,26 @@
 </head>
 <body class="dash-root">
 
+  <!-- ─── Mobile top bar ─── -->
+  <div class="mob-topbar" id="mob-topbar">
+    <button class="mob-burger" id="mob-menu-btn" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <a href="/" class="cove-logo mob-topbar__logo">
+      <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+        <path d="M5 19.5 Q9 17 14 19.5 Q19 22 23 19.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" fill="none"/>
+        <path d="M5 14.5 Q9 12 14 14.5 Q19 17 23 14.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" fill="none" opacity="0.65"/>
+        <path d="M5 9.5 Q9 7 14 9.5 Q19 12 23 9.5" stroke="url(#mob-lg)" stroke-width="2.3" stroke-linecap="round" fill="none" opacity="0.4"/>
+        <defs><linearGradient id="mob-lg" x1="5" y1="9.5" x2="23" y2="9.5" gradientUnits="userSpaceOnUse"><stop stop-color="#e8540a"/><stop offset="1" stop-color="#ff7240"/></linearGradient></defs>
+      </svg>
+      <span>cove</span>
+    </a>
+    <button class="mob-topbar__settings-btn" id="mob-settings-btn" aria-label="Account settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </button>
+  </div>
+  <div class="mob-backdrop" id="mob-backdrop"></div>
+
   <!-- ─── Sidebar ─── -->
   <aside class="sidebar">
     <div class="sidebar__top">
@@ -39,19 +59,23 @@
       </button>
       <button class="sidebar__item" data-view="flow">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        My Flow
+        SMS Questions
       </button>
       <button class="sidebar__item" data-view="notifications">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        Notifications
+        Alerts &amp; Hours
       </button>
       <button class="sidebar__item" data-view="integrations">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        Integrations
+        Lead sources
       </button>
       <button class="sidebar__item" data-view="billing">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         Billing
+      </button>
+      <button class="sidebar__item" data-view="settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
       </button>
     </nav>
 
@@ -60,6 +84,10 @@
         <div class="sidebar__user-name" id="sidebar-name">—</div>
         <div class="sidebar__user-email" id="sidebar-email">—</div>
       </div>
+      <button class="sidebar__item sidebar__item--help" data-view="help" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="3"/></svg>
+        Help &amp; support
+      </button>
       <button class="sidebar__item sidebar__item--signout" id="logout-btn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign out
@@ -77,7 +105,6 @@
           <h1 class="page-header__title" id="biz-name-header">Your business</h1>
           <span id="live-badge"></span>
         </div>
-        <div class="page-header__number" id="biz-number-sub"></div>
       </div>
 
       <!-- Getting started panel (hidden once dismissed or all done) -->
@@ -85,7 +112,7 @@
         <div class="gs-panel__header">
           <div>
             <div class="gs-panel__eyebrow">Setup checklist</div>
-            <div class="gs-panel__title">Get Cove running in minutes</div>
+            <div class="gs-panel__title">Get your first lead today.</div>
             <div class="gs-panel__progress"><span id="gs-done-count">1</span> of 4 steps complete</div>
           </div>
           <button class="gs-panel__dismiss" id="gs-dismiss" type="button">Dismiss</button>
@@ -94,32 +121,32 @@
           <div class="gs-step gs-step--done">
             <div class="gs-step__icon">✓</div>
             <div class="gs-step__content">
-              <div class="gs-step__title">Create your account</div>
+              <div class="gs-step__title">Account created</div>
             </div>
-          </div>
-          <div class="gs-step" id="gs-step-flow">
-            <div class="gs-step__icon"></div>
-            <div class="gs-step__content">
-              <div class="gs-step__title">Review your qualification questions</div>
-              <div class="gs-step__sub">Check the SMS flow your leads will receive and customise it to your business.</div>
-            </div>
-            <button class="gs-step__action" data-view="flow" type="button">Review &rarr;</button>
           </div>
           <div class="gs-step" id="gs-step-notif">
             <div class="gs-step__icon"></div>
             <div class="gs-step__content">
-              <div class="gs-step__title">Set up your notification number</div>
-              <div class="gs-step__sub">Add your mobile so you get a lead summary the moment someone qualifies.</div>
+              <div class="gs-step__title">Add your mobile number</div>
+              <div class="gs-step__sub">So you get a text the moment a lead qualifies. Takes 10 seconds.</div>
             </div>
-            <button class="gs-step__action" data-view="notifications" type="button">Set up &rarr;</button>
+            <button class="gs-step__action" data-view="notifications" type="button">Add number &rarr;</button>
           </div>
           <div class="gs-step" id="gs-step-forward">
             <div class="gs-step__icon"></div>
             <div class="gs-step__content">
               <div class="gs-step__title">Set up call forwarding</div>
-              <div class="gs-step__sub">Forward missed calls to your Cove number so leads get texted back automatically.</div>
+              <div class="gs-step__sub">Pick your carrier, tap the code. Takes 30 seconds on your phone.</div>
             </div>
-            <button class="gs-step__action" data-view="integrations" type="button">Set up &rarr;</button>
+            <button class="gs-step__action" data-view="integrations" data-itab="calls" type="button">Set up &rarr;</button>
+          </div>
+          <div class="gs-step" id="gs-step-flow">
+            <div class="gs-step__icon"></div>
+            <div class="gs-step__content">
+              <div class="gs-step__title">Review your SMS questions</div>
+              <div class="gs-step__sub">Your questions are ready. Check they sound right for your business — edit anything.</div>
+            </div>
+            <button class="gs-step__action" data-view="flow" type="button">Review &rarr;</button>
           </div>
         </div>
       </div>
@@ -131,8 +158,8 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
           </div>
           <div class="alert-card__body">
-            <div class="alert-card__title">Your Cove number is being provisioned</div>
-            <p class="alert-card__sub">This usually takes 1–2 minutes. Refresh the page and it should appear. If it's been more than 5 minutes, something may have gone wrong.</p>
+            <div class="alert-card__title">Cove is getting ready</div>
+            <p class="alert-card__sub">This usually takes 1–2 minutes. Refresh the page to check. If it's been more than 5 minutes, something may have gone wrong — contact us and we'll sort it.</p>
             <div class="alert-card__actions">
               <button class="btn btn--secondary btn--sm" onclick="location.reload()">↻ Refresh</button>
               <button class="btn btn--ghost btn--sm" id="reset-setup-btn">Start setup again</button>
@@ -147,7 +174,7 @@
           </div>
           <div class="setup-step" id="sstep-2">
             <div class="setup-step__dot setup-step__dot--spin"></div>
-            <div class="setup-step__text">Provisioning your dedicated Cove number…</div>
+            <div class="setup-step__text">Setting everything up…</div>
           </div>
           <div class="setup-step" id="sstep-3">
             <div class="setup-step__dot"></div>
@@ -156,19 +183,56 @@
         </div>
       </div>
 
-      <!-- Forwarding reminder -->
-      <div id="forwarding-banner" class="banner-wrap hidden">
-        <div class="alert-card alert-card--coral">
+      <!-- First lead celebration (shown once when first lead arrives) -->
+      <div id="first-lead-banner" class="banner-wrap hidden">
+        <div class="alert-card alert-card--green">
           <div class="alert-card__icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 14.9a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.14 4h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 14.92z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <div class="alert-card__body">
-            <div class="alert-card__title">One step left — set up call forwarding</div>
-            <p class="alert-card__sub">Your Cove number is live. Forward missed calls to it and every missed call will trigger the SMS flow automatically.</p>
+            <div class="alert-card__title">Your first lead just came in. Cove is working.</div>
+            <p class="alert-card__sub">From here, every missed call gets texted back automatically. Check the lead below and call them back while they're still warm.</p>
             <div class="alert-card__actions">
-              <a href="/onboarding?step=complete" class="btn btn--primary btn--sm">View forwarding instructions</a>
-              <button class="btn btn--ghost btn--sm" id="dismiss-forwarding-btn">Dismiss</button>
+              <button class="btn btn--ghost btn--sm" id="dismiss-first-lead-btn">Got it</button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Forwarding reminder — persistent until first lead arrives -->
+      <div id="forwarding-banner" class="hidden">
+        <!-- idle state -->
+        <div class="fwd-banner" id="fwd-state-idle">
+          <span class="fwd-banner__dot"></span>
+          <div class="fwd-banner__body">
+            <div class="fwd-banner__title">One last step — forward your missed calls</div>
+            <div class="fwd-banner__sub" id="fwd-idle-sub">Cove is live, but needs missed call forwarding on your phone to start qualifying leads.</div>
+          </div>
+          <div class="fwd-banner__actions">
+            <button class="btn btn--primary btn--sm" id="fwd-banner-setup-btn">Set up forwarding →</button>
+            <button class="btn btn--ghost btn--sm" id="fwd-test-btn">Test it</button>
+          </div>
+        </div>
+        <!-- calling state -->
+        <div class="fwd-banner fwd-banner--calling hidden" id="fwd-state-calling">
+          <span class="fwd-banner__dot fwd-banner__dot--pulse"></span>
+          <div class="fwd-banner__body">
+            <div class="fwd-banner__title">Calling your phone — let it ring out, don't answer</div>
+            <div class="fwd-banner__sub">Your carrier will forward the unanswered call to Cove. Only works once forwarding is set up on your phone.</div>
+          </div>
+          <div class="fwd-banner__actions">
+            <button class="btn btn--ghost btn--sm" id="fwd-cancel-btn">Cancel</button>
+          </div>
+        </div>
+        <!-- verified state -->
+        <div class="fwd-banner fwd-banner--verified hidden" id="fwd-state-verified">
+          <span class="fwd-banner__dot fwd-banner__dot--green"></span>
+          <div class="fwd-banner__body">
+            <div class="fwd-banner__title">Forwarding confirmed ✓</div>
+            <div class="fwd-banner__sub">Missed calls will now be forwarded to Cove automatically.</div>
+          </div>
+          <div class="fwd-banner__actions">
+            <button class="btn btn--ghost btn--sm" id="fwd-dismiss-btn">Dismiss</button>
           </div>
         </div>
       </div>
@@ -176,16 +240,20 @@
       <!-- Stats -->
       <div class="stats-strip" id="stats-strip">
         <div class="stat-item">
-          <div class="stat-item__val" id="stat-week">—</div>
+          <div class="stat-item__val" id="stat-week">0</div>
           <div class="stat-item__key">Leads this week</div>
         </div>
         <div class="stat-item">
-          <div class="stat-item__val stat-item__val--green" id="stat-done">—</div>
-          <div class="stat-item__key">Completed flows</div>
+          <div class="stat-item__val stat-item__val--green" id="stat-done">0</div>
+          <div class="stat-item__key">Qualified leads</div>
         </div>
         <div class="stat-item">
-          <div class="stat-item__val stat-item__val--muted" id="stat-abandoned">—</div>
+          <div class="stat-item__val stat-item__val--muted" id="stat-abandoned">0</div>
           <div class="stat-item__key">No reply</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__val stat-item__val--orange" id="stat-rate">—</div>
+          <div class="stat-item__key">Response rate</div>
         </div>
       </div>
 
@@ -193,8 +261,10 @@
       <div class="section">
         <div class="section__title">Recent activity — last 7 days</div>
         <div class="card leads-card">
-          <div id="leads-container">
-            <div class="leads-loading">Loading…</div>
+          <div class="leads-table-wrap">
+            <div id="leads-container">
+              <div class="leads-loading">Loading…</div>
+            </div>
           </div>
         </div>
       </div>
@@ -203,68 +273,80 @@
     <!-- ═══ MY FLOW ═══ -->
     <div id="view-flow" class="hidden">
       <div class="page-header">
-        <h1 class="page-header__title">My Flow</h1>
-        <p class="page-header__sub">Edit the questions Cove texts to every lead. Changes go live instantly.</p>
+        <h1 class="page-header__title">SMS Questions</h1>
+        <p class="page-header__sub">These are texted to every missed caller, one at a time. Edit anything — changes go live instantly.</p>
       </div>
 
-      <!-- Business details + welcome message -->
+      <!-- Full-width: Business name + welcome message -->
       <div class="card card--mb">
-        <div class="card__section">
-          <div class="section__title">Business details</div>
-          <div class="form-section">
-            <div class="form-group">
-              <label for="flow-biz-name">Business name</label>
-              <input type="text" id="flow-biz-name" />
+        <div class="card__section flow-setup">
+          <input type="text" id="flow-biz-name" class="flow-biz-input" placeholder="Your business name" />
+          <div class="flow-setup__divider"></div>
+          <div class="flow-setup__msg-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="flow-setup__msg-icon"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.73 12 19.79 19.79 0 0 1 1.66 3.38 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 15.91 16l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span>First message — sent instantly when someone misses a call</span>
+          </div>
+          <textarea id="flow-intro" class="flow-intro-ta textarea--noresize" placeholder="Hi {firstName}, this is {businessName}. We just missed your call — quick question:"></textarea>
+          <p class="flow-setup__hint"><code class="inline-code">{firstName}</code> and <code class="inline-code">{businessName}</code> are replaced automatically.</p>
+        </div>
+      </div>
+
+      <div class="flow-layout">
+
+        <!-- Left: SMS Questions -->
+        <div class="flow-layout__editor">
+          <div class="section">
+            <div class="section__title-row">
+              <span class="section__title section__title--flush">SMS Questions</span>
             </div>
-            <div class="form-group">
-              <label for="flow-booking">Booking link <span class="label-optional">(optional)</span></label>
-              <input type="url" id="flow-booking" placeholder="https://book.yourbusiness.com.au" />
-              <span class="hint">Added to the completion message when a lead finishes the flow.</span>
+            <p class="section__sub">Each message is sent one at a time. The lead replies with a letter (A/B/C) or types a free answer.</p>
+            <div class="flow-section" id="flow-cards"></div>
+            <button class="flow-add-btn" id="flow-add-btn" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add question
+            </button>
+          </div>
+        </div><!-- /flow-layout__editor -->
+
+        <!-- Right: live preview -->
+        <div class="flow-layout__preview">
+          <div class="fpp">
+            <div class="fpp__topbar">
+              <span class="fpp__topbar-label">Customer preview</span>
+              <span class="fpp__topbar-sub">This is exactly what your customer sees on their phone</span>
+            </div>
+            <div class="fpp__phone">
+              <div class="fpp__statusbar">
+                <span class="fpp__time">9:41</span>
+                <div class="fpp__status-icons">
+                  <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="3" width="3" height="8" rx="1" fill="white" opacity=".4"/><rect x="4.5" y="2" width="3" height="9" rx="1" fill="white" opacity=".6"/><rect x="9" y=".5" width="3" height="10.5" rx="1" fill="white" opacity=".8"/><rect x="13.5" y="0" width="2.5" height="11" rx="1" fill="white"/></svg>
+                  <svg width="20" height="11" viewBox="0 0 20 11" fill="none"><rect x=".5" y=".5" width="16" height="10" rx="2.5" stroke="white" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="13" height="8" rx="2" fill="white"/><path d="M18 3.5v4a2 2 0 0 0 0-4Z" fill="white" opacity=".4"/></svg>
+                </div>
+              </div>
+              <div class="fpp__contact-bar">
+                <div class="fpp__back">
+                  <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#0a84ff" stroke-width="2.2" stroke-linecap="round"><path d="M8 1L1.5 7.5L8 14"/></svg>
+                  <span>3</span>
+                </div>
+                <div class="fpp__contact-info">
+                  <div class="fpp__avatar">C</div>
+                  <div class="fpp__contact-name">Cove</div>
+                </div>
+                <div class="fpp__contact-actions">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.73 12 19.79 19.79 0 0 1 1.66 3.38 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 15.91 16l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+              </div>
+              <div class="fpp__screen" id="flow-preview-screen"></div>
+              <div class="fpp__homebar"></div>
             </div>
           </div>
         </div>
 
-        <div class="card__divider"></div>
+      </div><!-- /flow-layout -->
 
-        <div class="card__section">
-          <div class="section__title">Welcome message</div>
-          <p class="section__hint">Sent immediately when someone misses a call. <code class="inline-code">{firstName}</code> and <code class="inline-code">{businessName}</code> are filled in automatically.</p>
-          <div class="form-group">
-            <textarea id="flow-intro" rows="2" placeholder="Hi {firstName}, this is {businessName}. Quick question…" class="textarea--noresize"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- SMS Questions -->
-      <div class="section">
-        <div class="section__title-row">
-          <span class="section__title section__title--flush">SMS Questions</span>
-          <button class="flow-ai-btn" id="flow-regen-btn" type="button">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-            Regenerate with AI
-          </button>
-        </div>
-        <p class="section__sub">Each question is sent as a separate SMS. Leads reply with a letter (A, B, C…) or free text.</p>
-        <div class="flow-section" id="flow-cards"></div>
-      </div>
-
-      <!-- AI Regenerate modal -->
-      <div id="regen-modal" class="modal-overlay hidden">
-        <div class="modal">
-          <h2 class="modal__title">Regenerate with AI</h2>
-          <p class="modal__sub">Describe your business and we'll rewrite the flow. This replaces your current questions.</p>
-          <textarea id="regen-desc" rows="3" placeholder="e.g. We're a residential plumbing business in Sydney…" class="modal__textarea"></textarea>
-          <div id="regen-error" class="auth-error"></div>
-          <div class="modal__actions">
-            <button class="btn btn--secondary" id="regen-cancel">Cancel</button>
-            <button class="btn btn--primary" id="regen-confirm">Regenerate</button>
-          </div>
-        </div>
-      </div>
 
       <div class="save-bar">
         <span class="saved" id="flow-saved">Saved</span>
-        <button class="btn btn--secondary btn--sm" id="flow-cancel">Discard</button>
         <button class="btn btn--primary" id="flow-save">Save changes</button>
       </div>
     </div>
@@ -272,8 +354,8 @@
     <!-- ═══ NOTIFICATIONS ═══ -->
     <div id="view-notifications" class="hidden">
       <div class="page-header">
-        <h1 class="page-header__title">Notifications</h1>
-        <p class="page-header__sub">Where Cove sends lead summaries when someone completes the flow.</p>
+        <h1 class="page-header__title">Alerts &amp; Hours</h1>
+        <p class="page-header__sub">Where Cove sends you a summary when a lead finishes answering, and when you're available to take them.</p>
       </div>
 
       <div class="card">
@@ -285,9 +367,22 @@
               <input type="tel" id="notif-phone" placeholder="+61 412 345 678" />
               <span class="hint">You'll get a text with their name, what they need, and urgency.</span>
             </div>
-            <div class="form-group">
-              <label for="notif-email">Email <span class="label-optional">(optional)</span></label>
-              <input type="email" id="notif-email" placeholder="you@yourbusiness.com.au" />
+            <div class="toggle-row" style="margin-bottom:10px">
+              <div class="toggle-row__info">
+                <div class="toggle-row__label">Email lead summaries</div>
+                <div class="toggle-row__sub">Get an email every time a lead qualifies.</div>
+              </div>
+              <label class="toggle" aria-label="Enable email notifications">
+                <input type="checkbox" id="notif-email-toggle" />
+                <div class="toggle__track"></div>
+                <div class="toggle__thumb"></div>
+              </label>
+            </div>
+            <div id="notif-email-wrap" class="hidden">
+              <div class="form-group">
+                <input type="email" id="notif-email" placeholder="you@yourbusiness.com.au" />
+                <span class="hint">We'll email you a summary with the lead's name, need, and phone number.</span>
+              </div>
             </div>
             <div class="form-group">
               <label for="notif-webhook">Webhook URL <span class="label-optional">(optional)</span></label>
@@ -365,117 +460,152 @@
     <!-- ═══ INTEGRATIONS ═══ -->
     <div id="view-integrations" class="hidden">
       <div class="page-header">
-        <h1 class="page-header__title">Integrations</h1>
-        <p class="page-header__sub">Three ways to get leads into Cove — pick whichever fits your setup. They all do the same thing: trigger the SMS flow automatically.</p>
+        <h1 class="page-header__title">Lead sources</h1>
+        <p class="page-header__sub">The ways leads reach Cove. Set up one or all of them.</p>
       </div>
 
-      <!-- Method 1: Call forwarding -->
-      <div class="int-card">
-        <div class="int-card__header">
-          <span class="int-card__num">01</span>
-          <div>
-            <div class="int-card__title">Missed calls — call forwarding</div>
-            <div class="int-card__desc">The simplest setup. Forward unanswered calls on your mobile to your Cove number.</div>
-          </div>
-        </div>
-        <div class="int-card__body">
-          <div class="int-flow">
-            <span>Customer calls you</span>
-            <span class="int-flow__arrow">→</span>
-            <span>You don't answer</span>
-            <span class="int-flow__arrow">→</span>
-            <span>Carrier forwards to Cove</span>
-            <span class="int-flow__arrow">→</span>
-            <span class="int-flow__step--highlight">Cove texts them instantly</span>
-          </div>
-          <div>
-            <a href="/onboarding?step=complete" class="btn btn--primary btn--sm">View setup instructions</a>
-          </div>
-        </div>
+      <!-- Tab bar -->
+      <div class="int-tabs">
+        <button class="int-tab int-tab--active" data-itab="calls">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Missed calls
+        </button>
+        <button class="int-tab" data-itab="form">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Website form
+        </button>
+        <button class="int-tab" data-itab="crm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          CRM
+        </button>
       </div>
 
-      <!-- Method 2: Website embed -->
-      <div class="int-card">
-        <div class="int-card__header">
-          <span class="int-card__num">02</span>
-          <div>
-            <div class="int-card__title">Website contact form</div>
-            <div class="int-card__desc">Add a snippet to your site. Form submissions trigger the SMS flow immediately — even at midnight.</div>
-          </div>
-        </div>
-        <div class="int-card__body">
-          <div>
-            <div class="snippet-label">Paste into your website's &lt;head&gt; or just before &lt;/body&gt;</div>
-            <div class="snippet-wrap">
-              <pre id="embed-snippet" class="snippet">Loading…</pre>
-              <button onclick="copySnippet()" class="snippet-copy" id="copy-snippet-btn">Copy</button>
+      <!-- Panel: Missed calls -->
+      <div class="int-panel int-panel--active" id="int-panel-calls">
+        <div class="int-section">
+          <div class="int-section__label">What happens</div>
+          <div class="int-how-list">
+            <div class="int-how-item">
+              <span class="int-how-num">1</span>
+              <div><strong>A customer calls your number</strong><p>Could be from your website, Google, word of mouth — anywhere</p></div>
+            </div>
+            <div class="int-how-item">
+              <span class="int-how-num">2</span>
+              <div><strong>You don't pick up</strong><p>You're on another call, on the tools, or it's after hours</p></div>
+            </div>
+            <div class="int-how-item">
+              <span class="int-how-num">3</span>
+              <div><strong>Your carrier forwards the call to Cove</strong><p>One-time setup on your phone — takes 30 seconds</p></div>
+            </div>
+            <div class="int-how-item int-how-item--hl">
+              <span class="int-how-num int-how-num--hl">4</span>
+              <div><strong>Cove texts them back instantly</strong><p>They get a message, answer your questions, and you get a lead summary</p></div>
             </div>
           </div>
-          <p class="int-note">On your form's submit button, call <code class="inline-code">Cove.send({ phone: '...', name: '...' })</code>. Works with Wix, Squarespace, Webflow, WordPress, and custom HTML.</p>
-          <div>
-            <div class="int-example-label">Full example — replace with your form's submit handler:</div>
+        </div>
+        <div class="int-section">
+          <div class="int-section__label">Set up call forwarding on your phone</div>
+          <p class="int-section__desc">Pick your carrier below and tap the code — it opens your dialler with everything pre-filled.</p>
+          <div class="cf-carrier-grid" id="dash-carrier-grid">
+            <button class="cf-carrier-tile" data-carrier="telstra">
+              <span class="cf-carrier-name">Telstra</span><span class="cf-carrier-sub">Dial code</span>
+            </button>
+            <button class="cf-carrier-tile" data-carrier="optus">
+              <span class="cf-carrier-name">Optus</span><span class="cf-carrier-sub">App or dial</span>
+            </button>
+            <button class="cf-carrier-tile" data-carrier="vodafone">
+              <span class="cf-carrier-name">Vodafone</span><span class="cf-carrier-sub">Dial code</span>
+            </button>
+            <button class="cf-carrier-tile" data-carrier="other">
+              <span class="cf-carrier-name">Other</span><span class="cf-carrier-sub">TPG, Boost…</span>
+            </button>
+          </div>
+          <div id="dash-cf-action" class="hidden" style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+            <div id="dash-optus-note" class="hidden" style="background:#fef9ec;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:12.5px;color:#92400e">
+              <strong>Disable Message Bank first:</strong> My Optus app → Manage → Message Bank → Deactivate
+            </div>
+            <!-- Dial code display -->
+            <div class="cf-code-row">
+              <span class="cf-code-display" id="dash-dial-code"></span>
+              <button class="btn btn--ghost btn--sm" id="dash-copy-code-btn" type="button">Copy</button>
+            </div>
+            <!-- Mobile: tap to activate -->
+            <div id="dash-mobile-section">
+              <a id="dash-activate-link" href="#" class="cf-activate-btn">Tap to activate — opens your dialler</a>
+              <p style="font-size:12px;color:var(--text-muted);margin:4px 0 0;text-align:center">Just tap <strong>Call</strong> — takes 5 seconds</p>
+            </div>
+            <!-- Desktop: send code to phone -->
+            <div id="dash-desktop-section" class="cf-desktop-send">
+              <p class="cf-desktop-send__label">On a desktop? Send this code to your phone:</p>
+              <div class="cf-desktop-send__row">
+                <input type="tel" id="dash-send-phone" placeholder="+61 400 000 000" style="flex:1;min-width:0" />
+                <button class="btn btn--primary btn--sm" id="dash-send-btn" type="button">Send</button>
+              </div>
+              <p class="cf-send-status" id="dash-send-status"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Website form -->
+      <div class="int-panel" id="int-panel-form">
+        <div class="int-section">
+          <div class="int-section__label">What happens</div>
+          <div class="int-how-list">
+            <div class="int-how-item">
+              <span class="int-how-num">1</span>
+              <div><strong>A visitor fills in your contact form</strong><p>On your website — could be at 2am, on a Sunday, whenever</p></div>
+            </div>
+            <div class="int-how-item">
+              <span class="int-how-num">2</span>
+              <div><strong>Cove picks up their phone number from the form</strong><p>One line of code on your site connects the form to Cove</p></div>
+            </div>
+            <div class="int-how-item int-how-item--hl">
+              <span class="int-how-num int-how-num--hl">3</span>
+              <div><strong>Cove texts them straight away</strong><p>They get your qualification questions immediately. You wake up to a qualified lead.</p></div>
+            </div>
+          </div>
+          <p class="int-section__desc">Works with Wix, Squarespace, Webflow, WordPress, or any custom HTML form.</p>
+        </div>
+        <div class="int-section">
+          <div class="int-section__label">Step 1 — Add this script to your website's &lt;head&gt;</div>
+          <div class="snippet-wrap">
+            <pre id="embed-snippet" class="snippet">Loading…</pre>
+            <button onclick="copySnippet()" class="snippet-copy" id="copy-snippet-btn">Copy</button>
+          </div>
+        </div>
+        <div class="int-section">
+          <div class="int-section__label">Step 2 — Call this when your form is submitted</div>
+          <div class="snippet-wrap">
             <pre class="snippet" id="embed-example">Loading…</pre>
+            <button onclick="copyExample()" class="snippet-copy" id="copy-example-btn">Copy</button>
           </div>
+          <p class="int-section__desc">Only the customer's phone number is required. Everything else is optional.</p>
         </div>
       </div>
 
-      <!-- Method 3: CRM / Zapier -->
-      <div class="int-card">
-        <div class="int-card__header">
-          <span class="int-card__num">03</span>
-          <div>
-            <div class="int-card__title">CRM or booking software</div>
-            <div class="int-card__desc">Connect any tool to Cove via Zapier or Make — takes about 5 minutes.</div>
+      <!-- Panel: CRM -->
+      <div class="int-panel" id="int-panel-crm">
+        <div class="int-section">
+          <div class="int-section__label">What this does</div>
+          <div class="int-how-list">
+            <div class="int-how-item">
+              <span class="int-how-num">1</span>
+              <div><strong>Cove qualifies a lead</strong><p>Via a missed call or your website contact form</p></div>
+            </div>
+            <div class="int-how-item int-how-item--hl">
+              <span class="int-how-num int-how-num--hl">2</span>
+              <div><strong>Their details appear in your CRM automatically</strong><p>Jobber, HubSpot, ServiceM8, Google Sheets — wherever you track jobs</p></div>
+            </div>
           </div>
         </div>
-        <div class="int-card__body">
-
-          <!-- Step 1: Webhook URL -->
-          <div>
-            <div class="snippet-label">Step 1 — Copy your Cove webhook URL</div>
-            <div class="webhook-row">
-              <code id="webhook-url" class="webhook-code">Loading…</code>
-              <button onclick="copyWebhook()" class="btn btn--secondary btn--sm" id="copy-webhook-btn">Copy</button>
-            </div>
+        <div class="int-section">
+          <div class="int-dfy-card">
+            <div class="int-dfy-card__badge">Done-for-you</div>
+            <div class="int-dfy-card__title">We set this up for you</div>
+            <p class="int-dfy-card__desc">Tell us what CRM you use, we connect it to Cove. Usually takes us about 30 minutes and it just works from then on.</p>
+            <a href="mailto:hello@usecove.app?subject=CRM%20setup%20for%20Cove" class="btn btn--primary btn--sm">Email us to get started →</a>
           </div>
-
-          <!-- Step 2: Create automation -->
-          <div>
-            <div class="snippet-label">Step 2 — Create an automation in Zapier or Make</div>
-            <div class="int-steps-guide">
-              <div class="int-guide-row">
-                <span class="int-guide-dot">A</span>
-                <span>Go to <a href="https://zapier.com" target="_blank" rel="noopener" class="text-link">Zapier</a> or <a href="https://www.make.com" target="_blank" rel="noopener" class="text-link">Make</a> and create a new automation</span>
-              </div>
-              <div class="int-guide-row">
-                <span class="int-guide-dot">B</span>
-                <span><strong>Trigger:</strong> your app — e.g. "HubSpot — New Contact" or "Jobber — New Request"</span>
-              </div>
-              <div class="int-guide-row">
-                <span class="int-guide-dot">C</span>
-                <span><strong>Action:</strong> "Webhooks by Zapier → POST request" — paste your Cove URL as the endpoint</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 3: Map fields -->
-          <div>
-            <div class="snippet-label">Step 3 — Map these fields in the request body</div>
-            <pre class="snippet">POST  (application/json)
-{
-  "phone":  "{{contact phone}}",  // required
-  "name":   "{{contact name}}",   // optional
-  "source": "hubspot"             // optional label
-}</pre>
-            <p class="int-note" style="margin-top:8px">Only <code class="inline-code">phone</code> is required. Cove uses it to send the qualification SMS.</p>
-          </div>
-
-          <!-- App shortcuts -->
-          <div>
-            <div class="snippet-label">Open the right Zapier integration page</div>
-            <div id="zapier-buttons" class="zapier-grid"></div>
-          </div>
-
         </div>
       </div>
     </div>
@@ -492,7 +622,7 @@
           <div class="section__title">Current plan</div>
           <div class="plan-display">
             <div class="plan-display__name">Cove Standard</div>
-            <div class="plan-display__price"><strong>$49</strong>/month · Cancel anytime</div>
+            <div class="plan-display__price"><strong>$89</strong>/month · Cancel anytime</div>
             <div class="plan-display__status">
               <span id="billing-status-badge"></span>
               <span id="billing-status-text" class="plan-display__status-text"></span>
@@ -519,10 +649,200 @@
             <div class="guarantee-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <div class="guarantee-title">30-day money-back guarantee</div>
+            <div class="guarantee-title">14-day money-back guarantee</div>
           </div>
-          <p class="section__sub">If Cove doesn't pay for itself within 30 days of activation, contact us and we'll give you a full refund — no questions asked.</p>
+          <p class="section__sub">If Cove doesn't pay for itself within 14 days of activation, contact us and we'll give you a full refund — no questions asked.</p>
           <a href="mailto:hello@coveplatform.com" class="text-link">hello@coveplatform.com</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SETTINGS ═══ -->
+    <div id="view-settings" class="hidden">
+      <div class="page-header">
+        <h1 class="page-header__title">Account settings</h1>
+        <p class="page-header__sub">Manage your business, profile, and account security.</p>
+      </div>
+
+      <!-- Business -->
+      <div class="card card--mb">
+        <div class="card__section">
+          <div class="section__title">Business</div>
+          <div class="form-section">
+            <div class="form-group">
+              <label for="settings-biz-name">Business name</label>
+              <input type="text" id="settings-biz-name" placeholder="Bay Plumbing" />
+            </div>
+            <div class="form-group">
+              <label for="settings-booking">Booking link <span class="label-optional">(optional)</span></label>
+              <input type="url" id="settings-booking" placeholder="https://yoursite.com/book" />
+              <span class="hint">Sent to leads when they complete the qualification flow.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview flow -->
+      <div class="card card--mb">
+        <div class="card__section">
+          <div class="section__title">Preview your flow</div>
+          <p class="section__hint" style="margin-bottom:14px">Send yourself the exact SMS sequence your leads receive.</p>
+          <div class="form-group" style="margin-bottom:0">
+            <div style="display:flex;gap:8px;align-items:flex-start">
+              <input type="tel" id="settings-preview-phone" placeholder="+61 400 000 000" style="flex:1" />
+              <button class="btn btn--secondary" id="settings-preview-btn" type="button" style="flex-shrink:0">Send preview</button>
+            </div>
+            <p class="hint" id="settings-preview-status" style="margin-top:6px;min-height:16px"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile -->
+      <div class="card card--mb">
+        <div class="card__section">
+          <div class="section__title">Profile</div>
+          <div class="form-section">
+            <div class="form-group">
+              <label for="settings-name">Display name</label>
+              <input type="text" id="settings-name" placeholder="Your name" autocomplete="name" />
+            </div>
+            <div class="form-group">
+              <label for="settings-email">Email address</label>
+              <input type="email" id="settings-email" disabled style="opacity:.55;cursor:not-allowed;" />
+              <span class="hint">Email cannot be changed. Contact support if you need to update it.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change password -->
+      <div class="card card--mb">
+        <div class="card__section">
+          <div class="section__title">Change password</div>
+          <div class="form-section">
+            <div class="form-group">
+              <label for="settings-pw-current">Current password</label>
+              <input type="password" id="settings-pw-current" autocomplete="current-password" />
+            </div>
+            <div class="form-group">
+              <label for="settings-pw-new">New password</label>
+              <input type="password" id="settings-pw-new" placeholder="Min. 8 characters" autocomplete="new-password" />
+            </div>
+            <div class="form-group">
+              <label for="settings-pw-confirm">Confirm new password</label>
+              <input type="password" id="settings-pw-confirm" autocomplete="new-password" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="settings-success" class="alert alert--success alert--mt hidden">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="settings-success-msg">Changes saved.</span>
+      </div>
+      <div id="settings-error" class="alert alert--error alert--mt hidden">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <span id="settings-error-msg">Something went wrong.</span>
+      </div>
+
+      <div class="save-bar">
+        <button class="btn btn--primary" id="settings-save">Save changes</button>
+      </div>
+    </div>
+
+    <!-- ═══ HELP ═══ -->
+    <div id="view-help" class="hidden">
+      <div class="page-header">
+        <h1 class="page-header__title">Help &amp; support</h1>
+        <p class="page-header__sub">Common questions answered — or reach us directly if you're stuck.</p>
+      </div>
+
+      <!-- FAQ accordion -->
+      <div class="card card--mb">
+        <div class="card__section">
+          <div class="section__title">Common questions</div>
+        </div>
+
+        <details class="faq-item">
+          <summary class="faq-item__q">How does Cove work?</summary>
+          <div class="faq-item__a">
+            <p>When a customer calls your number and you don't answer, your phone carrier forwards the missed call to Cove. Cove then immediately texts that person back with your qualification questions — one at a time.</p>
+            <p>When they finish replying, you get a summary sent to your phone or email: their name, what they need, and their number. You call back only the leads worth your time.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-item__q">How do I set up call forwarding?</summary>
+          <div class="faq-item__a">
+            <p>Go to <strong>Lead sources → Missed calls</strong> in the sidebar. Pick your carrier (Telstra, Optus, Vodafone, or other) and follow the steps — it takes about 30 seconds on your phone.</p>
+            <p>If you're on a desktop right now, you can send the setup code to your mobile from that same page.</p>
+            <button class="btn btn--secondary btn--sm" data-view="integrations" data-itab="calls" type="button" style="margin-top:4px">Go to Lead sources →</button>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-item__q">What does my customer actually see?</summary>
+          <div class="faq-item__a">
+            <p>They get a normal-looking text message from your Cove number. The first message introduces your business and asks the first question. It looks like a real person texting — not a robot.</p>
+            <p>You can see exactly what they see — and edit the messages — under <strong>SMS Questions</strong>.</p>
+            <button class="btn btn--secondary btn--sm" data-view="flow" type="button" style="margin-top:4px">Go to SMS Questions →</button>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-item__q">How do I test that it's working?</summary>
+          <div class="faq-item__a">
+            <p>Call your number from a different phone and don't answer — just let it ring out. Within a few seconds, that number should receive your first SMS question from Cove.</p>
+            <p>If nothing arrives, the most common cause is that call forwarding isn't active yet on your phone. Check <strong>Lead sources → Missed calls</strong> and make sure you've dialled the setup code.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-item__q">Can I edit my questions?</summary>
+          <div class="faq-item__a">
+            <p>Yes — go to <strong>SMS Questions</strong>, make your changes, and hit Save. Changes go live instantly. There's no minimum number of questions and no limit on edits.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-item__q">What happens if someone calls after hours?</summary>
+          <div class="faq-item__a">
+            <p>If you've turned on operating hours under <strong>Alerts &amp; Hours</strong>, anyone who calls outside those hours gets an after-hours message instead of your full question flow. You can set your hours and choose which days you're closed.</p>
+            <button class="btn btn--secondary btn--sm" data-view="notifications" type="button" style="margin-top:4px">Go to Alerts &amp; Hours →</button>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-item__q">How do I pause or cancel?</summary>
+          <div class="faq-item__a">
+            <p>Go to <strong>Billing</strong> in the sidebar. You can pause your account or cancel your subscription at any time — no lock-in, no cancellation fee.</p>
+            <p>If you cancel, your number stays active until the end of your billing period.</p>
+          </div>
+        </details>
+
+        <details class="faq-item faq-item--last">
+          <summary class="faq-item__q">My Cove number isn't texting people — what do I do?</summary>
+          <div class="faq-item__a">
+            <p>A few things to check first:</p>
+            <ul class="faq-list">
+              <li>Call forwarding is active on your phone (test by calling yourself from another number)</li>
+              <li>Your account is active — check the badge next to your business name on the Overview page</li>
+              <li>Your SMS Questions have at least one message saved</li>
+            </ul>
+            <p>Still not working? Email us below — we'll sort it out quickly.</p>
+          </div>
+        </details>
+      </div>
+
+      <!-- Contact / support card -->
+      <div class="help-contact-card">
+        <div class="help-contact-card__icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="help-contact-card__body">
+          <div class="help-contact-card__title">Still need help?</div>
+          <p class="help-contact-card__sub">We're a small team and we take support seriously. Email us and we'll get back to you — usually within a few hours on business days.</p>
+          <a href="mailto:hello@usecove.app" class="btn btn--primary btn--sm">Email hello@usecove.app</a>
         </div>
       </div>
     </div>
@@ -537,28 +857,92 @@
     let flowEdited = null;
 
     // ─── Navigation ───
-    const views = ['overview', 'flow', 'notifications', 'integrations', 'billing'];
+    const views = ['overview', 'flow', 'notifications', 'integrations', 'billing', 'settings', 'help'];
 
     function showView(name) {
       views.forEach(v => {
         document.getElementById('view-' + v).classList.add('hidden');
-        document.querySelector(`[data-view="${v}"]`).classList.remove('active');
+        const btn = document.querySelector(`[data-view="${v}"]`);
+        if (btn) btn.classList.remove('active');
       });
       document.getElementById('view-' + name).classList.remove('hidden');
-      document.querySelector(`[data-view="${name}"]`).classList.add('active');
+      const activeBtn = document.querySelector(`[data-view="${name}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
       if (name === 'flow' && business) renderFlowEditor();
       if (name === 'notifications' && business) fillNotificationForm();
       if (name === 'integrations' && business) fillIntegrations();
       if (name === 'billing') fillBilling();
+      if (name === 'settings' && user) fillSettings();
+      closeMobileMenu();
     }
 
     document.querySelectorAll('.sidebar__item[data-view]').forEach(btn => {
       btn.addEventListener('click', () => showView(btn.dataset.view));
     });
 
+    // Wire up in-page nav buttons (e.g. inside the help FAQ)
+    document.querySelectorAll('#view-help [data-view]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showView(btn.dataset.view);
+        if (btn.dataset.itab) activateIntTab(btn.dataset.itab);
+      });
+    });
+
+    // ─── Mobile menu ───
+    const mobMenuBtn = document.getElementById('mob-menu-btn');
+    const mobBackdrop = document.getElementById('mob-backdrop');
+    const sidebar = document.querySelector('.sidebar');
+
+    function openMobileMenu() {
+      sidebar.classList.add('sidebar--open');
+      mobBackdrop.classList.add('mob-backdrop--visible');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+      sidebar.classList.remove('sidebar--open');
+      mobBackdrop.classList.remove('mob-backdrop--visible');
+      document.body.style.overflow = '';
+    }
+    if (mobMenuBtn) mobMenuBtn.addEventListener('click', openMobileMenu);
+    if (mobBackdrop) mobBackdrop.addEventListener('click', closeMobileMenu);
+    const mobSettingsBtn = document.getElementById('mob-settings-btn');
+    if (mobSettingsBtn) mobSettingsBtn.addEventListener('click', () => showView('settings'));
+
     // ─── Load data ───
     async function init() {
       try {
+        // Dev bypass: /dashboard?dev=1 skips auth for testing
+        if (new URLSearchParams(window.location.search).has('dev')) {
+          user = { id: 'dev', name: 'Test User', email: 'test@cove.app', onboarding_complete: true };
+          business = { id: 'dev', name: 'Bay Plumbing', is_active: true, twilio_from_number: '+61491570006', owner_notify_phone: '+61400000001', integrations: {} };
+          document.getElementById('sidebar-name').textContent = user.name;
+          document.getElementById('sidebar-email').textContent = user.email;
+          const bizEl = document.getElementById('sidebar-biz-name');
+          if (bizEl) bizEl.textContent = business.name;
+
+          // Fake leads for preview
+          const _now = Date.now();
+          leadsData = [
+            { id: 'fake-1', name: 'Sarah Mitchell', phone: '+61411111111', status: 'completed', created_at: new Date(_now - 3600000).toISOString(), answers: { job_type_label: 'Burst pipe — urgent', location_label: 'Bondi Beach' } },
+            { id: 'fake-2', name: 'James Okafor', phone: '+61422222222', status: 'completed', created_at: new Date(_now - 7200000).toISOString(), answers: { job_type_label: 'Hot water system replacement', location_label: 'Newtown' } },
+            { id: 'fake-3', name: 'Emily Tan', phone: '+61433333333', status: 'active', created_at: new Date(_now - 900000).toISOString(), answers: { job_type_label: 'Blocked drain', location_label: 'Surry Hills' } },
+            { id: 'fake-4', name: 'Marcus Webb', phone: '+61444444444', status: 'active', created_at: new Date(_now - 9000000).toISOString(), answers: { job_type_label: 'Leaking tap', location_label: 'Coogee' } },
+            { id: 'fake-5', name: 'Anna Rossi', phone: '+61455555555', status: 'stopped', created_at: new Date(_now - 86400000).toISOString(), answers: {} },
+          ];
+          const _total = leadsData.length;
+          const _done = leadsData.filter(l => l.status === 'completed').length;
+          const _abandoned = leadsData.filter(l => l.status === 'active' && ((_now - new Date(l.created_at).getTime()) / 60000) > 60).length;
+          document.getElementById('stat-week').textContent = _total > 0 ? _total : '—';
+          document.getElementById('stat-done').textContent = _total > 0 ? _done : '—';
+          document.getElementById('stat-abandoned').textContent = _total > 0 ? _abandoned : '—';
+          document.getElementById('stat-rate').textContent = _total > 0 ? Math.round(_done / _total * 100) + '%' : '—';
+
+          fillOverview();
+          updateGetStartedPanel();
+          renderLeads(leadsData);
+          return;
+        }
+
         const meData = await fetch('/api/auth/me').then(r => r.json());
         if (!meData.ok) { location.href = '/login'; return; }
 
@@ -581,7 +965,11 @@
         // Overview
         fillOverview();
         await loadLeads();
+        setInterval(async () => { try { await loadLeads(); } catch {} }, 30000);
         updateGetStartedPanel();
+
+        // Fire trial email check in background — never blocks UI
+        fetch('/api/trial/check', { method: 'POST' }).catch(() => {});
       } catch (e) {
         console.error(e);
         location.href = '/login';
@@ -593,9 +981,11 @@
 
       // Status badge
       const badge = document.getElementById('live-badge');
-      if (business.is_active && business.twilio_from_number) {
+      if (business.is_active && business.twilio_from_number && business.forwarding_verified) {
         badge.innerHTML = '<span class="badge badge--live badge--dot">Live</span>';
-        document.getElementById('biz-number-sub').textContent = business.twilio_from_number;
+        document.getElementById('setup-alert').classList.add('hidden');
+      } else if (business.is_active && business.twilio_from_number) {
+        badge.innerHTML = '<span class="badge badge--setup badge--dot">Almost live</span>';
         document.getElementById('setup-alert').classList.add('hidden');
       } else {
         badge.innerHTML = '<span class="badge badge--setup badge--dot">Setting up</span>';
@@ -610,14 +1000,81 @@
         tryProvision();
       }
 
-      // Forwarding banner dismiss
-      const dismissBtn = document.getElementById('dismiss-forwarding-btn');
-      if (dismissBtn) {
-        dismissBtn.addEventListener('click', () => {
-          document.getElementById('forwarding-banner').classList.add('hidden');
-          sessionStorage.setItem('cf-dismissed', '1');
+
+      // ── Forwarding banner: verify test flow ──
+      (function initForwardingBanner() {
+        const banner      = document.getElementById('forwarding-banner');
+        const stateIdle   = document.getElementById('fwd-state-idle');
+        const stateCalling= document.getElementById('fwd-state-calling');
+        const stateVerified=document.getElementById('fwd-state-verified');
+        if (!banner) return;
+
+        function showState(name) {
+          stateIdle.classList.toggle('hidden', name !== 'idle');
+          stateCalling.classList.toggle('hidden', name !== 'calling');
+          stateVerified.classList.toggle('hidden', name !== 'verified');
+        }
+
+        let pollInterval = null;
+        let pollTimeout = null;
+        function startPolling() {
+          if (pollInterval) return;
+          pollInterval = setInterval(async () => {
+            try {
+              const r = await fetch('/api/me/forwarding-status').then(x => x.json());
+              if (r.forwarding_verified) {
+                clearInterval(pollInterval); clearTimeout(pollTimeout);
+                pollInterval = pollTimeout = null;
+                business.forwarding_verified = true;
+                showState('verified');
+              }
+            } catch { /* silent */ }
+          }, 3000);
+          // Give up after 2 minutes — carrier forwarding must not be set up yet
+          pollTimeout = setTimeout(() => {
+            clearInterval(pollInterval); pollInterval = null; pollTimeout = null;
+            showState('idle');
+            const sub = document.getElementById('fwd-idle-sub');
+            if (sub) {
+              sub.textContent = "Forwarding not detected. Make sure you've done the carrier setup first, then test again.";
+              sub.style.color = 'var(--amber, #d97706)';
+            }
+          }, 120000);
+        }
+
+        // "Verify it's working" button
+        document.getElementById('fwd-test-btn')?.addEventListener('click', async () => {
+          showState('calling');
+          try {
+            const res = await fetch('/api/me/verify-forwarding/start', { method: 'POST' });
+            const r = await res.json().catch(() => ({ ok: false, error: 'Server error — please try again.' }));
+            if (!r.ok) {
+              showState('idle');
+              // Show error in banner sub-text instead of alert
+              const sub = stateIdle.querySelector('.fwd-banner__sub');
+              if (sub) { sub.textContent = r.error || 'Could not place test call — check your phone number in Settings.'; sub.style.color = 'var(--red,#dc2626)'; }
+              return;
+            }
+            startPolling();
+          } catch {
+            // Connection error — still start polling in case call was placed
+            startPolling();
+          }
         });
-      }
+
+        // Cancel button
+        document.getElementById('fwd-cancel-btn')?.addEventListener('click', () => {
+          if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+          if (pollTimeout) { clearTimeout(pollTimeout); pollTimeout = null; }
+          showState('idle');
+        });
+
+        // Dismiss verified state
+        document.getElementById('fwd-dismiss-btn')?.addEventListener('click', () => {
+          banner.classList.add('hidden');
+          localStorage.setItem('cf-dismissed', '1');
+        });
+      })();
 
       // Reset setup handler
       const resetBtn = document.getElementById('reset-setup-btn');
@@ -675,6 +1132,11 @@
         btn.addEventListener('click', () => {
           showView(btn.dataset.view);
           if (btn.dataset.view === 'flow') localStorage.setItem('gs_flow_done', '1');
+          // If a specific tab is requested, activate it
+          if (btn.dataset.itab) {
+            const tabBtn = document.querySelector(`.int-tab[data-itab="${btn.dataset.itab}"]`);
+            if (tabBtn) tabBtn.click();
+          }
         });
       });
     }
@@ -686,7 +1148,6 @@
           business.twilio_from_number = res.number;
           business.is_active = true;
           document.getElementById('live-badge').innerHTML = '<span class="badge badge--live badge--dot">Live</span>';
-          document.getElementById('biz-number-sub').textContent = res.number;
           document.getElementById('setup-alert').classList.add('hidden');
           document.getElementById('billing-number').textContent = res.number;
           const s2dot = document.querySelector('#sstep-2 .setup-step__dot');
@@ -711,15 +1172,34 @@
         return age > 60;
       }).length;
 
-      document.getElementById('stat-week').textContent = total;
-      document.getElementById('stat-done').textContent = done;
-      document.getElementById('stat-abandoned').textContent = abandoned;
+      document.getElementById('stat-week').textContent = total > 0 ? total : '—';
+      document.getElementById('stat-done').textContent = total > 0 ? done : '—';
+      document.getElementById('stat-abandoned').textContent = total > 0 ? abandoned : '—';
+      document.getElementById('stat-rate').textContent = total > 0 ? Math.round(done / total * 100) + '%' : '—';
 
-      // Show forwarding banner if live but never had a lead
+      // Show/hide forwarding banner
       const banner = document.getElementById('forwarding-banner');
-      if (banner && business?.is_active && business?.twilio_from_number && total === 0
-          && !sessionStorage.getItem('cf-dismissed')) {
-        banner.classList.remove('hidden');
+      if (banner && business?.is_active && business?.twilio_from_number) {
+        const alreadyVerified = business.forwarding_verified;
+        const dismissed = localStorage.getItem('cf-dismissed');
+        if (alreadyVerified || total > 0 || dismissed) {
+          banner.classList.add('hidden');
+          if (total > 0) localStorage.removeItem('cf-dismissed');
+        } else {
+          banner.classList.remove('hidden');
+        }
+      }
+
+      // First lead celebration
+      if (total > 0 && !localStorage.getItem('first_lead_celebrated')) {
+        localStorage.setItem('first_lead_celebrated', '1');
+        const celebBanner = document.getElementById('first-lead-banner');
+        if (celebBanner) {
+          celebBanner.classList.remove('hidden');
+          document.getElementById('dismiss-first-lead-btn')?.addEventListener('click', () => {
+            celebBanner.classList.add('hidden');
+          });
+        }
       }
 
       renderLeads(leadsData);
@@ -749,39 +1229,8 @@
       return Math.floor(secs / 86400) + 'd ago';
     }
 
-    function renderLeads(leads) {
-      const container = document.getElementById('leads-container');
-      if (!leads.length) {
-        container.innerHTML = '<div class="leads-empty"><span>📭</span>No leads yet this week. Once Cove is live and call forwarding is set up, leads will appear here.</div>';
-        return;
-      }
-
-      const rows = leads.map(lead => {
-        const { label, cls } = getLeadStatus(lead);
-        const need = getLeadNeed(lead);
-        const name = lead.name || lead.phone || '—';
-        return `<tr>
-          <td class="name">${esc(name)}</td>
-          <td class="need">${esc(need)}</td>
-          <td><span class="lead-badge ${cls}">${label}</span></td>
-          <td class="time">${timeAgo(lead.created_at)}</td>
-        </tr>`;
-      }).join('');
-
-      container.innerHTML = `
-        <table class="leads-table">
-          <thead>
-            <tr>
-              <th>Name / Phone</th>
-              <th>What they need</th>
-              <th>Status</th>
-              <th style="text-align:right">Time</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
-    }
+    // Note: this function is overridden below by the full renderLeads with click handlers
+    function renderLeads(leads) {}
 
     // ─── Flow editor ───
     function getFlowConfig() {
@@ -790,14 +1239,36 @@
       return null;
     }
 
+    function captureFlowEdits() {
+      const flow = getFlowConfig();
+      if (!flow?.steps) return;
+      // Capture question text
+      document.querySelectorAll('.flow-question-input').forEach((ta, i) => {
+        if (flow.steps[i]) flow.steps[i].question = ta.value.trim();
+      });
+      // Capture option labels
+      document.querySelectorAll('.flow-opts-edit').forEach(wrap => {
+        const si = Number(wrap.dataset.optStep);
+        if (!flow.steps[si] || flow.steps[si].free_text) return;
+        const letters = 'ABCD';
+        flow.steps[si].options = Array.from(wrap.querySelectorAll('.flow-opt-input')).map((inp, j) => ({
+          value: letters[j],
+          label: inp.value.trim() || `Option ${letters[j]}`,
+        }));
+      });
+      // Capture intro
+      const introEl = document.getElementById('flow-intro');
+      if (introEl) flow.intro = introEl.value.trim();
+      flowEdited = JSON.parse(JSON.stringify(flow));
+    }
+
     function renderFlowEditor() {
       const flow = getFlowConfig();
       document.getElementById('flow-biz-name').value = business.name || '';
-      document.getElementById('flow-booking').value = business.booking_link || '';
 
       const container = document.getElementById('flow-cards');
       if (!flow || !flow.steps) {
-        container.innerHTML = '<div style="color:var(--text-faint);font-size:13.5px;padding:16px 0">No flow configured. <button class="flow-ai-btn" onclick="openRegenModal()">Generate with AI</button></div>';
+        container.innerHTML = '<div style="color:var(--text-faint);font-size:13.5px;padding:16px 0">No questions yet. Click <strong>Add question</strong> below to get started.</div>';
         return;
       }
 
@@ -806,31 +1277,97 @@
       if (introEl) {
         introEl.value = flow.intro || '';
         requestAnimationFrame(() => { introEl.style.height = 'auto'; introEl.style.height = introEl.scrollHeight + 'px'; });
-        introEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; }, { once: false });
+        introEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; updateFlowPreview(); }, { once: false });
       }
+      document.getElementById('flow-biz-name').addEventListener('input', updateFlowPreview, { once: true });
 
       container.innerHTML = flow.steps.map((step, i) => `
         <div class="flow-card">
           <div class="flow-card__header">
-            <span class="flow-card__num">Question ${i + 1}</span>
-            ${step.free_text ? '<span class="flow-card__badge flow-card__badge--free">Free text</span>' : '<span class="flow-card__badge">Multiple choice</span>'}
+            <span class="flow-card__num">Message ${i + 1}</span>
+            <div class="flow-card__header-actions">
+              <button class="flow-card__type-btn" data-step="${i}" type="button">
+                ${step.free_text ? 'Switch to multiple choice' : 'Switch to open answer'}
+              </button>
+              ${flow.steps.length > 1 ? `<button class="flow-card__del-btn" data-step="${i}" aria-label="Delete question" type="button">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>` : ''}
+            </div>
           </div>
           <div class="flow-card__body">
-            <textarea class="flow-question-input" data-step="${i}">${esc(step.question)}</textarea>
+            <div class="flow-q-label">Question</div>
+            <textarea class="flow-question-input" data-step="${i}" placeholder="e.g. What kind of job do you need done?">${esc(step.question)}</textarea>
             ${!step.free_text ? `
-            <div class="flow-opts-row">
-              ${step.options.map(o => `
-                <div class="flow-opt-chip">
-                  <strong>${esc(o.value)}</strong>
-                  <span>${esc(o.label)}</span>
+            <div class="flow-replies-label">Answer options</div>
+            <div class="flow-opts-edit" data-opt-step="${i}">
+              ${(step.options || []).map((o, j) => `
+                <div class="flow-opt-row">
+                  <span class="flow-opt-letter">${o.value}</span>
+                  <input class="flow-opt-input" type="text" value="${esc(o.label)}" placeholder="Option ${o.value}…" data-step="${i}" data-opt="${j}" />
+                  ${(step.options.length > 1) ? `<button class="flow-opt-del" data-step="${i}" data-opt="${j}" type="button" aria-label="Remove option">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>` : ''}
                 </div>`).join('')}
+              ${step.options.length < 4 ? `<button class="flow-opt-add" data-step="${i}" type="button">+ Add option</button>` : ''}
             </div>` : `
-            <div class="flow-free-note">Lead can reply with anything — captured in your summary.</div>`}
+            <div class="flow-free-note">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              The lead types any reply — their answer gets included in your notification.
+            </div>`}
           </div>
         </div>
       `).join('');
 
-      // Auto-size all textareas
+      // Bind type-switch buttons
+      container.querySelectorAll('.flow-card__type-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          captureFlowEdits();
+          const step = flowEdited.steps[Number(btn.dataset.step)];
+          step.free_text = !step.free_text;
+          if (!step.free_text && !step.options?.length) {
+            step.options = [{value:'A',label:'Option A'},{value:'B',label:'Option B'}];
+          }
+          renderFlowEditor();
+        });
+      });
+
+      // Bind delete-question buttons
+      container.querySelectorAll('.flow-card__del-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          captureFlowEdits();
+          flowEdited.steps.splice(Number(btn.dataset.step), 1);
+          renderFlowEditor();
+        });
+      });
+
+      // Bind delete-option buttons
+      container.querySelectorAll('.flow-opt-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          captureFlowEdits();
+          const si = Number(btn.dataset.step), oi = Number(btn.dataset.opt);
+          flowEdited.steps[si].options.splice(oi, 1);
+          const letters = 'ABCD';
+          flowEdited.steps[si].options.forEach((o, j) => { o.value = letters[j]; });
+          renderFlowEditor();
+        });
+      });
+
+      // Bind add-option buttons
+      container.querySelectorAll('.flow-opt-add').forEach(btn => {
+        btn.addEventListener('click', () => {
+          captureFlowEdits();
+          const si = Number(btn.dataset.step);
+          const opts = flowEdited.steps[si].options;
+          opts.push({ value: 'ABCD'[opts.length], label: '' });
+          renderFlowEditor();
+          setTimeout(() => {
+            const wrap = document.querySelector(`.flow-opts-edit[data-opt-step="${si}"]`);
+            wrap?.querySelectorAll('.flow-opt-input')[opts.length - 1]?.focus();
+          }, 30);
+        });
+      });
+
+      // Auto-size question textareas + live preview on input
       requestAnimationFrame(() => requestAnimationFrame(() => {
         container.querySelectorAll('.flow-question-input').forEach(ta => {
           ta.style.overflow = 'hidden';
@@ -839,66 +1376,77 @@
           ta.addEventListener('input', function() {
             this.style.height = '0';
             this.style.height = this.scrollHeight + 'px';
+            updateFlowPreview();
           });
         });
+        container.querySelectorAll('.flow-opt-input').forEach(inp => {
+          inp.addEventListener('input', updateFlowPreview);
+        });
+        updateFlowPreview();
       }));
     }
 
-    function openRegenModal() {
-      document.getElementById('regen-modal').classList.remove('hidden');
-      document.getElementById('regen-modal').style.display = 'flex';
+    // ─── Live SMS preview ───
+    function updateFlowPreview() {
+      const screen = document.getElementById('flow-preview-screen');
+      if (!screen) return;
+
+      const bizName = document.getElementById('flow-biz-name')?.value.trim() || business?.name || 'Your business';
+      const intro = document.getElementById('flow-intro')?.value.trim() || `Hi there, this is ${bizName}. Quick question:`;
+      const flow = getFlowConfig();
+
+      const mkBubble = (dir, html) => `<div class="fpp-bubble fpp-bubble--${dir}">${html}</div>`;
+
+      if (!flow?.steps?.length) {
+        screen.innerHTML = `<div class="fpp-empty">Generate a flow to see a preview here.</div>`;
+        return;
+      }
+
+      // Build current steps from DOM (live)
+      const steps = flow.steps.map((step, i) => {
+        const ta = document.querySelector(`.flow-question-input[data-step="${i}"]`);
+        const question = ta ? ta.value : step.question;
+        let options = step.options;
+        if (!step.free_text) {
+          const inps = document.querySelectorAll(`.flow-opts-edit[data-opt-step="${i}"] .flow-opt-input`);
+          if (inps.length) options = Array.from(inps).map((inp, j) => ({ value: 'ABCD'[j], label: inp.value || `Option ${'ABCD'[j]}` }));
+        }
+        return { ...step, question, options };
+      });
+
+      let html = mkBubble('in', esc(intro));
+      steps.forEach(step => {
+        let msg = esc(step.question || '…');
+        if (!step.free_text && step.options?.length) {
+          msg += '<br><br>' + step.options.map(o => `${o.value}) ${esc(o.label || '…')}`).join('<br>');
+        }
+        html += mkBubble('in', msg);
+        html += mkBubble('out', step.free_text ? '<em>Their reply…</em>' : esc(step.options?.[0]?.value || 'A'));
+      });
+      html += mkBubble('in', '✅ Got it! We\'ll be in touch shortly.');
+
+      screen.innerHTML = html;
+      screen.scrollTop = screen.scrollHeight;
     }
 
-    document.getElementById('flow-regen-btn').addEventListener('click', openRegenModal);
-    document.getElementById('regen-cancel').addEventListener('click', () => {
-      document.getElementById('regen-modal').classList.add('hidden');
-    });
-    document.getElementById('regen-confirm').addEventListener('click', async () => {
-      const desc = document.getElementById('regen-desc').value.trim();
-      const err = document.getElementById('regen-error');
-      err.classList.remove('visible');
-      if (!desc) { err.textContent = 'Please describe your business first.'; err.classList.add('visible'); return; }
-
-      const btn = document.getElementById('regen-confirm');
-      btn.disabled = true; btn.textContent = 'Regenerating…';
-
-      const res = await fetch('/api/me/regenerate-flow', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description: desc }),
-      }).then(r => r.json());
-
-      btn.disabled = false; btn.textContent = 'Regenerate';
-
-      if (res.ok) {
-        flowEdited = res.flow;
-        document.getElementById('regen-modal').classList.add('hidden');
-        renderFlowEditor();
-      } else {
-        err.textContent = res.error || 'Could not regenerate.';
-        err.classList.add('visible');
+    document.getElementById('flow-add-btn').addEventListener('click', () => {
+      captureFlowEdits();
+      if (!flowEdited) {
+        const base = getFlowConfig();
+        flowEdited = base ? JSON.parse(JSON.stringify(base)) : { steps: [] };
       }
-    });
-
-    document.getElementById('flow-cancel').addEventListener('click', () => {
-      flowEdited = null;
+      flowEdited.steps.push({ question: '', free_text: false, options: [{value:'A',label:'Option A'},{value:'B',label:'Option B'}] });
       renderFlowEditor();
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('.flow-question-input');
+        inputs[inputs.length - 1]?.focus();
+      }, 50);
     });
 
     document.getElementById('flow-save').addEventListener('click', async () => {
-      const flow = getFlowConfig();
-      if (flow) {
-        document.querySelectorAll('.flow-question-input').forEach((ta, i) => {
-          if (flow.steps[i]) flow.steps[i].question = ta.value.trim();
-        });
-        flowEdited = flow;
-      }
+      captureFlowEdits();
 
       const bizName = document.getElementById('flow-biz-name').value.trim();
-      const booking = document.getElementById('flow-booking').value.trim();
-      const introMsg = document.getElementById('flow-intro')?.value.trim();
-      if (flowEdited && introMsg) flowEdited.intro = introMsg;
-      else if (flow && introMsg) flow.intro = introMsg;
 
       const btn = document.getElementById('flow-save');
       btn.disabled = true; btn.textContent = 'Saving…';
@@ -914,11 +1462,10 @@
       await fetch('/api/me/business', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: bizName, bookingLink: booking || null }),
+        body: JSON.stringify({ name: bizName }),
       });
 
       business.name = bizName;
-      business.booking_link = booking;
       if (flowEdited) { business.flow_config = flowEdited; flowEdited = null; }
 
       document.getElementById('flow-saved').classList.add('visible');
@@ -932,6 +1479,9 @@
 
     function fillNotificationForm() {
       document.getElementById('notif-phone').value = business.owner_notify_phone || '';
+      const hasEmail = !!business.owner_notify_email;
+      document.getElementById('notif-email-toggle').checked = hasEmail;
+      document.getElementById('notif-email-wrap').classList.toggle('hidden', !hasEmail);
       document.getElementById('notif-email').value = business.owner_notify_email || '';
 
       const integrations = business.integrations || {};
@@ -964,6 +1514,10 @@
         chip.classList.toggle('closed', closedDays.includes(d));
       });
     }
+
+    document.getElementById('notif-email-toggle').addEventListener('change', (e) => {
+      document.getElementById('notif-email-wrap').classList.toggle('hidden', !e.target.checked);
+    });
 
     document.getElementById('hours-enabled').addEventListener('change', (e) => {
       document.getElementById('hours-config').classList.toggle('hidden', !e.target.checked);
@@ -1000,7 +1554,9 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           notifyPhone: document.getElementById('notif-phone').value.trim(),
-          notifyEmail: document.getElementById('notif-email').value.trim() || null,
+          notifyEmail: document.getElementById('notif-email-toggle').checked
+            ? document.getElementById('notif-email').value.trim() || null
+            : null,
           webhookUrl: document.getElementById('notif-webhook').value.trim() || null,
           operatingHours,
         }),
@@ -1043,29 +1599,7 @@
 <\/script>`;
       document.getElementById('embed-example').textContent = example;
 
-      const webhookUrl = `${base}/api/webhook/generic/${bizId}`;
-      document.getElementById('webhook-url').textContent = webhookUrl;
-
-      const integrations = [
-        { name: 'HubSpot',      icon: '🟠', desc: 'New contact',    url: 'https://zapier.com/apps/hubspot/integrations/webhooks' },
-        { name: 'Jobber',       icon: '🔵', desc: 'New request',    url: 'https://zapier.com/apps/jobber/integrations/webhooks' },
-        { name: 'ServiceM8',    icon: '🟢', desc: 'New job',        url: 'https://zapier.com/apps/servicem8/integrations/webhooks' },
-        { name: 'Google Forms', icon: '📋', desc: 'Form response',  url: 'https://zapier.com/apps/google-forms/integrations/webhooks' },
-        { name: 'Pipedrive',    icon: '🟣', desc: 'New lead',       url: 'https://zapier.com/apps/pipedrive/integrations/webhooks' },
-        { name: 'Make',         icon: '⚙️',  desc: 'Any app',        url: 'https://www.make.com/en/integrations/webhooks' },
-      ];
-
-      const container = document.getElementById('zapier-buttons');
-      container.innerHTML = integrations.map(i => `
-        <a href="${i.url}" target="_blank" rel="noopener" class="zapier-btn">
-          <span style="font-size:1.1rem;line-height:1;flex-shrink:0">${i.icon}</span>
-          <div style="flex:1;min-width:0">
-            <div class="zapier-btn__name">${i.name}</div>
-            <div class="zapier-btn__desc">${i.desc}</div>
-          </div>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        </a>
-      `).join('');
+      fillIntWebhook();
     }
 
     function copySnippet() {
@@ -1076,13 +1610,178 @@
       });
     }
 
-    function copyWebhook() {
-      const text = document.getElementById('webhook-url').textContent;
+    function copyExample() {
+      const text = document.getElementById('embed-example').textContent;
       navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('copy-webhook-btn');
+        const btn = document.getElementById('copy-example-btn');
         btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000);
       });
     }
+
+
+    // ─── Integration tabs ───
+    document.querySelectorAll('.int-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.int-tab').forEach(t => t.classList.remove('int-tab--active'));
+        document.querySelectorAll('.int-panel').forEach(p => p.classList.remove('int-panel--active'));
+        tab.classList.add('int-tab--active');
+        document.getElementById('int-panel-' + tab.dataset.itab).classList.add('int-panel--active');
+      });
+    });
+
+    // ─── Missed calls: inline carrier setup ───
+    (function() {
+      const grid = document.getElementById('dash-carrier-grid');
+      const action = document.getElementById('dash-cf-action');
+      const dialCodeEl = document.getElementById('dash-dial-code');
+      const activateLink = document.getElementById('dash-activate-link');
+      const optusNote = document.getElementById('dash-optus-note');
+      const copyCodeBtn = document.getElementById('dash-copy-code-btn');
+      const mobileSect = document.getElementById('dash-mobile-section');
+      const desktopSect = document.getElementById('dash-desktop-section');
+      const sendBtn = document.getElementById('dash-send-btn');
+      const sendStatus = document.getElementById('dash-send-status');
+      if (!grid) return;
+
+      // Detect mobile vs desktop
+      const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      if (mobileSect) mobileSect.classList.toggle('hidden', !isMobile);
+      if (desktopSect) desktopSect.classList.toggle('hidden', isMobile);
+
+      const buildCode = (carrier, num) => {
+        if (carrier === 'vodafone') return `*61*${num}*11*20#`;
+        return `**61*${num}*11*20#`; // telstra, optus, other
+      };
+
+      let currentCode = '';
+
+      grid.addEventListener('click', e => {
+        const tile = e.target.closest('.cf-carrier-tile');
+        if (!tile) return;
+
+        const carrier = tile.dataset.carrier;
+        const num = business?.twilio_from_number || '+61XXXXXXXXX';
+
+        // Highlight selected tile
+        grid.querySelectorAll('.cf-carrier-tile').forEach(t => t.classList.remove('active'));
+        tile.classList.add('active');
+
+        // Optus: show note about disabling Message Bank first
+        if (optusNote) optusNote.classList.toggle('hidden', carrier !== 'optus');
+
+        // Build dial code
+        currentCode = buildCode(carrier, num);
+        if (dialCodeEl) dialCodeEl.textContent = currentCode;
+        if (activateLink) activateLink.href = 'tel:' + currentCode;
+
+        // Pre-fill send-to-phone with registered number
+        const sendPhoneInput = document.getElementById('dash-send-phone');
+        if (sendPhoneInput && !sendPhoneInput.value && business?.owner_notify_phone) {
+          sendPhoneInput.value = business.owner_notify_phone;
+        }
+
+        // Reveal action section
+        action.classList.remove('hidden');
+        action.style.display = 'flex';
+      });
+
+      // Copy code to clipboard
+      if (copyCodeBtn) {
+        copyCodeBtn.addEventListener('click', () => {
+          if (!currentCode) return;
+          navigator.clipboard.writeText(currentCode).then(() => {
+            copyCodeBtn.textContent = 'Copied!';
+            setTimeout(() => { copyCodeBtn.textContent = 'Copy'; }, 2000);
+          }).catch(() => {
+            // Fallback for older browsers
+            const ta = document.createElement('textarea');
+            ta.value = currentCode;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            copyCodeBtn.textContent = 'Copied!';
+            setTimeout(() => { copyCodeBtn.textContent = 'Copy'; }, 2000);
+          });
+        });
+      }
+
+      // Desktop: send code to phone via SMS
+      if (sendBtn) {
+        sendBtn.addEventListener('click', async () => {
+          const phone = document.getElementById('dash-send-phone')?.value.trim();
+          if (!phone || !currentCode) return;
+          sendBtn.disabled = true;
+          sendBtn.textContent = 'Sending…';
+          if (sendStatus) { sendStatus.textContent = ''; sendStatus.style.color = ''; }
+          try {
+            const res = await fetch('/api/demo/send', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ phone, message: `Your Cove call forwarding code:\n\n${currentCode}\n\nDial this on your mobile, then tap Call to activate.` }),
+            }).then(r => r.json());
+            if (res.ok) {
+              if (sendStatus) { sendStatus.textContent = 'Sent! Check your messages.'; sendStatus.style.color = 'var(--green)'; }
+              sendBtn.textContent = 'Sent ✓';
+              setTimeout(() => { sendBtn.disabled = false; sendBtn.textContent = 'Send'; }, 3000);
+            } else {
+              if (sendStatus) { sendStatus.textContent = res.error || 'Could not send — try again.'; sendStatus.style.color = 'var(--red,#dc2626)'; }
+              sendBtn.disabled = false;
+              sendBtn.textContent = 'Send';
+            }
+          } catch {
+            if (sendStatus) { sendStatus.textContent = 'Could not send — try again.'; sendStatus.style.color = 'var(--red,#dc2626)'; }
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send';
+          }
+        });
+      }
+    })();
+
+    // ─── CRM tab: pre-fill webhook input + save ───
+    function fillIntWebhook() {
+      const input = document.getElementById('int-webhook-input');
+      if (input && business?.integrations?.completion_webhook_url) {
+        input.value = business.integrations.completion_webhook_url;
+      }
+    }
+    document.getElementById('save-webhook-btn')?.addEventListener('click', async function() {
+      const input = document.getElementById('int-webhook-input');
+      const url = input?.value.trim() || null;
+      this.disabled = true; this.textContent = 'Saving…';
+      try {
+        const res = await fetch('/api/notifications', {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ webhookUrl: url }),
+        }).then(r => r.json());
+        const statusEl = document.getElementById('webhook-save-status');
+        if (res.ok) {
+          if (business.integrations) business.integrations.completion_webhook_url = url;
+          const notifWebhook = document.getElementById('notif-webhook');
+          if (notifWebhook) notifWebhook.value = url || '';
+          this.textContent = 'Saved ✓'; this.disabled = false;
+          if (statusEl) { statusEl.textContent = url ? 'Connected — Cove will send qualified leads here.' : 'Webhook removed.'; statusEl.style.color = 'var(--green)'; }
+          setTimeout(() => { this.textContent = 'Save'; if (statusEl) statusEl.textContent = ''; }, 3000);
+        } else {
+          this.textContent = 'Save'; this.disabled = false;
+          if (statusEl) { statusEl.textContent = 'Could not save — try again.'; statusEl.style.color = 'var(--red, #dc2626)'; }
+        }
+      } catch {
+        this.textContent = 'Save'; this.disabled = false;
+        const statusEl = document.getElementById('webhook-save-status');
+        if (statusEl) { statusEl.textContent = 'Could not save — try again.'; statusEl.style.color = 'var(--red, #dc2626)'; }
+      }
+    });
+
+    // ─── Forwarding banner ───
+    document.getElementById('fwd-banner-setup-btn')?.addEventListener('click', () => {
+      showView('integrations');
+      // Activate the "Missed calls" tab
+      document.querySelectorAll('.int-tab').forEach(t => t.classList.remove('int-tab--active'));
+      document.querySelectorAll('.int-panel').forEach(p => p.classList.remove('int-panel--active'));
+      document.querySelector('.int-tab[data-itab="calls"]')?.classList.add('int-tab--active');
+      document.getElementById('int-panel-calls')?.classList.add('int-panel--active');
+    });
 
     // ─── Billing ───
     function fillBilling() {
@@ -1112,6 +1811,113 @@
       btn.disabled = false; btn.textContent = 'Manage billing →';
       if (data.ok && data.url) { location.href = data.url; }
       else { alert(data.error || 'Could not open billing portal.'); }
+    });
+
+    // ─── Settings ───
+    function fillSettings() {
+      document.getElementById('settings-name').value = user.name || '';
+      document.getElementById('settings-email').value = user.email || '';
+      document.getElementById('settings-biz-name').value = business?.name || '';
+      document.getElementById('settings-booking').value = business?.booking_link || '';
+      document.getElementById('settings-pw-current').value = '';
+      document.getElementById('settings-pw-new').value = '';
+      document.getElementById('settings-pw-confirm').value = '';
+      document.getElementById('settings-success').classList.add('hidden');
+      document.getElementById('settings-error').classList.add('hidden');
+      document.getElementById('settings-preview-status').textContent = '';
+    }
+
+    document.getElementById('settings-save').addEventListener('click', async () => {
+      const btn = document.getElementById('settings-save');
+      const successEl = document.getElementById('settings-success');
+      const errorEl = document.getElementById('settings-error');
+      successEl.classList.add('hidden');
+      errorEl.classList.add('hidden');
+
+      const name = document.getElementById('settings-name').value.trim();
+      const pwCurrent = document.getElementById('settings-pw-current').value;
+      const pwNew = document.getElementById('settings-pw-new').value;
+      const pwConfirm = document.getElementById('settings-pw-confirm').value;
+
+      if (pwNew && pwNew !== pwConfirm) {
+        document.getElementById('settings-error-msg').textContent = 'New passwords do not match.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      if (pwNew && pwNew.length < 8) {
+        document.getElementById('settings-error-msg').textContent = 'Password must be at least 8 characters.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      btn.disabled = true; btn.textContent = 'Saving…';
+      try {
+        const bizName = document.getElementById('settings-biz-name').value.trim();
+        const bookingLink = document.getElementById('settings-booking').value.trim();
+
+        const payload = { name };
+        if (pwNew) { payload.currentPassword = pwCurrent; payload.newPassword = pwNew; }
+
+        const [profileRes] = await Promise.all([
+          fetch('/api/auth/update-profile', {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          }).then(r => r.json()),
+          fetch('/api/me/business', {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: bizName, bookingLink: bookingLink || null }),
+          }),
+        ]);
+
+        if (profileRes.ok) {
+          user.name = name;
+          business.name = bizName;
+          business.booking_link = bookingLink || null;
+          document.getElementById('sidebar-name').textContent = name || user.email;
+          document.getElementById('biz-name-header').textContent = bizName;
+          const bizEl = document.getElementById('sidebar-biz-name');
+          if (bizEl) bizEl.textContent = bizName;
+          document.getElementById('settings-success-msg').textContent = pwNew ? 'Settings and password saved.' : 'Settings saved.';
+          successEl.classList.remove('hidden');
+          document.getElementById('settings-pw-current').value = '';
+          document.getElementById('settings-pw-new').value = '';
+          document.getElementById('settings-pw-confirm').value = '';
+        } else {
+          document.getElementById('settings-error-msg').textContent = profileRes.error || 'Could not save changes. Try again.';
+          errorEl.classList.remove('hidden');
+        }
+      } catch (e) {
+        document.getElementById('settings-error-msg').textContent = 'Network error. Please try again.';
+        errorEl.classList.remove('hidden');
+      }
+      btn.disabled = false; btn.textContent = 'Save changes';
+    });
+
+    // ─── Preview SMS ───
+    document.getElementById('settings-preview-btn')?.addEventListener('click', async () => {
+      const phone = document.getElementById('settings-preview-phone').value.trim();
+      const statusEl = document.getElementById('settings-preview-status');
+      if (!phone) { statusEl.textContent = 'Enter a phone number first.'; statusEl.style.color = 'var(--red,#dc2626)'; return; }
+      const btn = document.getElementById('settings-preview-btn');
+      btn.disabled = true; btn.textContent = 'Sending…';
+      statusEl.textContent = ''; statusEl.style.color = '';
+      try {
+        const res = await fetch('/api/demo/send', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, message: `Hi! This is a preview from ${business?.name || 'Cove'}.\n\nYou'll receive the exact SMS your leads get when they call. Reply as if you were a customer to see the full flow.` }),
+        }).then(r => r.json());
+        if (res.ok) {
+          statusEl.textContent = 'Sent! Check your messages.';
+          statusEl.style.color = 'var(--green)';
+        } else {
+          statusEl.textContent = res.error || 'Could not send — try again.';
+          statusEl.style.color = 'var(--red,#dc2626)';
+        }
+      } catch {
+        statusEl.textContent = 'Network error — try again.';
+        statusEl.style.color = 'var(--red,#dc2626)';
+      }
+      btn.disabled = false; btn.textContent = 'Send preview';
     });
 
     // ─── Logout ───
@@ -1164,6 +1970,45 @@
     async function loadMessages(leadId) {
       const body = document.getElementById('thread-body');
       body.innerHTML = '<div class="thread-loading">Loading…</div>';
+
+      // Dev mode: return fake conversation threads
+      if (leadId.startsWith('fake-')) {
+        const _t = Date.now();
+        const fakeConvos = {
+          'fake-1': [
+            { direction: 'outbound', body: 'Hi Sarah! Bay Plumbing here — thanks for calling. What can we help with today?', created_at: new Date(_t - 3500000).toISOString() },
+            { direction: 'inbound', body: 'Hi yes I have a burst pipe under the kitchen sink, water everywhere 😬', created_at: new Date(_t - 3480000).toISOString() },
+            { direction: 'outbound', body: 'That sounds urgent — we\'ll get someone to you ASAP. What suburb are you in?', created_at: new Date(_t - 3460000).toISOString() },
+            { direction: 'inbound', body: 'Bondi Beach', created_at: new Date(_t - 3440000).toISOString() },
+            { direction: 'outbound', body: 'Perfect — can you drop us your address? We can have someone there within 2 hours.', created_at: new Date(_t - 3420000).toISOString() },
+            { direction: 'inbound', body: '12 Campbell Parade. Please hurry!', created_at: new Date(_t - 3400000).toISOString() },
+            { direction: 'system', body: '✓ Lead qualified — owner notified', created_at: new Date(_t - 3395000).toISOString() },
+          ],
+          'fake-2': [
+            { direction: 'outbound', body: 'Hi James! Bay Plumbing here — thanks for calling. What can we help with?', created_at: new Date(_t - 7100000).toISOString() },
+            { direction: 'inbound', body: 'Hot water system stopped working this morning, no hot water at all', created_at: new Date(_t - 7080000).toISOString() },
+            { direction: 'outbound', body: 'Sorry to hear that — any idea how old the system is?', created_at: new Date(_t - 7060000).toISOString() },
+            { direction: 'inbound', body: 'About 12 years old, think it needs replacing', created_at: new Date(_t - 7040000).toISOString() },
+            { direction: 'outbound', body: 'Makes sense at that age. We\'ll come assess and quote. What suburb?', created_at: new Date(_t - 7020000).toISOString() },
+            { direction: 'inbound', body: 'Newtown — 7 King St', created_at: new Date(_t - 7000000).toISOString() },
+            { direction: 'system', body: '✓ Lead qualified — owner notified', created_at: new Date(_t - 6990000).toISOString() },
+          ],
+          'fake-3': [
+            { direction: 'outbound', body: 'Hi Emily! Bay Plumbing here — thanks for calling. What can we help with?', created_at: new Date(_t - 860000).toISOString() },
+            { direction: 'inbound', body: 'Blocked drain in the bathroom, been slow for a week', created_at: new Date(_t - 840000).toISOString() },
+            { direction: 'outbound', body: 'Got it — what suburb are you in?', created_at: new Date(_t - 820000).toISOString() },
+            { direction: 'inbound', body: 'Surry Hills', created_at: new Date(_t - 800000).toISOString() },
+          ],
+        };
+        const msgs = fakeConvos[leadId];
+        if (msgs) {
+          renderMessages(msgs);
+        } else {
+          body.innerHTML = '<div class="thread-empty">No messages recorded yet.<br><span>Messages from new leads will appear here.</span></div>';
+        }
+        return;
+      }
+
       try {
         const res = await fetch(`/api/me/leads/${leadId}/messages`);
         const data = await res.json();
@@ -1194,35 +2039,50 @@
       body.scrollTop = body.scrollHeight;
     }
 
-    // Make rows clickable — patch into renderLeads
-    const _origRenderLeads = renderLeads;
-    // Override renderLeads to attach click handlers after render
+    // Override renderLeads with redesigned table
     function renderLeads(leads) {
       const container = document.getElementById('leads-container');
       if (!leads.length) {
-        container.innerHTML = '<div class="leads-empty"><span>📭</span>No leads yet this week. Once Cove is live and call forwarding is set up, leads will appear here.</div>';
+        container.innerHTML = `
+          <div class="leads-empty">
+            <div class="leads-empty__icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.73 12 19.79 19.79 0 0 1 1.66 3.38 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 13 13.91l.27-.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 20 16z"/></svg>
+            </div>
+            <div class="leads-empty__title">No leads yet this week</div>
+            <div class="leads-empty__sub">Once Cove is live and call forwarding is set up, leads will appear here automatically.</div>
+          </div>`;
         return;
       }
+      const now = Date.now();
       const rows = leads.map((lead, i) => {
         const { label, cls } = getLeadStatus(lead);
         const need = getLeadNeed(lead);
-        const name = lead.name || lead.phone || '—';
-        return `<tr class="lead-row" data-index="${i}">
-          <td class="name">${esc(name)}</td>
-          <td class="need">${esc(need)}</td>
-          <td><span class="lead-badge ${cls}">${label}</span></td>
-          <td class="time">${timeAgo(lead.created_at)}</td>
-          <td class="thread-cell"><span class="thread-open-btn">View →</span></td>
+        const name = lead.name || '—';
+        const ageMs = now - new Date(lead.created_at).getTime();
+        const isNew = ageMs < 5 * 60 * 1000;
+        const isUrgent = lead.status === 'active' && ageMs < 30 * 60 * 1000;
+        const showPhone = lead.phone && lead.name && lead.phone !== lead.name;
+        return `<tr class="lead-row${isUrgent ? ' lead-row--urgent' : ''}" data-index="${i}">
+          <td class="name-cell">
+            <div class="lead-name">${esc(name)}</div>
+            ${showPhone ? `<div class="lead-phone">${esc(lead.phone)}</div>` : ''}
+            ${need !== '—' ? `<div class="lead-need-sub">${esc(need)}</div>` : ''}
+          </td>
+          <td class="status-cell">
+            ${isNew ? '<span class="lead-badge lead-badge--new">New</span>' : ''}
+            <span class="lead-badge ${cls}">${label}</span>
+          </td>
+          <td class="time-cell">${timeAgo(lead.created_at)}</td>
+          <td class="view-cell"><span class="thread-open-btn">View</span></td>
         </tr>`;
       }).join('');
       container.innerHTML = `
         <table class="leads-table">
           <thead>
             <tr>
-              <th>Name / Phone</th>
-              <th>What they need</th>
+              <th>Lead</th>
               <th>Status</th>
-              <th style="text-align:right">Time</th>
+              <th>Time</th>
               <th></th>
             </tr>
           </thead>
@@ -1233,9 +2093,6 @@
         row.addEventListener('click', () => openThread(leads[Number(row.dataset.index)]));
       });
     }
-
-    document.getElementById('thread-close').addEventListener('click', closeThread);
-    document.getElementById('thread-overlay').addEventListener('click', closeThread);
 
   </script>
 
@@ -1258,6 +2115,11 @@
     </div>
     <div class="thread-body" id="thread-body"></div>
   </div>
+
+  <script>
+    document.getElementById('thread-close').addEventListener('click', closeThread);
+    document.getElementById('thread-overlay').addEventListener('click', closeThread);
+  </script>
 
 </body>
 </html>

@@ -448,6 +448,22 @@ export function buildUrgentAlert(lead, business, stepKey, answerLabel) {
     .join("\n");
 }
 
+export function buildExitSummary(lead, business, lastAttempt, reason) {
+  const reasonLine =
+    reason === "call_requested"
+      ? "→ Lead asked to be called back directly."
+      : `→ Lead had trouble answering. Last reply: "${lastAttempt || "—"}"`;
+  return [
+    `INCOMPLETE LEAD — ${business.name || "Business"}`,
+    `Name: ${lead.name || "Unknown"}`,
+    `Phone: ${lead.phone}`,
+    reasonLine,
+    "Worth calling back.",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 export function isStopKeyword(text) {
   const t = String(text || "").trim().toUpperCase();
   return ["STOP", "UNSUBSCRIBE", "CANCEL", "END", "QUIT"].includes(t);

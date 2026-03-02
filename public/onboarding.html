@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/dash.css" />
   <style>
     /* ── Onboarding split layout ── */
@@ -125,90 +125,7 @@
       line-height: 1.6; margin-bottom: 1.5rem;
     }
 
-    .ob-stat-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: .6rem;
-      margin-bottom: 1.5rem;
-    }
-    .ob-stat {
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: 10px; padding: .85rem 1rem;
-    }
-    .ob-stat strong {
-      display: block; font-size: 1.65rem; font-weight: 900;
-      letter-spacing: -.05em; color: #fff; line-height: 1;
-      margin-bottom: .2rem;
-    }
-    .ob-stat span { font-size: .65rem; color: rgba(255,255,255,.28); line-height: 1.4; text-transform: uppercase; letter-spacing: .07em; }
 
-    .ob-bullets { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1.5rem; }
-    .ob-bullet {
-      display: flex; align-items: center; gap: .65rem;
-      font-size: .82rem; color: rgba(255,255,255,.45); line-height: 1.45;
-    }
-    .ob-bullet-icon {
-      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
-      display: grid; place-items: center;
-      background: rgba(16,185,129,.15); color: #16a34a;
-    }
-    .ob-bullet-icon--blue { background: rgba(232,84,10,.15); color: #60A5FA; }
-
-    .ob-sms-preview {
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: 12px; padding: .9rem 1rem;
-      margin-top: auto; display: flex; flex-direction: column; gap: .5rem;
-    }
-    .ob-sms-label {
-      font-size: .6rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: rgba(255,255,255,.18);
-      margin-bottom: .05rem;
-    }
-    .ob-bubble {
-      font-size: .8rem; line-height: 1.5; padding: .45rem .7rem;
-      border-radius: 12px; width: fit-content; max-width: 92%;
-    }
-    .ob-bubble--recv {
-      background: rgba(255,255,255,.07); color: rgba(255,255,255,.75);
-      border-bottom-left-radius: 3px; margin-right: auto;
-    }
-    .ob-bubble--sent {
-      background: #e8540a; color: #fff; font-weight: 600;
-      border-bottom-right-radius: 3px; margin-left: auto;
-    }
-
-    .ob-guarantee {
-      display: flex; align-items: center; gap: .55rem;
-      margin-top: 1rem; padding-top: 1rem;
-      font-size: .75rem; color: rgba(255,255,255,.22);
-      border-top: 1px solid rgba(255,255,255,.06);
-    }
-    .ob-guarantee svg { color: rgba(255,255,255,.15); flex-shrink: 0; }
-
-    /* ── AI loading state ── */
-    .ob-ai-loading {
-      display: flex; flex-direction: column;
-      gap: 1.5rem; padding: 1.5rem 0;
-    }
-    .ob-ai-loading-header { display: flex; align-items: center; gap: 1rem; }
-    .ob-ai-spinner {
-      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-      border: 2.5px solid #E4E4E7; border-top-color: #e8540a;
-      animation: spin .75s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .ob-ai-loading-text { font-size: 1.1rem; font-weight: 700; color: #18181B; letter-spacing: -.02em; }
-    .ob-ai-loading-sub { font-size: .875rem; color: #71717A; margin-top: .15rem; }
-    .ob-ai-loading-steps { display: flex; flex-direction: column; gap: .5rem; }
-    .ob-ai-loading-step {
-      font-size: .875rem; color: #A1A1AA;
-      display: flex; align-items: center; gap: .65rem;
-      padding: .6rem .9rem; border-radius: 8px; transition: all .2s;
-    }
-    .ob-ai-loading-step.active { color: #e8540a; font-weight: 600; background: #fff2ea; }
-    .ob-ai-loading-step.done { color: #16a34a; }
-    .ob-ai-loading-step.done svg { display: block; }
-    .ob-ai-loading-step svg { display: none; }
 
     /* ── Flow question cards ── */
     .ob-flow-questions { display: flex; flex-direction: column; gap: .65rem; margin-bottom: 1rem; }
@@ -398,6 +315,45 @@
     .cf-test-status.error { color: #DC2626; }
     .cf-test-note { font-size: .78rem; color: #A1A1AA; }
 
+    /* ── Carrier tiles ── */
+    .cf-carrier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; }
+    .cf-carrier-tile {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: .2rem; padding: .9rem .75rem; border: 2px solid #E4E4E7; border-radius: 14px;
+      background: #fff; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s;
+    }
+    .cf-carrier-tile:hover { border-color: #e8540a; background: #fff8f5; }
+    .cf-carrier-tile.active { border-color: #e8540a; background: #fff8f5; }
+    .cf-carrier-name { font-size: .9rem; font-weight: 700; color: #18181B; }
+    .cf-carrier-tile.active .cf-carrier-name { color: #e8540a; }
+    .cf-carrier-sub { font-size: .68rem; color: #A1A1AA; font-weight: 500; }
+    .cf-carrier-tile.active .cf-carrier-sub { color: #e8540a; opacity: .7; }
+
+    /* ── Hero activate button ── */
+    .cf-activate-btn {
+      display: flex; align-items: center; justify-content: center; gap: .65rem;
+      width: 100%; background: #18181B; color: #fff; border: none; border-radius: 14px;
+      padding: 1rem 1.25rem; font-family: inherit; font-size: 1rem; font-weight: 700;
+      cursor: pointer; text-decoration: none; margin-bottom: .4rem; transition: background .15s;
+      letter-spacing: -.01em;
+    }
+    .cf-activate-btn:hover { background: #27272a; color: #fff; }
+
+    /* ── Send to phone button ── */
+    .cf-send-phone-btn {
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      width: 100%; background: #fff; color: #3F3F46; border: 1.5px solid #E4E4E7;
+      border-radius: 12px; padding: .75rem 1rem; font-family: inherit; font-size: .88rem;
+      font-weight: 600; cursor: pointer; transition: border-color .15s, background .15s;
+    }
+    .cf-send-phone-btn:hover { border-color: #e8540a; background: #fff8f5; }
+    .cf-send-phone-btn.sent { border-color: #16a34a; color: #16a34a; background: #f0fdf4; pointer-events: none; }
+
+    /* ── Skip link ── */
+    .cf-skip-link { text-align: center; margin-top: 1.25rem; font-size: .82rem; }
+    .cf-skip-link a { color: #A1A1AA; text-decoration: underline; }
+    .cf-skip-link a:hover { color: #71717A; }
+
     .ob-info-banner {
       display: flex; align-items: flex-start; gap: .65rem;
       background: #F8FAFC; border: 1px solid #E4E4E7; border-radius: 10px;
@@ -526,7 +482,7 @@
     }
     .cv-done-q { flex: 1; font-size: .85rem; color: #18181B; line-height: 1.5; }
     .cv-done-reply {
-      font-size: .72rem; color: #16a34a; font-weight: 600;
+      font-size: .72rem; color: #71717A; font-weight: 600;
       white-space: nowrap; flex-shrink: 0; margin-top: .15rem;
     }
     .cv-connector-line { width: 2px; height: 16px; background: #E4E4E7; margin: 0 0 .5rem 10px; }
@@ -562,69 +518,133 @@
     .cv-row-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .4rem; }
     .cv-label { display: flex; align-items: center; gap: .4rem; font-size: .72rem; font-weight: 600; color: #A1A1AA; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .4rem; }
 
-    /* ── iPhone mockup (ported from styles.css) ── */
-    .iphone {
-      width: 340px; margin: 0 auto;
-      background: #000; border-radius: 44px;
-      border: 3px solid #2a2a2a; overflow: hidden;
-      box-shadow: 0 0 0 1px rgba(255,255,255,.05) inset,
-        0 30px 60px rgba(0,0,0,.6);
+    /* ── Lead card ── */
+    .ob-lead-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px; padding: 1.1rem 1.15rem 1rem;
+      transition: opacity .5s ease;
     }
-    .iphone__statusbar { display:flex; justify-content:space-between; align-items:center; padding:14px 26px 0; font-size:.72rem; font-weight:600; color:#fff; }
-    .iphone__statusbar-icons { display:flex; align-items:center; gap:5px; }
-    .iphone__island { width:120px; height:34px; background:#000; border-radius:20px; margin:-12px auto 6px; position:relative; z-index:2; border:2px solid #1a1a1a; }
-    .iphone__header { display:flex; align-items:center; gap:.5rem; padding:.45rem .85rem .55rem; background:rgba(0,0,0,.92); backdrop-filter:blur(12px); border-bottom:.5px solid rgba(255,255,255,.08); }
-    .iphone__back { color:#0a84ff; display:flex; align-items:center; flex-shrink:0; }
-    .iphone__contact { display:flex; align-items:center; gap:.45rem; flex:1; min-width:0; }
-    .iphone__avatar { width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,#e8540a,#ff7240); color:#fff; font-size:.55rem; font-weight:700; display:grid; place-items:center; flex-shrink:0; letter-spacing:.02em; }
-    .iphone__contact-info { min-width:0; }
-    .iphone__name { font-size:.82rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .iphone__sub { font-size:.6rem; color:#8e8e93; }
-    .iphone__actions { display:flex; gap:.6rem; color:#0a84ff; flex-shrink:0; }
-    .iphone__screen { display:flex; flex-direction:column; padding:.25rem .65rem; min-height:280px; }
-    .iphone__time { text-align:center; font-size:.63rem; font-weight:500; color:#8e8e93; padding:.6rem 0 .5rem; }
-    .iphone__inputbar { display:flex; align-items:center; gap:.4rem; padding:.4rem .65rem .65rem; background:#000; border-top:.5px solid rgba(255,255,255,.08); }
-    .iphone__inputbar-plus { width:28px; height:28px; border-radius:50%; background:#636366; display:grid; place-items:center; flex-shrink:0; }
-    .iphone__inputbar-field { flex:1; background:transparent; border:1px solid #3a3a3c; border-radius:18px; padding:.4rem .75rem; color:#8e8e93; font-size:.78rem; font-family:inherit; }
-    .iphone__inputbar-send { width:28px; height:28px; border-radius:50%; background:#0a84ff; display:grid; place-items:center; flex-shrink:0; }
-    .imsg { width:fit-content; max-width:78%; padding:.5rem .75rem; border-radius:18px; font-size:.82rem; line-height:1.5; margin-bottom:.2rem; white-space:pre-line; }
-    .imsg--recv { background:#1c1c1e; color:rgba(255,255,255,.92); border-bottom-left-radius:6px; margin-right:auto; }
-    .imsg--sent { background:#0a84ff; color:#fff; margin-left:auto; border-bottom-right-radius:6px; font-weight:600; }
-    .imsg--delivered { width:fit-content; margin-left:auto; font-size:.58rem; color:#8e8e93; padding:1px 4px 4px; }
-    .iphone--hero { width:260px; border-radius:36px; border-width:2.5px; box-shadow:0 0 0 1px rgba(255,255,255,.05) inset, 0 25px 50px rgba(232,84,10,.2), 0 10px 20px rgba(0,0,0,.15); }
-    .iphone--hero .iphone__statusbar { padding:10px 20px 0; font-size:.6rem; }
-    .iphone--hero .iphone__statusbar-icons { gap:4px; }
-    .iphone--hero .iphone__statusbar-icons svg { transform:scale(.85); }
-    .iphone--hero .iphone__island { width:95px; height:27px; margin:-9px auto 4px; border-radius:16px; }
-    .iphone--hero .iphone__header { padding:.35rem .7rem .4rem; gap:.4rem; }
-    .iphone--hero .iphone__avatar { width:24px; height:24px; min-width:24px; flex-shrink:0; font-size:.45rem; }
-    .iphone--hero .iphone__name { font-size:.7rem; }
-    .iphone--hero .iphone__sub { font-size:.5rem; }
-    .iphone--hero .iphone__back svg { width:8px; height:14px; }
-    .iphone--hero .iphone__actions svg { width:14px; height:14px; }
-    .iphone--hero .iphone__screen { display:block; height:300px; min-height:unset; padding:.2rem .55rem; overflow-y:auto; overflow-x:hidden; scroll-behavior:smooth; background:#000; position:relative; }
-    .iphone--hero .iphone__screen::-webkit-scrollbar { width:0; }
-    .iphone--hero .iphone__time { font-size:.52rem; padding:.4rem 0 .3rem; }
-    .iphone--hero .imsg { font-size:.68rem; padding:.35rem .55rem; border-radius:16px; margin-bottom:.15rem; line-height:1.45; }
-    .iphone--hero .imsg--recv { border-bottom-left-radius:5px; }
-    .iphone--hero .imsg--sent { border-bottom-right-radius:5px; }
-    .iphone--hero .imsg--delivered { font-size:.48rem; padding:1px 3px 3px; }
-    .iphone--hero .iphone__inputbar { padding:.3rem .55rem .5rem; gap:.3rem; }
-    .iphone--hero .iphone__inputbar-plus, .iphone--hero .iphone__inputbar-send { width:22px; height:22px; }
-    .iphone--hero .iphone__inputbar-plus svg, .iphone--hero .iphone__inputbar-send svg { width:10px; height:10px; }
-    .iphone--hero .iphone__inputbar-field { font-size:.64rem; padding:.3rem .6rem; border-radius:15px; }
-    .hero-typing { display:none; align-items:center; padding:.15rem .3rem; }
+    .ob-lead-card__badge {
+      display: inline-flex; align-items: center; gap: .45rem;
+      font-size: .58rem; font-weight: 800; letter-spacing: .1em;
+      text-transform: uppercase; color: #ff4d4d; margin-bottom: .9rem;
+    }
+    .ob-lead-card__dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #ff4d4d; flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(255,77,77,.8);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    .ob-lead-card__name {
+      font-size: 1.05rem; font-weight: 800; color: #fff;
+      letter-spacing: -.03em; margin-bottom: .2rem;
+    }
+    .ob-lead-card__meta {
+      font-size: .63rem; color: rgba(255,255,255,.28); margin-bottom: .85rem;
+    }
+    .ob-lead-card__divider { height: 1px; background: rgba(255,255,255,.07); margin-bottom: .85rem; }
+    .ob-lead-card__summary {
+      font-size: .8rem; color: rgba(255,255,255,.7); line-height: 1.6; margin-bottom: .9rem;
+    }
+    .ob-lead-card__footer {
+      display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    }
+    .ob-lead-card__time { font-size: .6rem; color: rgba(255,255,255,.25); }
+    .ob-lead-card__call {
+      display: inline-flex; align-items: center; gap: .35rem;
+      background: #e8540a; color: #fff;
+      font-size: .68rem; font-weight: 700;
+      padding: .35rem .8rem; border-radius: 6px;
+    }
+
+    /* ── Chat preview card ── */
+    .imsg { width:fit-content; max-width:82%; padding:.45rem .7rem; border-radius:16px; font-size:.75rem; line-height:1.5; margin-bottom:.15rem; white-space:pre-line; }
+    .imsg--recv { background:#1c1c1e; color:rgba(255,255,255,.88); border-bottom-left-radius:4px; margin-right:auto; }
+    .imsg--sent { background:#0a84ff; color:#fff; margin-left:auto; border-bottom-right-radius:4px; font-weight:600; }
+    .imsg--delivered { width:fit-content; margin-left:auto; font-size:.5rem; color:#8e8e93; padding:1px 3px 4px; opacity:1!important; transform:none!important; }
+    .hero-typing { display:none; align-items:center; padding:.1rem .25rem; }
     .hero-typing.show { display:flex; }
-    .hero-typing__dots { display:flex; gap:2.5px; background:#1c1c1e; padding:.35rem .55rem; border-radius:16px; border-bottom-left-radius:5px; }
-    .hero-typing__dot { width:5px; height:5px; background:#636366; border-radius:50%; animation:htBounce .9s ease-in-out infinite; }
+    .hero-typing__dots { display:flex; gap:2.5px; background:#1c1c1e; padding:.32rem .5rem; border-radius:14px; border-bottom-left-radius:4px; }
+    .hero-typing__dot { width:4.5px; height:4.5px; background:#636366; border-radius:50%; animation:htBounce .9s ease-in-out infinite; }
     .hero-typing__dot:nth-child(2) { animation-delay:.15s; }
     .hero-typing__dot:nth-child(3) { animation-delay:.3s; }
     @keyframes htBounce { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-3px);opacity:1} }
-    .iphone--hero .imsg:not(.show) { opacity:0; transform:translateY(8px); }
-    .iphone--hero .imsg.show { animation:heroMsgIn .3s ease-out forwards; }
     @keyframes heroMsgIn { to{opacity:1;transform:translateY(0)} }
-    .iphone--hero .imsg--delivered { opacity:1!important; transform:none!important; }
-    .ob-notif-card { transition:opacity .5s ease, transform .5s ease; }
+
+    .ob-chat-card {
+      background: rgba(0,0,0,.4);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px; overflow: hidden;
+    }
+    .ob-chat-card-header {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .7rem .9rem;
+      background: rgba(255,255,255,.04);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .ob-chat-avatar {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg,#e8540a,#ff7240);
+      color: #fff; font-size: .55rem; font-weight: 800;
+      display: grid; place-items: center;
+    }
+    .ob-chat-name { font-size: .8rem; font-weight: 700; color: #fff; }
+    .ob-chat-status-line { font-size: .6rem; color: rgba(255,255,255,.3); margin-top: .05rem; }
+    .ob-chat-msgs {
+      padding: .5rem .8rem .6rem; display: flex; flex-direction: column;
+      height: 190px; overflow-y: auto; overflow-x: hidden;
+      scroll-behavior: smooth; background: #000;
+    }
+    .ob-chat-msgs::-webkit-scrollbar { width: 0; }
+    .ob-chat-time { text-align: center; font-size: .52rem; font-weight: 500; color: #8e8e93; padding: .35rem 0 .3rem; }
+    .ob-chat-msgs .imsg:not(.show) { opacity: 0; transform: translateY(6px); }
+    .ob-chat-msgs .imsg.show { animation: heroMsgIn .3s ease-out forwards; }
+
+    /* ── Sidebar stats ── */
+    .ob-sidebar-stats-row {
+      display: flex;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px; overflow: hidden;
+    }
+    .ob-sidebar-stat-item {
+      flex: 1; padding: .75rem .5rem; text-align: center;
+      border-right: 1px solid rgba(255,255,255,.08);
+    }
+    .ob-sidebar-stat-item:last-child { border-right: none; }
+    .ob-sidebar-stat-item strong {
+      display: block; font-size: 1.15rem; font-weight: 900;
+      color: #fff; letter-spacing: -.04em; line-height: 1; margin-bottom: .18rem;
+    }
+    .ob-sidebar-stat-item span {
+      font-size: .56rem; color: rgba(255,255,255,.28);
+      text-transform: uppercase; letter-spacing: .06em; line-height: 1.4;
+    }
+
+    /* ── Demo widget ── */
+    .ob-demo-widget {
+      background: rgba(232,84,10,.1);
+      border: 1px solid rgba(232,84,10,.25);
+      border-radius: 12px; padding: .85rem 1rem;
+    }
+    .ob-demo-label { font-size: .72rem; font-weight: 700; color: rgba(255,255,255,.5); margin-bottom: .45rem; }
+    .ob-demo-row { display: flex; gap: .4rem; }
+    .ob-demo-input {
+      flex: 1; background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 8px; padding: .45rem .7rem;
+      font-size: .82rem; color: #fff; font-family: inherit;
+      outline: none; min-width: 0;
+    }
+    .ob-demo-input::placeholder { color: rgba(255,255,255,.22); }
+    .ob-demo-input:focus { border-color: rgba(232,84,10,.45); }
+    .ob-demo-send-btn {
+      background: #e8540a; color: #fff; border: none;
+      border-radius: 8px; padding: .45rem .85rem;
+      font-size: .78rem; font-weight: 700; cursor: pointer;
+      font-family: inherit; white-space: nowrap; flex-shrink: 0;
+    }
+    .ob-demo-send-btn:disabled { opacity: .55; cursor: not-allowed; }
+    .ob-demo-status-txt { font-size: .7rem; margin-top: .35rem; min-height: .9rem; color: rgba(255,255,255,.35); }
 
     /* ── Responsive ── */
     @media (max-width: 1200px) {
@@ -715,52 +735,58 @@
             <input type="text" id="biz-name" placeholder="Bay Plumbing" autocomplete="organization" />
           </div>
 
-          <!-- Industry selector -->
+          <div class="ob-field">
+            <label for="ob-step1-phone">Your mobile number <span class="optional">(optional)</span></label>
+            <input type="tel" id="ob-step1-phone" placeholder="+61 412 345 678" autocomplete="tel" />
+            <div class="ob-field-hint">So we can text you when a lead qualifies. You can add this later too.</div>
+          </div>
+
+          <!-- Industry tiles -->
           <div class="ob-field">
             <label>What industry are you in?</label>
             <div class="ob-industry-grid" id="ob-industry-grid">
-              <button class="ob-industry-tile" data-ind="trades" type="button">
-                <span class="ob-industry-tile-icon">🔧</span>
+              <button type="button" class="ob-industry-tile" data-industry="trades">
+                <span class="ob-industry-tile-icon">🔨</span>
                 <div>
                   <div class="ob-industry-tile-name">Trades &amp; Construction</div>
-                  <div class="ob-industry-tile-sub">Plumbing, electrical, building &amp; more</div>
+                  <div class="ob-industry-tile-sub">Plumbing, electrical, roofing…</div>
                 </div>
               </button>
-              <button class="ob-industry-tile" data-ind="health" type="button">
+              <button type="button" class="ob-industry-tile" data-industry="health">
                 <span class="ob-industry-tile-icon">🏥</span>
                 <div>
                   <div class="ob-industry-tile-name">Health &amp; Medical</div>
-                  <div class="ob-industry-tile-sub">Dental, physio, chiro &amp; more</div>
+                  <div class="ob-industry-tile-sub">Dental, physio, GP…</div>
                 </div>
               </button>
-              <button class="ob-industry-tile" data-ind="beauty" type="button">
-                <span class="ob-industry-tile-icon">✂️</span>
+              <button type="button" class="ob-industry-tile" data-industry="beauty">
+                <span class="ob-industry-tile-icon">💆</span>
                 <div>
                   <div class="ob-industry-tile-name">Beauty &amp; Wellness</div>
-                  <div class="ob-industry-tile-sub">Hair, beauty, massage &amp; more</div>
+                  <div class="ob-industry-tile-sub">Hair, skin, massage…</div>
                 </div>
               </button>
-              <button class="ob-industry-tile" data-ind="professional" type="button">
+              <button type="button" class="ob-industry-tile" data-industry="professional">
                 <span class="ob-industry-tile-icon">💼</span>
                 <div>
                   <div class="ob-industry-tile-name">Professional Services</div>
-                  <div class="ob-industry-tile-sub">Accounting, legal, real estate &amp; more</div>
+                  <div class="ob-industry-tile-sub">Accounting, legal, real estate…</div>
                 </div>
               </button>
-              <button class="ob-industry-tile ob-industry-tile--wide" data-ind="other" type="button">
-                <span class="ob-industry-tile-icon">🏪</span>
+              <button type="button" class="ob-industry-tile ob-industry-tile--wide" data-industry="other">
+                <span class="ob-industry-tile-icon">✨</span>
                 <div>
                   <div class="ob-industry-tile-name">Other</div>
-                  <div class="ob-industry-tile-sub">Retail, hospitality, or something else</div>
+                  <div class="ob-industry-tile-sub">Tell us what your business does</div>
                 </div>
               </button>
             </div>
           </div>
 
-          <!-- Specialty picker -->
+          <!-- Specialty chips -->
           <div class="ob-specialty-wrap" id="ob-specialty-wrap">
             <label>What type of <span id="ob-spec-industry-label">business</span>?</label>
-            <div class="ob-specialty-chips" id="ob-spec-chips"></div>
+            <div class="ob-specialty-chips" id="ob-specialty-chips-container"></div>
           </div>
 
           <!-- Free-text description (shown for Other industry or Other specialty) -->
@@ -769,10 +795,6 @@
             <textarea id="biz-desc" rows="3" placeholder="e.g. We run a mobile dog grooming service in Melbourne..."></textarea>
           </div>
 
-          <div class="ob-field">
-            <label for="biz-booking">Online booking link <span class="optional">(optional)</span></label>
-            <input type="url" id="biz-booking" placeholder="https://book.yoursite.com.au" autocomplete="url" />
-          </div>
         </div>
 
         <div id="step1-error" class="ob-error"></div>
@@ -834,7 +856,7 @@
 
         <div style="background:#fff2ea;border:1px solid #BFDBFE;border-radius:12px;padding:.9rem 1.1rem;display:flex;align-items:flex-start;gap:.75rem;margin-bottom:2rem">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e8540a" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <div style="font-size:.82rem;color:#e8540a;line-height:1.55">On the next screen you'll see the exact questions Cove will send. They're written for <strong id="bridge-biz-name">your business</strong> by AI — you can edit or rewrite any of them.</div>
+          <div style="font-size:.82rem;color:#e8540a;line-height:1.55">On the next screen you'll see the exact questions Cove will send. They're set up for <strong id="bridge-biz-name">your business</strong> — you can edit or rewrite any of them before going live.</div>
         </div>
 
         <div class="ob-actions">
@@ -849,35 +871,10 @@
       <!-- Step 2: AI flow -->
       <div id="step-2" class="ob-form-inner hidden">
         <div class="ob-step-label">Step 2 of 4</div>
-        <h1 class="ob-heading">Build your SMS conversation.</h1>
-        <p class="ob-sub">This is exactly what your missed callers receive. Edit any message — watch the preview update live on the right.</p>
+        <h1 class="ob-heading">Your questions are ready.</h1>
+        <p class="ob-sub">Review and edit the questions Cove will text to every missed caller. You can update them anytime from your dashboard.</p>
 
-        <!-- Loading state -->
-        <div id="flow-loading">
-          <div class="ob-ai-loading">
-            <div class="ob-ai-loading-header">
-              <div class="ob-ai-spinner"></div>
-              <div>
-                <div class="ob-ai-loading-text">Writing your conversation…</div>
-                <div class="ob-ai-loading-sub">Takes about 10 seconds</div>
-              </div>
-            </div>
-            <div class="ob-ai-loading-steps">
-              <div class="ob-ai-loading-step active" id="ai-step-1">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Reading your business description
-              </div>
-              <div class="ob-ai-loading-step" id="ai-step-2">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Crafting qualification questions
-              </div>
-              <div class="ob-ai-loading-step" id="ai-step-3">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Formatting your SMS flow
-              </div>
-            </div>
-          </div>
-        </div>
+        <div id="flow-loading" class="hidden"></div>
 
         <!-- One-at-a-time question builder -->
         <div id="flow-content" class="hidden">
@@ -951,13 +948,6 @@
             </div>
           </div>
 
-          <!-- Regen link -->
-          <div style="margin-top:1.5rem">
-            <button class="ob-regen-btn" id="regen-btn" type="button">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-              Regenerate all with AI
-            </button>
-          </div>
         </div>
 
         <div id="step2-error" class="ob-error"></div>
@@ -1004,18 +994,18 @@
       <!-- Step 4: Payment -->
       <div id="step-4" class="ob-form-inner hidden">
         <div class="ob-step-label">Last step</div>
-        <h1 class="ob-heading">Activate your account.</h1>
-        <p class="ob-sub">Add your card to go live. If Cove doesn't pay for itself in 30 days, we'll refund you in full — no questions.</p>
+        <h1 class="ob-heading">You're almost live.</h1>
+        <p class="ob-sub">No charge for 14 days. After that, $89/mo — cancel anytime. If Cove doesn't pay for itself in your first paid month, we'll refund you in full.</p>
 
         <div class="ob-plan-card">
           <div class="ob-plan-top">
-            <div class="ob-plan-price">$49<span>/month</span></div>
-            <div class="ob-plan-note">Cancel anytime · 30-day money-back guarantee</div>
+            <div class="ob-plan-price">$89<span>/month</span></div>
+            <div class="ob-plan-note">14-day free trial · 14-day money-back guarantee</div>
           </div>
           <div class="ob-plan-items">
             <div class="ob-plan-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Your own dedicated AU SMS number</div>
             <div class="ob-plan-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Texts leads back in 10 seconds, 24/7</div>
-            <div class="ob-plan-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>AI-qualified lead summaries to your phone</div>
+            <div class="ob-plan-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Lead summaries sent straight to your phone</div>
             <div class="ob-plan-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Webhook &amp; CRM integrations included</div>
           </div>
         </div>
@@ -1025,8 +1015,8 @@
         <div class="ob-actions" style="margin-top:.5rem">
           <button class="btn btn--ghost" id="step4-back" type="button">← Back</button>
           <button class="btn btn--primary btn--lg" id="step4-pay" type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Add payment details
+            Start 14-day free trial
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
 
@@ -1037,135 +1027,91 @@
 
       <!-- Complete: call forwarding -->
       <div id="step-complete" class="ob-form-inner hidden">
-        <div class="ob-complete-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <h1 class="ob-heading">Set up call forwarding.</h1>
-        <p class="ob-sub">Forward missed calls on your mobile to your Cove number. Takes 30 seconds. After that, every missed call sends an automatic text to your lead.</p>
 
-        <!-- Number display -->
+        <!-- Account active -->
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.75rem">
+          <div class="ob-complete-icon" style="margin-bottom:0;flex-shrink:0">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#16a34a;margin-bottom:.2rem">Account active</div>
+            <div style="font-size:1.1rem;font-weight:800;color:#18181B;letter-spacing:-.03em">You're in — one step left.</div>
+          </div>
+        </div>
+
+        <h1 class="ob-heading" style="font-size:1.5rem">Forward your missed calls.</h1>
+        <p class="ob-sub">Takes 30 seconds on your phone. Pick your carrier and tap the button — that's it.</p>
+
+        <!-- Cove number -->
         <div class="cf-num-box">
           <div class="cf-num-box-left">
             <div class="cf-num-box-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             </div>
             <div>
-              <div class="cf-num-box-label">Your Cove number</div>
+              <div class="cf-num-box-label">Your Cove number — forward missed calls here</div>
               <div class="cf-num-box-number" id="cf-number-text"><span class="cf-num-loading">Setting up…</span></div>
             </div>
           </div>
         </div>
 
-        <!-- Carrier tabs -->
-        <div class="cf-tabs">
-          <button class="cf-tab active" data-tab="telstra">Telstra</button>
-          <button class="cf-tab" data-tab="optus">Optus</button>
-          <button class="cf-tab" data-tab="vodafone">Vodafone</button>
-          <button class="cf-tab" data-tab="other">Other</button>
+        <!-- Carrier tiles -->
+        <div style="font-size:.82rem;font-weight:700;color:#3F3F46;margin:1.25rem 0 .6rem;letter-spacing:-.01em">Who's your carrier?</div>
+        <div class="cf-carrier-grid">
+          <button class="cf-carrier-tile" data-carrier="telstra" type="button">
+            <span class="cf-carrier-name">Telstra</span>
+            <span class="cf-carrier-sub">Dial code</span>
+          </button>
+          <button class="cf-carrier-tile" data-carrier="optus" type="button">
+            <span class="cf-carrier-name">Optus</span>
+            <span class="cf-carrier-sub">App or dial</span>
+          </button>
+          <button class="cf-carrier-tile" data-carrier="vodafone" type="button">
+            <span class="cf-carrier-name">Vodafone</span>
+            <span class="cf-carrier-sub">Dial code</span>
+          </button>
+          <button class="cf-carrier-tile" data-carrier="other" type="button">
+            <span class="cf-carrier-name">Other</span>
+            <span class="cf-carrier-sub">TPG, Boost…</span>
+          </button>
         </div>
-        <div class="cf-tab-panels">
 
-          <!-- Telstra -->
-          <div class="cf-panel active" id="panel-telstra">
-            <div class="cf-panel-step">
-              <div class="cf-panel-num">1</div>
-              <div class="cf-panel-text">Open your <strong>Phone app</strong> and go to the dial pad</div>
-            </div>
-            <div class="cf-panel-step">
-              <div class="cf-panel-num">2</div>
-              <div class="cf-panel-text">
-                Dial this code and tap <strong>Call</strong>
-                <br><a class="cf-dial-btn" id="code-1-link" href="#"><span id="code-1">**61*+XXXXXXXXXX*11*20#</span> <span class="cf-dial-btn-icon">↗</span></a>
-              </div>
-            </div>
-            <div class="cf-panel-step">
-              <div class="cf-panel-num">3</div>
-              <div class="cf-panel-text">You'll hear a confirmation tone. Done — call forwarding is active.</div>
-            </div>
+        <!-- Carrier-specific section (revealed after selection) -->
+        <div id="cf-carrier-section" style="display:none">
+
+          <!-- Optus warning -->
+          <div id="cf-optus-warn" class="cf-warn-banner" style="display:none;margin-bottom:1rem">
+            <span class="cf-warn-icon">⚠️</span>
+            <div><strong>Disable Message Bank first.</strong> Go to <strong>My Optus app → Manage → Message Bank → Deactivate</strong>. Or call <strong>321</strong> from your Optus mobile.</div>
           </div>
 
-          <!-- Optus -->
-          <div class="cf-panel" id="panel-optus">
-            <div class="cf-warn-banner">
-              <span class="cf-warn-icon">⚠️</span>
-              <div><strong>Disable Message Bank first.</strong> If Optus Message Bank (voicemail) is active it will block call diversion and callers get a "temporary service restrictions" error. You must turn it off before diverting calls to Cove.<br><span style="margin-top:.3rem;display:inline-block">Open <strong>My Optus app</strong> → <strong>Manage</strong> → <strong>Message Bank</strong> → tap <strong>Deactivate</strong>.<br>Or call <strong>321</strong> from your Optus mobile and follow the prompts to switch it off.</span></div>
-            </div>
-            <div class="cf-panel-step">
-              <div class="cf-panel-num">1</div>
-              <div class="cf-panel-text">Open <strong>My Optus app</strong> → tap <strong>Manage</strong> → <strong>Call divert</strong></div>
-            </div>
-            <div class="cf-panel-step">
-              <div class="cf-panel-num">2</div>
-              <div class="cf-panel-text">Under <strong>When unanswered</strong>, enter your Cove number in local format:<br>
-                <span class="cf-code" id="carrier-number-local" style="margin-top:.35rem;display:inline-block">loading…</span>
-              </div>
-            </div>
-            <div class="cf-panel-step">
-              <div class="cf-panel-num">3</div>
-              <div class="cf-panel-text">Tap <strong>Save</strong>. Or try the dial code:<br>
-                <a class="cf-dial-btn" id="code-2-link" href="#" style="margin-top:.35rem"><span id="code-2">**61*+XXXXXXXXXX#</span> <span class="cf-dial-btn-icon">↗</span></a>
-              </div>
-            </div>
-          </div>
+          <!-- Hero tap-to-activate button -->
+          <a class="cf-activate-btn" id="cf-activate-link" href="#">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Tap to activate forwarding
+          </a>
+          <p style="text-align:center;font-size:.78rem;color:#A1A1AA;margin:.3rem 0 1.1rem;line-height:1.5">Opens your phone dialler with the code pre-filled. Just tap <strong style="color:#3F3F46">Call</strong> — done.</p>
 
-          <!-- Vodafone -->
-          <div class="cf-panel" id="panel-vodafone">
-            <div class="cf-panel-step">
-              <div class="cf-panel-num">1</div>
-              <div class="cf-panel-text">Open <strong>My Vodafone app</strong> → <strong>Services</strong> → <strong>Call divert</strong></div>
-            </div>
-            <div class="cf-panel-step">
-              <div class="cf-panel-num">2</div>
-              <div class="cf-panel-text">Set <strong>Divert when unanswered</strong> to your Cove number:<br>
-                <span class="cf-code" id="carrier-number" style="margin-top:.35rem;display:inline-block">loading…</span>
-              </div>
-            </div>
-            <div class="cf-panel-step">
-              <div class="cf-panel-num">3</div>
-              <div class="cf-panel-text">Save. Or dial from the keypad:<br>
-                <a class="cf-dial-btn" id="code-3-link" href="#" style="margin-top:.35rem"><span id="code-3">*61*+XXXXXXXXXX*11*20#</span> <span class="cf-dial-btn-icon">↗</span></a>
-              </div>
-            </div>
-          </div>
-
-          <!-- Other -->
-          <div class="cf-panel" id="panel-other">
-            <div class="cf-panel-step">
-              <div class="cf-panel-num">1</div>
-              <div class="cf-panel-text">Open your <strong>Phone app</strong> dial pad and enter this code, then tap <strong>Call</strong>:<br>
-                <a class="cf-dial-btn" id="code-4-link" href="#" style="margin-top:.35rem"><span id="code-4">**61*+XXXXXXXXXX*11*20#</span> <span class="cf-dial-btn-icon">↗</span></a>
-              </div>
-            </div>
-            <div class="cf-panel-step">
-              <div class="cf-panel-num">2</div>
-              <div class="cf-panel-text">If that fails, call your carrier and say: <em>"Set call divert when unanswered to <span id="other-number">your Cove number</span>"</em></div>
-            </div>
-          </div>
+          <!-- Send to phone -->
+          <button class="cf-send-phone-btn" id="cf-send-phone-btn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Send setup to my phone instead
+          </button>
+          <div id="cf-send-status" style="font-size:.8rem;min-height:1.1rem;margin:.4rem 0 .25rem;text-align:center"></div>
 
         </div>
 
-        <!-- Test SMS -->
-        <div class="cf-test-block">
-          <div class="cf-test-title">Test it — send yourself an SMS</div>
-          <div class="cf-test-row">
-            <input type="tel" id="cf-test-phone" placeholder="Your mobile e.g. 0412 345 678" class="cf-test-input" />
-            <button class="btn btn--primary btn--sm" id="cf-test-btn" type="button">Send</button>
-          </div>
-          <div class="cf-test-status" id="cf-test-status"></div>
-          <div class="cf-test-note">If you receive it, your Cove number is working.</div>
-        </div>
-
-        <div class="ob-info-banner">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          <span>Your number is saved in your dashboard. Questions? <a href="mailto:hello@coveplatform.com" style="color:#e8540a;font-weight:600">hello@coveplatform.com</a></span>
-        </div>
-
-        <div class="ob-actions ob-actions--right" style="margin-top:1.75rem">
+        <div class="ob-actions ob-actions--right" style="margin-top:1.5rem">
           <button class="btn btn--primary btn--lg" id="go-dashboard" type="button">
-            Go to dashboard
+            Go to my dashboard
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
+
+        <p class="cf-skip-link">
+          <a href="/dashboard">I'll set up call forwarding later from my dashboard</a>
+        </p>
+
       </div>
 
     </main>
@@ -1174,81 +1120,76 @@
     <aside class="ob-sidebar" id="ob-sidebar">
 
       <!-- Default sidebar (steps 1-3) -->
-      <div id="sidebar-default" style="display:flex;flex-direction:column;height:100%;align-items:center;justify-content:center;gap:1.5rem">
+      <div id="sidebar-default" style="display:flex;flex-direction:column;height:100%;justify-content:center;gap:1.75rem">
 
-        <div style="text-align:center">
-          <div class="ob-sidebar-badge" style="justify-content:center;margin-bottom:.75rem">
+        <div>
+          <div class="ob-sidebar-badge">
             <span class="ob-sidebar-badge-dot"></span>
-            Live in 10 seconds
+            Responds in seconds
           </div>
-          <div style="font-size:1.5rem;font-weight:900;letter-spacing:-.04em;color:#fff;line-height:1.15">
-            What your customer gets.
+          <div style="font-size:1.55rem;font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1.15;margin-bottom:.4rem">
+            What your customer<br>sees instantly.
           </div>
-          <div style="font-size:.82rem;color:rgba(255,255,255,.35);margin-top:.4rem">
-            The moment you miss a call — this lands on their phone.
-          </div>
-        </div>
-
-        <!-- iPhone mockup -->
-        <div style="position:relative">
-          <div class="iphone iphone--hero">
-            <div class="iphone__statusbar">
-              <span>9:41</span>
-              <div class="iphone__statusbar-icons">
-                <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><rect y="3.5" width="3" height="7.5" rx=".8" opacity=".3"/><rect x="4.3" y="1.5" width="3" height="9.5" rx=".8" opacity=".55"/><rect x="8.6" y="0" width="3" height="11" rx=".8" opacity=".8"/><rect x="12.9" y="0" width="3" height="11" rx=".8"/></svg>
-                <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="#fff" stroke-width="1.2"><path d="M1.5 7.5C3.5 3 6.5 1 7.5 1s4 2 6 6.5" opacity=".3"/><path d="M3.5 7C5 4 6.5 2.5 7.5 2.5S10 4 11.5 7" opacity=".6"/><path d="M5.5 7C6.2 5 7 4 7.5 4s1.3 1 2 3"/><circle cx="7.5" cy="8.5" r="1.2" fill="#fff" stroke="none"/></svg>
-                <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x=".5" y=".5" width="20" height="10" rx="2.5" stroke="#fff" stroke-opacity=".35"/><rect x="21.5" y="3" width="1.5" height="5" rx=".75" fill="#fff" opacity=".4"/><rect x="1.5" y="1.5" width="15" height="8" rx="1.5" fill="#fff"/></svg>
-              </div>
-            </div>
-            <div class="iphone__island"></div>
-            <div class="iphone__header">
-              <div class="iphone__back"><svg width="10" height="17" viewBox="0 0 10 17" fill="none" stroke="#0a84ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1L2 8.5 9 16"/></svg></div>
-              <div class="iphone__contact">
-                <div class="iphone__avatar" id="ob-iphone-avatar">BP</div>
-                <div class="iphone__contact-info">
-                  <div class="iphone__name" id="ob-iphone-name">Bay Plumbing</div>
-                  <div class="iphone__sub">SMS</div>
-                </div>
-              </div>
-              <div class="iphone__actions">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              </div>
-            </div>
-            <div class="iphone__screen" id="ob-iphone-screen">
-              <div class="iphone__time">Today 9:41 AM</div>
-              <div class="hero-typing" id="ob-iphone-typing"><div class="hero-typing__dots"><div class="hero-typing__dot"></div><div class="hero-typing__dot"></div><div class="hero-typing__dot"></div></div></div>
-            </div>
-            <div class="iphone__inputbar">
-              <div class="iphone__inputbar-plus"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
-              <div class="iphone__inputbar-field">Text Message</div>
-              <div class="iphone__inputbar-send"><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></div>
-            </div>
-          </div>
-
-          <!-- Notification card -->
-          <div class="ob-notif-card" id="ob-iphone-notif" style="opacity:0;transform:translateY(12px);width:260px;margin-top:.75rem">
-            <div style="text-align:center;font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#ff7240;margin-bottom:.35rem">↓ Sent to your phone instantly</div>
-            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.65rem .75rem .6rem;backdrop-filter:blur(12px)">
-              <div style="display:flex;align-items:center;gap:.35rem;margin-bottom:.3rem">
-                <svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="url(#ob-nlg)"/><path d="M18 8a7 7 0 1 0 0 12" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><defs><linearGradient id="ob-nlg" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#e8540a"/><stop offset="1" stop-color="#ff7240"/></linearGradient></defs></svg>
-                <span style="font-size:.58rem;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.04em">Cove</span>
-                <span style="margin-left:auto;font-size:.52rem;color:rgba(255,255,255,.35)">now</span>
-              </div>
-              <div style="font-size:.7rem;font-weight:700;color:#fff;margin-bottom:.15rem">🚨 New Urgent Lead</div>
-              <div style="font-size:.62rem;line-height:1.5;color:rgba(255,255,255,.55)">Sam Thompson — Burst pipe<br>Urgency: Emergency · Call back ASAP</div>
-            </div>
-            <div style="text-align:center;font-size:.56rem;color:rgba(255,255,255,.3);margin-top:.35rem;letter-spacing:.02em;font-weight:500">Delivered via SMS + Email · No app needed</div>
+          <div style="font-size:.82rem;color:rgba(255,255,255,.35);line-height:1.6">
+            The moment you miss a call, this lands on their phone.
           </div>
         </div>
 
-        <!-- Demo input -->
-        <div style="width:260px;background:rgba(232,84,10,.15);border:1px solid rgba(232,84,10,.4);border-radius:14px;padding:1rem 1.1rem">
-          <div style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.65);margin-bottom:.5rem">Try it — text yourself the demo</div>
-          <div style="display:flex;gap:.4rem">
-            <input id="ob-demo-phone" type="tel" placeholder="0412 345 678" style="flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.5rem .75rem;font-size:.82rem;color:#fff;font-family:inherit;outline:none;min-width:0" />
-            <button id="ob-demo-btn" type="button" onclick="obSendDemo()" style="background:#e8540a;color:#fff;border:none;border-radius:8px;padding:.5rem .85rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">Send</button>
+        <!-- Clean chat preview -->
+        <div class="ob-chat-card">
+          <div class="ob-chat-card-header">
+            <div class="ob-chat-avatar" id="ob-iphone-avatar">BP</div>
+            <div>
+              <div class="ob-chat-name" id="ob-iphone-name">Bay Plumbing</div>
+              <div class="ob-chat-status-line">SMS · Delivered instantly</div>
+            </div>
           </div>
-          <div id="ob-demo-status" style="font-size:.72rem;margin-top:.4rem;min-height:1rem;color:rgba(255,255,255,.45)"></div>
+          <div class="ob-chat-msgs" id="ob-iphone-screen">
+            <div class="ob-chat-time">Today 9:41 AM</div>
+            <div class="hero-typing" id="ob-iphone-typing"><div class="hero-typing__dots"><div class="hero-typing__dot"></div><div class="hero-typing__dot"></div><div class="hero-typing__dot"></div></div></div>
+          </div>
+        </div>
+
+        <!-- Lead card (revealed after chat completes) -->
+        <div class="ob-lead-card" id="ob-lead-card" style="display:none;opacity:0">
+          <div class="ob-lead-card__badge">
+            <span class="ob-lead-card__dot"></span>
+            Urgent lead
+          </div>
+          <div class="ob-lead-card__name">Sam Thompson</div>
+          <div class="ob-lead-card__meta">+61 412 345 678 · just now</div>
+          <div class="ob-lead-card__divider"></div>
+          <div class="ob-lead-card__summary">Burst pipe under the sink — water still running, can't find the shutoff valve</div>
+          <div class="ob-lead-card__footer">
+            <div class="ob-lead-card__time">⏱ Qualified in 38 seconds</div>
+            <div class="ob-lead-card__call">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call back now
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="ob-sidebar-stats-row">
+          <div class="ob-sidebar-stat-item">
+            <strong>74%</strong>
+            <span>lead response</span>
+          </div>
+          <div class="ob-sidebar-stat-item">
+            <strong>10 sec</strong>
+            <span>first message</span>
+          </div>
+          <div class="ob-sidebar-stat-item">
+            <strong>2–3×</strong>
+            <span>more bookings</span>
+          </div>
+        </div>
+
+        <!-- hidden demo elements kept for JS compatibility -->
+        <div style="display:none">
+          <input id="ob-demo-phone" type="tel" />
+          <button id="ob-demo-btn" type="button"></button>
+          <div id="ob-demo-status"></div>
         </div>
 
       </div>
@@ -1267,20 +1208,18 @@
           This is the exact SMS conversation they receive within 10 seconds of a missed call.
         </div>
 
-        <!-- Phone shell -->
-        <div style="flex:1;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:1rem 1.1rem;display:flex;flex-direction:column;overflow:hidden">
-          <!-- Fake SMS header -->
-          <div style="display:flex;align-items:center;gap:.65rem;padding-bottom:.85rem;margin-bottom:.85rem;border-bottom:1px solid rgba(255,255,255,.07)">
-            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#e8540a,#ff7240);display:grid;place-items:center;font-size:.7rem;font-weight:800;color:#fff" id="sidebar-step2-avatar">BP</div>
+        <!-- Chat preview -->
+        <div class="ob-chat-card" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+          <div class="ob-chat-card-header">
+            <div class="ob-chat-avatar" id="sidebar-step2-avatar">BP</div>
             <div>
-              <div style="font-size:.82rem;font-weight:700;color:#fff" id="sidebar-step2-name">Bay Plumbing</div>
-              <div style="font-size:.68rem;color:rgba(255,255,255,.3)">SMS · Delivered instantly</div>
+              <div class="ob-chat-name" id="sidebar-step2-name">Bay Plumbing</div>
+              <div class="ob-chat-status-line">SMS · Delivered instantly</div>
             </div>
           </div>
-
           <!-- Messages — populated by JS -->
-          <div id="sidebar-step2-msgs" style="display:flex;flex-direction:column;overflow-y:auto;flex:1;gap:.1rem;padding:.25rem 0">
-            <div style="color:rgba(255,255,255,.2);font-size:.7rem;padding:.5rem 0;text-align:center">
+          <div id="sidebar-step2-msgs" style="display:flex;flex-direction:column;overflow-y:auto;flex:1;gap:0;padding:.65rem .8rem;background:#000;">
+            <div style="color:rgba(255,255,255,.2);font-size:.68rem;padding:.5rem 0;text-align:center">
               Preview loads as you type your questions…
             </div>
           </div>
@@ -1300,17 +1239,17 @@
         </div>
 
         <div style="font-size:2.2rem;font-weight:900;letter-spacing:-.05em;color:#fff;line-height:1.1;margin-bottom:1rem">
-          One job covers<br/><span style="color:#ff7240">6 months.</span>
+          One job covers<br/><span style="color:#ff7240">the month.</span>
         </div>
 
         <div style="font-size:.85rem;color:rgba(255,255,255,.35);line-height:1.6;margin-bottom:2rem">
-          Average trade job is $400+. Cove is $49/mo. The maths is simple.
+          Average trade job is $400+. Cove is $89/mo. The maths is simple.
         </div>
 
         <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end">
           <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem">
-            <div style="font-size:3rem;font-weight:900;letter-spacing:-.06em;color:#fff;line-height:1">$49</div>
-            <div style="font-size:.8rem;color:rgba(255,255,255,.35);margin-top:.3rem;margin-bottom:1.5rem">per month · cancel anytime</div>
+            <div style="font-size:3rem;font-weight:900;letter-spacing:-.06em;color:#fff;line-height:1">$89</div>
+            <div style="font-size:.8rem;color:rgba(255,255,255,.35);margin-top:.3rem;margin-bottom:1.5rem">per month · 14-day free trial</div>
             <div style="display:flex;flex-direction:column;gap:.6rem">
               <div style="display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:rgba(255,255,255,.55)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -1322,7 +1261,7 @@
               </div>
               <div style="display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:rgba(255,255,255,.55)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                30-day money-back guarantee
+                14-day money-back guarantee
               </div>
             </div>
           </div>
@@ -1378,8 +1317,6 @@
         const nm = document.getElementById('sidebar-step2-name');
         if (av) av.textContent = initials;
         if (nm) nm.textContent = name || 'Your business';
-      } else if (n === 4) {
-        sidebarPayment.style.display = 'flex';
       } else {
         sidebarDefault.style.display = 'flex';
       }
@@ -1392,11 +1329,18 @@
     const params = new URLSearchParams(location.search);
     if (params.get('step') === 'complete') {
       showStep('complete');
-      // Try to fill number immediately from session, then fall back to polling
       fetch('/api/auth/me').then(r => r.json()).then(data => {
         const num = data.business?.twilio_from_number;
         if (num) { fillNumber(num); }
         else { loadNumber(); }
+        // Pre-fill test phone + send-to-phone with their saved notify number
+        const notifyPhone = data.business?.owner_notify_phone;
+        if (notifyPhone) {
+          const local = notifyPhone.startsWith('+61') ? '0' + notifyPhone.slice(3) : notifyPhone;
+          const testInput = document.getElementById('cf-test-phone');
+          if (testInput && !testInput.value) testInput.value = local;
+          bizData.notifyPhone = notifyPhone;
+        }
       }).catch(() => loadNumber());
     } else if (params.get('step') === 'billing') {
       showStep(4);
@@ -1419,43 +1363,82 @@
 
     let _loadNumberAttempts = 0;
     let _provisionAttempted = false;
+    let _coveNumber = null;
+    let _selectedCarrier = null;
 
-    function fillNumber(num) {
-      const numBox = document.getElementById('cf-number-text');
-      if (numBox) numBox.textContent = num;
-
-      const localNum = num.startsWith('+61') ? '0' + num.slice(3) : num;
-      const intlNum  = num.startsWith('+')   ? '0011' + num.slice(1) : num;
-
-      const codes = {
-        'code-1': `**61*${num}*11*20#`,
-        'code-2': `**61*${num}#`,
-        'code-3': `*61*${num}*11*20#`,
-        'code-4': `**61*${intlNum}*11*20#`,
-      };
-      for (const [id, code] of Object.entries(codes)) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = code;
-        const link = document.getElementById(id + '-link');
-        if (link) link.href = `tel:${encodeURIComponent(code)}`;
+    function getDialCode(carrier, num) {
+      const intlNum = num.startsWith('+') ? '0011' + num.slice(1) : num;
+      switch (carrier) {
+        case 'telstra':  return `**61*${num}*11*20#`;
+        case 'optus':    return `**61*${num}#`;
+        case 'vodafone': return `*61*${num}*11*20#`;
+        default:         return `**61*${intlNum}*11*20#`;
       }
-      const cn = document.getElementById('carrier-number');
-      if (cn) cn.textContent = num;
-      const ln = document.getElementById('carrier-number-local');
-      if (ln) ln.textContent = localNum;
-      const on = document.getElementById('other-number');
-      if (on) on.textContent = num;
     }
 
-    // ─── Carrier tabs ───
-    document.querySelectorAll('.cf-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.cf-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.cf-panel').forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        const panel = document.getElementById('panel-' + tab.dataset.tab);
-        if (panel) panel.classList.add('active');
+    function updateActivateLink() {
+      if (!_coveNumber || !_selectedCarrier) return;
+      const code = getDialCode(_selectedCarrier, _coveNumber);
+      const link = document.getElementById('cf-activate-link');
+      if (link) link.href = 'tel:' + encodeURIComponent(code);
+    }
+
+    function fillNumber(num) {
+      _coveNumber = num;
+      const numBox = document.getElementById('cf-number-text');
+      if (numBox) numBox.textContent = num;
+      updateActivateLink();
+    }
+
+    // ─── Carrier tiles ───
+    document.querySelectorAll('.cf-carrier-tile').forEach(tile => {
+      tile.addEventListener('click', () => {
+        document.querySelectorAll('.cf-carrier-tile').forEach(t => t.classList.remove('active'));
+        tile.classList.add('active');
+        _selectedCarrier = tile.dataset.carrier;
+
+        const section = document.getElementById('cf-carrier-section');
+        if (section) section.style.display = 'block';
+
+        const optusWarn = document.getElementById('cf-optus-warn');
+        if (optusWarn) optusWarn.style.display = _selectedCarrier === 'optus' ? 'flex' : 'none';
+
+        updateActivateLink();
       });
+    });
+
+    // ─── Send setup to phone ───
+    document.getElementById('cf-send-phone-btn')?.addEventListener('click', async function() {
+      if (!_coveNumber || !_selectedCarrier) return;
+      const code = getDialCode(_selectedCarrier, _coveNumber);
+      const phone = bizData.notifyPhone || document.getElementById('cf-test-phone')?.value.trim();
+      const status = document.getElementById('cf-send-status');
+      if (!phone) {
+        if (status) { status.textContent = 'Enter your number in the test box below first.'; status.style.color = '#DC2626'; }
+        return;
+      }
+      this.disabled = true; this.textContent = 'Sending…';
+      const carrierNames = { telstra: 'Telstra', optus: 'Optus', vodafone: 'Vodafone', other: 'your carrier' };
+      const msg = `Cove — activate call forwarding (${carrierNames[_selectedCarrier]})\n\nTap the code below to open your dialler, then tap Call:\n\n${code}\n\nYou'll hear a tone confirming it worked.\n\n(Your Cove number: ${_coveNumber})`;
+      try {
+        const r = await fetch('/api/demo/send', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, message: msg }),
+        });
+        let res;
+        try { res = await r.json(); } catch { res = { ok: false, error: 'Server error — try again.' }; }
+        if (res.ok) {
+          this.textContent = '✓ Sent to your phone';
+          this.classList.add('sent');
+          if (status) { status.textContent = `Instructions sent to ${phone} — open the SMS and dial the code.`; status.style.color = '#16a34a'; }
+        } else {
+          this.disabled = false; this.textContent = 'Send setup to my phone instead';
+          if (status) { status.textContent = res.error || 'Could not send — try again.'; status.style.color = '#DC2626'; }
+        }
+      } catch(e) {
+        this.disabled = false; this.textContent = 'Send setup to my phone instead';
+        if (status) { status.textContent = 'Could not send — check your connection and try again.'; status.style.color = '#DC2626'; }
+      }
     });
 
     async function loadNumber() {
@@ -1502,48 +1485,26 @@
         testBtn.disabled = true; testBtn.textContent = 'Sending…';
         status.textContent = ''; status.className = 'cf-test-status';
         try {
-          const res = await fetch('/api/demo/send', {
+          const r = await fetch('/api/demo/send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone, message: `✅ Cove is connected! Your call forwarding is set up correctly. Missed calls will now be texted back automatically.` })
-          }).then(r => r.json());
+            body: JSON.stringify({ phone, message: `Hi, this is a test from Cove. Your number is working.\n\nOnce you've set up call forwarding, missed calls to your business number will automatically trigger an SMS qualification flow.` })
+          });
+          let res;
+          try { res = await r.json(); } catch { res = { ok: false, error: 'Server error — try again.' }; }
           if (res.ok) {
-            status.textContent = '✅ Test SMS sent! Check your phone — if you got it, you\'re all set.';
+            status.textContent = 'Test SMS sent — if it arrived, your Cove number is working. Now set up call forwarding above to go live.';
             status.className = 'cf-test-status success';
           } else {
             status.textContent = res.error || 'Could not send — check your number and try again.';
             status.className = 'cf-test-status error';
           }
         } catch(e) {
-          status.textContent = 'Network error — try again.';
+          status.textContent = 'Could not send — check your connection and try again.';
           status.className = 'cf-test-status error';
         }
-        testBtn.disabled = false; testBtn.textContent = 'Send test SMS';
+        testBtn.disabled = false; testBtn.textContent = 'Send';
       });
-    }
-
-    // ─── AI loading animation ───
-    function animateAISteps() {
-      const steps = ['ai-step-1', 'ai-step-2', 'ai-step-3'];
-      let i = 0;
-      function advance() {
-        if (i > 0) {
-          const prev = document.getElementById(steps[i - 1]);
-          if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
-        }
-        if (i < steps.length) {
-          const cur = document.getElementById(steps[i]);
-          if (cur) cur.classList.add('active');
-          i++;
-          if (i < steps.length) setTimeout(advance, 1200);
-        }
-      }
-      // Reset
-      steps.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) { el.classList.remove('active', 'done'); }
-      });
-      setTimeout(advance, 400);
     }
 
     // ─── One-at-a-time Question Builder ───
@@ -1551,6 +1512,7 @@
     // qbActiveIdx: index being edited right now
     let qbSteps = [];
     let qbActiveIdx = 0;
+    let _savedRemainingSteps = []; // steps after the one being edited, restored on done
 
     function mkBubble(text, sent) {
       const row = document.createElement('div');
@@ -1658,13 +1620,12 @@
 
     // Edit a committed step
     function qbEditStep(idx) {
-      // Commit current if valid
       qbCommitActive();
-      // Remove steps after idx from committed list
+      // Save steps that come after the one being edited so they're not lost
+      _savedRemainingSteps = flowConfig.steps.slice(idx + 1);
       qbSteps = flowConfig.steps.slice(0, idx);
       qbRenderDoneList();
       qbLoadActive(idx);
-      // Hide final actions
       document.getElementById('step2-final-actions').style.display = 'none';
       document.getElementById('qb-active').style.display = 'block';
     }
@@ -1672,6 +1633,8 @@
     // Add another question button
     document.getElementById('qb-add-btn').addEventListener('click', async () => {
       if (!qbCommitActive()) return;
+      // User chose to add more — discard any remaining steps from before edit
+      _savedRemainingSteps = [];
       // Cache the AI reply for the committed step so done list shows it
       const step = flowConfig.steps[qbActiveIdx];
       if (step && !step._aiReply) {
@@ -1702,14 +1665,17 @@
         setTimeout(() => document.getElementById('qb-active-text').style.outline = '', 1200);
         return;
       }
-      qbSteps = flowConfig.steps.slice(0, qbActiveIdx + 1);
-      // Store AI reply on last step
+      const committedSteps = flowConfig.steps.slice(0, qbActiveIdx + 1);
+      // Store AI reply on last committed step
       const lastStep = flowConfig.steps[qbActiveIdx];
       if (lastStep && !lastStep._aiReply) {
         const cacheKey = lastStep.question + '|' + !!lastStep.free_text;
         lastStep._aiReply = _aiReplyCache[cacheKey] || smartSampleReply(lastStep.question, !!lastStep.free_text);
       }
-      flowConfig.steps = qbSteps;
+      // Restore any steps that were after the one being edited
+      flowConfig.steps = [...committedSteps, ..._savedRemainingSteps];
+      _savedRemainingSteps = [];
+      qbSteps = [...flowConfig.steps];
       qbRenderDoneList();
       document.getElementById('qb-active').style.display = 'none';
       document.getElementById('step2-final-actions').style.display = 'flex';
@@ -1744,6 +1710,7 @@
       qbSteps = [];
       qbActiveIdx = 0;
       _aiReplyCache = {};
+      _savedRemainingSteps = [];
       document.getElementById('qb-done-list').innerHTML = '';
       document.getElementById('step2-final-actions').style.display = 'none';
       // Populate greeting
@@ -1753,7 +1720,12 @@
         introEl.style.height = 'auto';
         introEl.style.height = introEl.scrollHeight + 'px';
       }
-      qbLoadActive(0);
+      // Show all questions in read-only done list immediately — user clicks Edit to change one
+      qbSteps = [...flow.steps];
+      qbActiveIdx = flow.steps.length;
+      qbRenderDoneList();
+      document.getElementById('qb-active').style.display = 'none';
+      document.getElementById('step2-final-actions').style.display = 'flex';
       updateSidebarPreview();
     }
 
@@ -1780,14 +1752,17 @@
     let _aiReplyCache = {}; // key = question+mode → reply text
 
     function mkTypingDots() {
-      const wrap = document.createElement('div');
-      wrap.className = 'qb-typing';
-      wrap.id = 'qb-typing-indicator';
-      wrap.innerHTML = '<div class="qb-typing__dot"></div><div class="qb-typing__dot"></div><div class="qb-typing__dot"></div>';
-      return wrap;
+      const row = document.createElement('div');
+      row.id = 'qb-typing-indicator';
+      row.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:.25rem;';
+      const bubble = document.createElement('div');
+      bubble.style.cssText = 'background:#0a84ff;padding:.42rem .65rem;border-radius:16px;border-bottom-right-radius:4px;display:inline-flex;align-items:center;gap:3px;';
+      bubble.innerHTML = '<div style="width:4.5px;height:4.5px;background:rgba(255,255,255,.7);border-radius:50%;animation:htBounce .9s ease-in-out infinite"></div><div style="width:4.5px;height:4.5px;background:rgba(255,255,255,.7);border-radius:50%;animation:htBounce .9s ease-in-out infinite;animation-delay:.15s"></div><div style="width:4.5px;height:4.5px;background:rgba(255,255,255,.7);border-radius:50%;animation:htBounce .9s ease-in-out infinite;animation-delay:.3s"></div>';
+      row.appendChild(bubble);
+      return row;
     }
 
-    async function fetchAIReply(question, isFree, options) {
+    async function fetchSampleReply(question, isFree, options) {
       const cacheKey = question + '|' + isFree;
       if (_aiReplyCache[cacheKey]) return _aiReplyCache[cacheKey];
       try {
@@ -1858,7 +1833,7 @@
           const currentQ = document.getElementById('qb-active-text')?.value.trim();
           if (currentQ !== capturedQ) return;
 
-          const reply = await fetchAIReply(capturedQ, isFree, opts);
+          const reply = await fetchSampleReply(capturedQ, isFree, opts);
 
           // Remove typing dots, add real reply bubble with fade-in
           const dotsEl = document.getElementById('qb-typing-indicator');
@@ -1937,41 +1912,48 @@
     let selectedIndustry = null;
     let selectedSpecialty = null;
 
+    const specWrap = document.getElementById('ob-specialty-wrap');
+    const otherWrap = document.getElementById('ob-other-wrap');
+
     document.querySelectorAll('.ob-industry-tile').forEach(tile => {
       tile.addEventListener('click', function() {
         document.querySelectorAll('.ob-industry-tile').forEach(t => t.classList.remove('selected'));
         this.classList.add('selected');
-        selectedIndustry = this.dataset.ind;
+        selectedIndustry = this.dataset.industry;
         selectedSpecialty = null;
-        const specWrap = document.getElementById('ob-specialty-wrap');
-        const otherWrap = document.getElementById('ob-other-wrap');
+
         if (selectedIndustry === 'other') {
           specWrap.classList.remove('visible');
           otherWrap.style.display = 'block';
           return;
         }
+
         otherWrap.style.display = 'none';
         const specLabel = document.getElementById('ob-spec-industry-label');
         if (specLabel) specLabel.textContent = INDUSTRY_LABELS[selectedIndustry] || 'business';
-        const chips = document.getElementById('ob-spec-chips');
-        chips.innerHTML = '';
+
+        // Populate specialty chips
+        const chipsContainer = document.getElementById('ob-specialty-chips-container');
+        chipsContainer.innerHTML = '';
         (INDUSTRY_SPECIALTIES[selectedIndustry] || []).forEach(spec => {
           const btn = document.createElement('button');
-          btn.type = 'button'; btn.className = 'ob-spec-chip'; btn.textContent = spec;
+          btn.type = 'button';
+          btn.className = 'ob-spec-chip';
+          btn.textContent = spec;
           btn.addEventListener('click', function() {
             document.querySelectorAll('.ob-spec-chip').forEach(c => c.classList.remove('selected'));
             this.classList.add('selected');
             selectedSpecialty = spec;
-            document.getElementById('ob-other-wrap').style.display = spec === 'Other' ? 'block' : 'none';
+            otherWrap.style.display = selectedSpecialty === 'Other' ? 'block' : 'none';
           });
-          chips.appendChild(btn);
+          chipsContainer.appendChild(btn);
         });
         specWrap.classList.add('visible');
       });
     });
 
-    // ─── Step 1 → 2a (bridge) ───
-    document.getElementById('step1-next').addEventListener('click', () => {
+    // ─── Step 1 → 2 (directly — skip bridge) ───
+    document.getElementById('step1-next').addEventListener('click', async () => {
       const name = document.getElementById('biz-name').value.trim();
       const err = document.getElementById('step1-error');
       err.classList.remove('visible');
@@ -1988,105 +1970,48 @@
         desc = SPECIALTY_DESC[selectedSpecialty] || `We are a ${selectedSpecialty} business in Melbourne, Australia.`;
       }
 
-      bizData = { ...bizData, businessName: name, description: desc, bookingLink: document.getElementById('biz-booking').value.trim() };
+      const earlyPhone = document.getElementById('ob-step1-phone')?.value.trim();
+      bizData = { ...bizData, businessName: name, description: desc };
+      if (earlyPhone) bizData.notifyPhone = earlyPhone;
 
-      // Update bridge screen with business name
-      const bridgeName = document.getElementById('bridge-biz-name');
-      if (bridgeName) bridgeName.textContent = name;
-
-      showStep('2a');
+      showStep(2);
+      flowConfig = makeFallbackFlow();
+      renderFlow(flowConfig);
+      document.getElementById('flow-loading').classList.add('hidden');
+      document.getElementById('flow-content').classList.remove('hidden');
     });
 
-    // Fallback flow used when AI is unavailable
+    // Starter flow — hardcoded placeholder questions, always used (no AI generation)
     function makeFallbackFlow() {
       const biz = bizData.businessName || 'our team';
       return {
-        intro: `Hi {firstName}! Thanks for calling ${biz} — we missed you. Mind if we ask a couple of quick questions so we can help you faster?`,
+        intro: `Hi! Thanks for calling ${biz} — we missed you. We'll ask you 3 quick questions so we can call you back faster.`,
         steps: [
-          { id: 'q1', key: 'service', question: 'What do you need help with?', free_text: false,
-            options: [{ value: 'A', label: 'General enquiry' }, { value: 'B', label: 'Urgent issue' }, { value: 'C', label: 'Get a quote' }],
+          { id: 'q1', key: 'name', question: "What's your name?", free_text: true,
+            options: [], invalid_text: null, urgent_values: [] },
+          { id: 'q2', key: 'service', question: 'What do you need help with?', free_text: false,
+            options: [{ value: 'A', label: 'General enquiry' }, { value: 'B', label: 'Urgent job' }, { value: 'C', label: 'Get a quote' }],
             invalid_text: 'Please reply A, B or C.', urgent_values: ['B'] },
-          { id: 'q2', key: 'timing', question: 'When would you like us to get back to you?', free_text: false,
+          { id: 'q3', key: 'timing', question: 'How soon do you need us?', free_text: false,
             options: [{ value: 'A', label: 'ASAP' }, { value: 'B', label: 'Today' }, { value: 'C', label: 'This week' }],
             invalid_text: 'Please reply A, B or C.', urgent_values: ['A'] },
         ],
       };
     }
 
-    // ─── Step 2a → 2 (trigger AI generation) ───
-    document.getElementById('step2a-back').addEventListener('click', () => showStep(1));
-    document.getElementById('step2a-next').addEventListener('click', async () => {
-      const btn = document.getElementById('step2a-next');
-      btn.disabled = true;
-      btn.innerHTML = 'Writing questions… <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    // step-2a is no longer navigated to — kept in DOM for safety but skipped in flow
 
-      showStep(2);
-      document.getElementById('flow-loading').classList.remove('hidden');
-      document.getElementById('flow-content').classList.add('hidden');
-      animateAISteps();
-
-      try {
-        const r = await fetch('/api/onboarding/generate-flow', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ businessName: bizData.businessName, description: bizData.description }),
-        });
-        const res = await r.json();
-
-        if (res.ok && res.flow) {
-          flowConfig = res.flow;
-        } else {
-          flowConfig = makeFallbackFlow();
-          const stepErr = document.getElementById('step2-error');
-          if (stepErr) { stepErr.textContent = res.error || 'AI unavailable — using a starter template. Edit the questions below.'; stepErr.classList.add('visible'); }
-        }
-      } catch (e) {
-        console.error('generate-flow error', e);
-        flowConfig = makeFallbackFlow();
-        const stepErr = document.getElementById('step2-error');
-        if (stepErr) { stepErr.textContent = 'Could not reach AI — using a starter template. Edit the questions below.'; stepErr.classList.add('visible'); }
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = 'See my questions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-        document.getElementById('flow-loading').classList.add('hidden');
-        renderFlow(flowConfig);
-        document.getElementById('flow-content').classList.remove('hidden');
-      }
-    });
-
-    document.getElementById('regen-btn').addEventListener('click', async () => {
-      document.getElementById('flow-loading').classList.remove('hidden');
-      document.getElementById('flow-content').classList.add('hidden');
-      animateAISteps();
-
-      try {
-        const r = await fetch('/api/onboarding/generate-flow', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ businessName: bizData.businessName, description: bizData.description }),
-        });
-        const res = await r.json();
-        if (res.ok && res.flow) {
-          flowConfig = res.flow;
-        } else {
-          flowConfig = makeFallbackFlow();
-        }
-      } catch (e) {
-        console.error('regen-flow error', e);
-        flowConfig = makeFallbackFlow();
-      } finally {
-        document.getElementById('flow-loading').classList.add('hidden');
-        renderFlow(flowConfig);
-        document.getElementById('flow-content').classList.remove('hidden');
-      }
-    });
 
     // ─── Step 2 → 3 ───
-    document.getElementById('step2-back').addEventListener('click', () => showStep('2a'));
+    document.getElementById('step2-back').addEventListener('click', () => showStep(1));
     document.getElementById('step2-next').addEventListener('click', () => {
       if (flowConfig) {
-        // flowConfig.steps is kept up-to-date by the qb state machine
         bizData.flowConfig = flowConfig;
+      }
+      // Pre-fill phone from step 1 if already entered
+      if (bizData.notifyPhone) {
+        const phoneField = document.getElementById('notify-phone');
+        if (phoneField && !phoneField.value) phoneField.value = bizData.notifyPhone;
       }
       showStep(3);
     });
@@ -2115,7 +2040,6 @@
           flowConfig: bizData.flowConfig || null,
           notifyPhone: phone,
           notifyEmail: email || null,
-          bookingLink: bizData.bookingLink || null,
         }),
       }).then(r => r.json());
 
@@ -2161,7 +2085,7 @@
     // Check if Stripe is configured — update button label accordingly
     fetch('/api/config/stripe-mode').then(r => r.json()).then(res => {
       if (!res.stripeEnabled) {
-        payBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Activate account (free trial)`;
+        payBtn.innerHTML = `Activate account — it's free <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
         document.querySelector('#step-4 .ob-sub').textContent = 'Click below to activate your account and get your dedicated number set up.';
       }
     }).catch(() => {});
@@ -2173,53 +2097,63 @@
       location.href = '/dashboard';
     });
 
-    // ─── Sidebar iPhone animation ───
+    // ─── Sidebar chat animation ───
     function runObIphoneAnim() {
-      const screen   = document.getElementById('ob-iphone-screen');
-      const typing   = document.getElementById('ob-iphone-typing');
-      const notif    = document.getElementById('ob-iphone-notif');
+      const screen    = document.getElementById('ob-iphone-screen');
+      const typing    = document.getElementById('ob-iphone-typing');
+      const chatCard  = screen ? screen.closest('.ob-chat-card') : null;
+      const leadCard  = document.getElementById('ob-lead-card');
       if (!screen || !typing) return;
 
       const msgs = [
-        { cls: 'imsg--recv', text: 'Hi Sam — thanks for calling Bay Plumbing.\n\nHow urgent is this?\nA) Emergency  B) Same day  C) Can wait' },
-        { cls: 'imsg--sent', text: 'A' },
+        { cls: 'imsg--recv', text: 'Hi Sam, this is Bay Plumbing. We missed your call — what can we help with?' },
+        { cls: 'imsg--sent', text: 'Burst pipe under the sink, water everywhere' },
         { cls: 'imsg--delivered', text: '✓ Delivered' },
-        { cls: 'imsg--recv', text: 'Got it — emergency. What\'s the issue?\n1) Leak / burst pipe  2) Blocked drain\n3) Hot water  4) Other' },
-        { cls: 'imsg--sent', text: '1' },
+        { cls: 'imsg--recv', text: 'Understood. Is the water still running or have you been able to shut it off?' },
+        { cls: 'imsg--sent', text: 'Still running, I can\'t find the valve' },
         { cls: 'imsg--delivered', text: '✓ Delivered' },
-        { cls: 'imsg--recv', text: 'Thanks Sam! We\'ll have someone call you back within the hour. 🔧' },
+        { cls: 'imsg--recv', text: 'Noted. A plumber will call you within the next 5 minutes.' },
       ];
 
-      // Clear old messages (keep time div)
+      // Reset state
       [...screen.querySelectorAll('.imsg')].forEach(el => el.remove());
       typing.classList.remove('show');
-      if (notif) { notif.style.opacity = '0'; notif.style.transform = 'translateY(12px)'; }
+      if (chatCard) { chatCard.style.transition = ''; chatCard.style.opacity = '1'; chatCard.style.display = ''; }
+      if (leadCard) { leadCard.style.opacity = '0'; leadCard.style.display = 'none'; }
 
       let i = 0;
       function next() {
         if (i >= msgs.length) {
-          // Show notification card
-          if (notif) {
-            setTimeout(() => {
-              notif.style.opacity = '1';
-              notif.style.transform = 'translateY(0)';
-            }, 600);
-          }
-          // Loop after delay
-          setTimeout(runObIphoneAnim, 6000);
+          // Transition: fade out chat → show lead card
+          setTimeout(() => {
+            if (chatCard) {
+              chatCard.style.transition = 'opacity .5s ease';
+              chatCard.style.opacity = '0';
+              setTimeout(() => {
+                chatCard.style.display = 'none';
+                if (leadCard) {
+                  leadCard.style.display = 'block';
+                  requestAnimationFrame(() => { leadCard.style.opacity = '1'; });
+                }
+                // After viewing lead card, reset and loop
+                setTimeout(() => {
+                  if (leadCard) { leadCard.style.opacity = '0'; }
+                  setTimeout(runObIphoneAnim, 600);
+                }, 5000);
+              }, 500);
+            } else {
+              setTimeout(runObIphoneAnim, 6000);
+            }
+          }, 1500);
           return;
         }
         const m = msgs[i];
         const isRecv = m.cls === 'imsg--recv';
-        // Show typing before recv messages
         if (isRecv) {
           typing.classList.add('show');
-          screen.appendChild(typing); // move to end
+          screen.appendChild(typing);
           screen.scrollTop = screen.scrollHeight;
-          setTimeout(() => {
-            typing.classList.remove('show');
-            addMsg();
-          }, 900);
+          setTimeout(() => { typing.classList.remove('show'); addMsg(); }, 1000);
         } else {
           addMsg();
         }
@@ -2233,9 +2167,9 @@
         requestAnimationFrame(() => div.classList.add('show'));
         screen.scrollTop = screen.scrollHeight;
         i++;
-        setTimeout(next, m.cls === 'imsg--delivered' ? 200 : 700);
+        setTimeout(next, m.cls === 'imsg--delivered' ? 250 : 800);
       }
-      setTimeout(next, 500);
+      setTimeout(next, 600);
     }
 
     // Start animation once page is ready

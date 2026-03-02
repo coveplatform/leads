@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/dash.css" />
 </head>
 <body class="auth-root">
@@ -60,6 +60,9 @@
         </div>
 
         <button class="btn btn--primary btn--full btn--lg" id="login-btn" type="button">Sign in</button>
+        <div style="text-align:center;margin-top:.75rem">
+          <a href="#" id="show-forgot" style="font-size:.83rem;color:#A1A1AA;text-decoration:underline;text-underline-offset:2px">Forgot password?</a>
+        </div>
       </div>
 
       <div class="auth-footer">
@@ -100,16 +103,35 @@
           <input type="password" id="signup-password" placeholder="At least 8 characters" autocomplete="new-password" />
         </div>
 
-        <label class="auth-terms-label">
-          <input type="checkbox" id="signup-terms" />
-          <span>I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a></span>
-        </label>
-
         <button class="btn btn--primary btn--full btn--lg" id="signup-btn" type="button">Create account</button>
+        <p style="font-size:.75rem;color:#A1A1AA;text-align:center;margin-top:.6rem;line-height:1.5">
+          By creating an account you agree to our <a href="/terms" target="_blank" style="color:#71717A">Terms of Service</a> and <a href="/privacy" target="_blank" style="color:#71717A">Privacy Policy</a>
+        </p>
       </div>
 
       <div class="auth-footer">
         Already have an account? <a href="#" id="show-login">Sign in</a>
+      </div>
+    </div>
+
+    <!-- Forgot password view -->
+    <div id="view-forgot" class="hidden">
+      <h1 class="auth-heading">Reset your password</h1>
+      <p class="auth-sub">Enter your email and we'll send you a link to reset your password.</p>
+
+      <div id="forgot-error" class="auth-error" role="alert"></div>
+      <div id="forgot-success" class="auth-error" style="background:#F0FDF4;border-color:#BBF7D0;color:#166534;display:none" role="status"></div>
+
+      <div class="auth-form">
+        <div class="field">
+          <label for="forgot-email">Email</label>
+          <input type="email" id="forgot-email" placeholder="you@business.com.au" autocomplete="email" />
+        </div>
+        <button class="btn btn--primary btn--full btn--lg" id="forgot-btn" type="button">Send reset link</button>
+      </div>
+
+      <div class="auth-footer">
+        <a href="#" id="show-login-from-forgot">← Back to sign in</a>
       </div>
     </div>
 
@@ -121,19 +143,23 @@
   <script>
     const viewLogin = document.getElementById('view-login');
     const viewSignup = document.getElementById('view-signup');
+    const viewForgot = document.getElementById('view-forgot');
     const loginError = document.getElementById('login-error');
     const signupError = document.getElementById('signup-error');
 
-    document.getElementById('show-signup').addEventListener('click', (e) => {
-      e.preventDefault();
+    function showView(name) {
       viewLogin.classList.add('hidden');
-      viewSignup.classList.remove('hidden');
-    });
-    document.getElementById('show-login').addEventListener('click', (e) => {
-      e.preventDefault();
       viewSignup.classList.add('hidden');
-      viewLogin.classList.remove('hidden');
-    });
+      viewForgot.classList.add('hidden');
+      if (name === 'login') viewLogin.classList.remove('hidden');
+      else if (name === 'signup') viewSignup.classList.remove('hidden');
+      else if (name === 'forgot') viewForgot.classList.remove('hidden');
+    }
+
+    document.getElementById('show-signup').addEventListener('click', e => { e.preventDefault(); showView('signup'); });
+    document.getElementById('show-login').addEventListener('click', e => { e.preventDefault(); showView('login'); });
+    document.getElementById('show-forgot').addEventListener('click', e => { e.preventDefault(); showView('forgot'); });
+    document.getElementById('show-login-from-forgot').addEventListener('click', e => { e.preventDefault(); showView('login'); });
 
     // Check URL params for errors
     const params = new URLSearchParams(location.search);
@@ -193,13 +219,42 @@
       if (e.key === 'Enter') document.getElementById('login-btn').click();
     });
 
+    document.getElementById('forgot-btn').addEventListener('click', async () => {
+      const email = document.getElementById('forgot-email').value.trim();
+      const errEl = document.getElementById('forgot-error');
+      const successEl = document.getElementById('forgot-success');
+      errEl.classList.remove('visible');
+      successEl.style.display = 'none';
+
+      if (!email) {
+        errEl.textContent = 'Please enter your email address.';
+        errEl.classList.add('visible');
+        return;
+      }
+
+      const btn = document.getElementById('forgot-btn');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      const data = await apiPost('/api/auth/forgot-password', { email });
+
+      btn.disabled = false;
+      btn.textContent = 'Send reset link';
+
+      // Always show success — don't reveal if email exists
+      successEl.textContent = 'If that email is registered, you\'ll receive a reset link shortly. Check your inbox (and spam folder).';
+      successEl.style.display = 'block';
+    });
+
+    document.getElementById('forgot-email').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('forgot-btn').click();
+    });
+
     document.getElementById('signup-btn').addEventListener('click', async () => {
       const name = document.getElementById('signup-name').value.trim();
       const email = document.getElementById('signup-email').value.trim();
       const password = document.getElementById('signup-password').value;
       signupError.classList.remove('visible');
-
-      const termsChecked = document.getElementById('signup-terms').checked;
 
       if (!name || !email || !password) {
         signupError.textContent = 'Please fill in all fields.';
@@ -208,11 +263,6 @@
       }
       if (password.length < 8) {
         signupError.textContent = 'Password must be at least 8 characters.';
-        signupError.classList.add('visible');
-        return;
-      }
-      if (!termsChecked) {
-        signupError.textContent = 'Please agree to the Terms of Service and Privacy Policy to continue.';
         signupError.classList.add('visible');
         return;
       }

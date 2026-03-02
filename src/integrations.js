@@ -1,7 +1,7 @@
 // Integration utilities: after-hours, CRM webhooks, lead nudge/timeout
 
 // ─── Email via Resend ───
-export async function sendEmailViaResend({ to, subject, text }) {
+export async function sendEmailViaResend({ to, subject, text, html }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
   try {
@@ -9,10 +9,11 @@ export async function sendEmailViaResend({ to, subject, text }) {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
       body: JSON.stringify({
-        from: process.env.NOTIFY_EMAIL || "Cove <noreply@coveplatform.com>",
+        from: process.env.NOTIFY_EMAIL || "Cove <hello@usecove.app>",
         to: Array.isArray(to) ? to : [to],
         subject,
         text,
+        ...(html ? { html } : {}),
       }),
       signal: AbortSignal.timeout(8000),
     });

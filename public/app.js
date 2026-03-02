@@ -14,50 +14,50 @@
     {
       biz: "Bay Plumbing", avatar: "BP",
       msgs: [
-        { type: "recv", text: "Hi Sam! Thanks for contacting Bay Plumbing 👋\n\nWhat do you need help with?\nA) Blocked drain\nB) Leak\nC) Hot water\nD) General", delay: 1000 },
-        { type: "sent", text: "B", delay: 1600 },
-        { type: "recv", text: "A leak — got it. How urgent?\nA) Emergency — leaking now\nB) This week\nC) Just quoting", delay: 1200 },
-        { type: "sent", text: "A", delay: 1400 },
-        { type: "recv", text: "Flagged as urgent 🚨\nBay Plumbing will call you within minutes.", delay: 1200 },
-        { type: "alert", text: "✅ Qualified in 45 seconds", delay: 800 },
+        { type: "recv", text: "Hi Sam, this is Bay Plumbing. We missed your call — what can we help with?", delay: 1000 },
+        { type: "sent", text: "Burst pipe under the sink, water everywhere", delay: 1800 },
+        { type: "recv", text: "Understood. Is the water still running or have you been able to shut it off?", delay: 1400 },
+        { type: "sent", text: "Still running, I can't find the valve", delay: 1600 },
+        { type: "recv", text: "Noted. A plumber will call you within the next 5 minutes.", delay: 1300 },
+        { type: "alert", text: "✅ Qualified in 38 seconds", delay: 900 },
       ],
-      notif: { title: "🚨 New Urgent Lead", body: "Sam Thompson — Leaking pipe\nUrgency: Emergency · Call back ASAP" }
+      notif: { title: "New urgent lead", body: "Sam Thompson\nBurst pipe · Water running · Can't find valve\nCall back now" }
     },
     {
       biz: "Smile Dental", avatar: "SD",
       msgs: [
-        { type: "recv", text: "Hi Lisa! Thanks for contacting Smile Dental 😊\n\nWhat's the visit for?\nA) Toothache / pain\nB) Check-up & clean\nC) Cosmetic\nD) Other", delay: 1000 },
-        { type: "sent", text: "A", delay: 1400 },
-        { type: "recv", text: "Sorry to hear that. How soon do you need to be seen?\nA) Today if possible\nB) Next few days\nC) Just booking ahead", delay: 1200 },
-        { type: "sent", text: "A", delay: 1300 },
-        { type: "recv", text: "Marked as urgent 🦷\nSmile Dental will call you shortly to book you in.", delay: 1200 },
-        { type: "alert", text: "✅ Qualified in 40 seconds", delay: 800 },
+        { type: "recv", text: "Hi Lisa, this is Smile Dental. We missed your call — how can we help?", delay: 1000 },
+        { type: "sent", text: "I have a bad toothache, been hurting since last night", delay: 1700 },
+        { type: "recv", text: "Thank you for letting us know. Is the pain constant or does it come and go?", delay: 1300 },
+        { type: "sent", text: "Constant. Kept me up all night", delay: 1400 },
+        { type: "recv", text: "We'll arrange to see you today. Someone will call you shortly to confirm a time.", delay: 1200 },
+        { type: "alert", text: "✅ Qualified in 42 seconds", delay: 900 },
       ],
-      notif: { title: "🦷 New Urgent Lead", body: "Lisa Chen — Toothache / pain\nUrgency: Today · Call to book in" }
+      notif: { title: "New urgent lead", body: "Lisa Chen\nToothache · Constant pain since last night\nBook in today" }
     },
     {
       biz: "Spark Electrical", avatar: "SE",
       msgs: [
-        { type: "recv", text: "Hi James! Thanks for reaching out to Spark Electrical ⚡\n\nWhat do you need help with?\nA) Power outage\nB) New install\nC) Safety inspection\nD) General", delay: 1000 },
-        { type: "sent", text: "A", delay: 1500 },
-        { type: "recv", text: "A power issue — understood. How urgent?\nA) No power right now\nB) Intermittent issue\nC) Just quoting", delay: 1200 },
-        { type: "sent", text: "B", delay: 1300 },
-        { type: "recv", text: "Got it — we'll follow up soon.\nSpark Electrical will be in touch to arrange a time.", delay: 1200 },
-        { type: "alert", text: "✅ Qualified in 50 seconds", delay: 800 },
+        { type: "recv", text: "Hi James, this is Spark Electrical. We missed your call — what's the issue?", delay: 1000 },
+        { type: "sent", text: "Half the house has no power", delay: 1600 },
+        { type: "recv", text: "Have you checked the switchboard for any tripped circuits?", delay: 1300 },
+        { type: "sent", text: "Yes, nothing has tripped — it's just dead", delay: 1500 },
+        { type: "recv", text: "Understood. An electrician will call you within 10 minutes.", delay: 1200 },
+        { type: "alert", text: "✅ Qualified in 44 seconds", delay: 900 },
       ],
-      notif: { title: "⚡ New Lead", body: "James Miller — Power outage\nUrgency: This week · Follow up today" }
+      notif: { title: "New urgent lead", body: "James Miller\nPower outage · No trips · Half house affected\nPriority call back" }
     },
     {
       biz: "Fresh Clean Co", avatar: "FC",
       msgs: [
-        { type: "recv", text: "Hi Rachel! Thanks for contacting Fresh Clean Co ✨\n\nWhat type of clean do you need?\nA) End of lease\nB) Regular / weekly\nC) Deep clean\nD) Commercial", delay: 1000 },
-        { type: "sent", text: "A", delay: 1500 },
-        { type: "recv", text: "End of lease — great. When do you need it done?\nA) Within 3 days\nB) Within 2 weeks\nC) Just getting quotes", delay: 1200 },
-        { type: "sent", text: "B", delay: 1200 },
-        { type: "recv", text: "Perfect, we'll get a quote to you.\nFresh Clean Co will be in touch shortly!", delay: 1200 },
-        { type: "alert", text: "✅ Qualified in 42 seconds", delay: 800 },
+        { type: "recv", text: "Hi Rachel, this is Fresh Clean Co. We missed your call — what do you need?", delay: 1000 },
+        { type: "sent", text: "End of lease clean, needs to be done by Friday", delay: 1700 },
+        { type: "recv", text: "We can accommodate that. How many bedrooms and bathrooms does the property have?", delay: 1300 },
+        { type: "sent", text: "3 bedrooms, 2 bathrooms, and a garage", delay: 1400 },
+        { type: "recv", text: "Thank you. We'll have a quote with you within the hour.", delay: 1200 },
+        { type: "alert", text: "✅ Qualified in 35 seconds", delay: 900 },
       ],
-      notif: { title: "✨ New Lead", body: "Rachel Kim — End of lease clean\nTimeline: Within 2 weeks · Send quote" }
+      notif: { title: "New lead", body: "Rachel Kim\n3 bed · 2 bath · Garage · By Friday\nSend quote today" }
     }
   ];
 

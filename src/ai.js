@@ -135,6 +135,45 @@ Return ONLY the value, nothing else.`;
   return match ? match.value : null;
 }
 
+// ─── Condense Free Text Answers for Owner Summary ───
+// Called once per completed lead — only processes free_text steps with long answers.
+
+export async function condenseFreeTextAnswers(flowConfig, answers) {
+  const freeTextSteps = (flowConfig.steps || []).filter((s) => s.free_text);
+  if (!freeTextSteps.length) return answers;
+
+  const updated = { ...answers };
+
+  for (const step of freeTextSteps) {
+    const raw = answers[`${step.key}_label`];
+    if (!raw || raw.length <= 60) continue; // Short enough already
+
+    try {
+      const prompt = `Summarise this customer SMS reply in one short phrase (max 10 words). Preserve the key detail. Drop filler words.
+
+Question: "${step.question}"
+Reply: "${raw}"
+
+Return ONLY the summary, nothing else.`;
+
+      const result = await callOpenAI(
+        [{ role: "user", content: prompt }],
+        { temperature: 0.2, max_tokens: 30 },
+      );
+
+      const condensed = result.trim();
+      if (condensed) {
+        updated[`${step.key}_label`] = condensed;
+        updated[`${step.key}_label_full`] = raw; // preserve original
+      }
+    } catch {
+      // Keep original on any error
+    }
+  }
+
+  return updated;
+}
+
 // ─── AI Available Check ───
 
 export function isAIConfigured() {

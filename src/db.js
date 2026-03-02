@@ -116,6 +116,19 @@ export async function createLead({ businessId, name, phone, email, message }) {
   return rows[0];
 }
 
+// Returns true if this phone has ever sent STOP to this business.
+// Must be checked before sending any outbound SMS to a number.
+export async function hasPhoneOptedOut(businessId, phone) {
+  const rows = await sql`
+    SELECT 1 FROM leads
+    WHERE business_id = ${businessId}
+      AND phone = ${phone}
+      AND status = 'stopped'
+    LIMIT 1
+  `;
+  return rows.length > 0;
+}
+
 export async function getLatestActiveLeadByBusinessAndPhone({ businessId, phone }) {
   const rows = await sql`
     SELECT * FROM leads
@@ -177,7 +190,8 @@ export async function updateBusiness(businessId, fields) {
       operating_hours   = COALESCE(${fields.operatingHours ? JSON.stringify(fields.operatingHours) : null}::jsonb, operating_hours),
       integrations      = COALESCE(${fields.integrations ? JSON.stringify(fields.integrations) : null}::jsonb, integrations),
       user_id           = COALESCE(${fields.userId ?? null}, user_id),
-      is_active         = COALESCE(${fields.isActive ?? null}, is_active)
+      is_active         = COALESCE(${fields.isActive ?? null}, is_active),
+      forwarding_verified = COALESCE(${fields.forwardingVerified ?? null}, forwarding_verified)
     WHERE id = ${businessId}
     RETURNING *
   `;
@@ -248,4 +262,40 @@ export async function getMessagesByLeadId(leadId) {
     ORDER BY created_at ASC
   `;
   return rows;
+}
+
+// ─── Password Reset ───
+
+export async function setPasswordResetToken(userId, token, expiresAt) {
+  await sql`
+    UPDATE users
+    SET password_reset_token = ${token}, password_reset_expires = ${expiresAt}, updated_at = now()
+    WHERE id = ${userId}
+  `;
+}
+
+export async function getUserByResetToken(token) {
+  const rows = await sql`
+    SELECT id, email, name, password_reset_expires
+    FROM users
+    WHERE password_reset_token = ${token}
+      AND password_reset_expires > now()
+    LIMIT 1
+  `;
+  return rows[0] || null;
+}
+
+export async function clearPasswordResetToken(userId) {
+  await sql`
+    UPDATE users
+    SET password_reset_token = NULL, password_reset_expires = NULL, updated_at = now()
+    WHERE id = ${userId}
+  `;
+}
+
+export async function updatePassword(userId, passwordHash) {
+  await sql`
+    UPDATE users SET password_hash = ${passwordHash}, updated_at = now()
+    WHERE id = ${userId}
+  `;
 }
