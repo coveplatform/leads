@@ -19,24 +19,23 @@
 
   <!--
     ── Logo mark ──
-    The nav logo uses a 28×28 viewBox with these arc paths:
-      bottom: M5 19.5 Q9 17 14 19.5 Q19 22 23 19.5
-      middle: M5 14.5 Q9 12 14 14.5 Q19 17 23 14.5
-      top:    M5  9.5 Q9  7 14  9.5 Q19 12 23  9.5
+    Source: favicon.svg which has a 32×32 viewBox and these exact paths:
+      bottom: M5 23.5 Q10.5 19.5 16 23.5 Q21.5 27.5 27 23.5  (stroke 3.5)
+      middle: M7 17   Q11.5 13   16 17   Q20.5 21   25 17     (stroke 3)
+      top:    M10 10.5 Q13 7.5   16 10.5  Q19 13.5  22 10.5   (stroke 2.5)
 
-    We place a 64×64 box at (80, 52), so scale = 64/28 ≈ 2.2857
-    and offset every point by (+80, +52).
+    Box here is 64×64 at (80, 52). Scale = 64/32 = exactly 2.
+    Every coordinate: x_new = x_orig × 2 + 80, y_new = y_orig × 2 + 52.
 
-    Precomputed (rounded to 1 dp):
-      bottom: M91.4 96.6  Q100.6 90.9  112 96.6  Q123.4 102.3 132.6 96.6
-      middle: M91.4 85.1  Q100.6 79.4  112 85.1  Q123.4  90.9 132.6 85.1
-      top:    M91.4 73.7  Q100.6 68.0  112 73.7  Q123.4  79.4 132.6 73.7
-    stroke-width: 2.3 × 2.2857 ≈ 5.3 → use 5
+      bottom: M(90,99) Q(101,91) (112,99) Q(123,107) (134,99)
+      middle: M(94,86) Q(103,78) (112,86) Q(121,94)  (130,86)
+      top:    M(100,73) Q(106,67) (112,73) Q(118,79)  (124,73)
+    Stroke widths ×2: 7, 6, 5.
   -->
   <rect x="80" y="52" width="64" height="64" rx="14" fill="#e8540a"/>
-  <path d="M91.4 96.6 Q100.6 90.9 112 96.6 Q123.4 102.3 132.6 96.6" stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/>
-  <path d="M91.4 85.1 Q100.6 79.4 112 85.1 Q123.4 90.9  132.6 85.1" stroke="white" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.7"/>
-  <path d="M91.4 73.7 Q100.6 68.0 112 73.7 Q123.4 79.4  132.6 73.7" stroke="white" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.38"/>
+  <path d="M90 99 Q101 91 112 99 Q123 107 134 99"  stroke="white" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <path d="M94 86 Q103 78 112 86 Q121 94  130 86"  stroke="white" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.75"/>
+  <path d="M100 73 Q106 67 112 73 Q118 79  124 73"  stroke="white" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.45"/>
 
   <!-- Logo wordmark -->
   <text x="158" y="97" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="38" font-weight="700" fill="white" letter-spacing="-1">cove</text>
