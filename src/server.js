@@ -1289,31 +1289,26 @@ app.post("/api/voice/inbound", async (req, res) => {
 
     console.log(`[voice/inbound] business=${business.name} id=${business.id}`);
 
-    // ── Forwarding detection ──
-    // If ForwardedFrom matches the owner's registered number, forwarding is confirmed.
-    // Mark the business as verified (fire-and-forget is fine here).
-    if (forwardedFrom && !business.forwarding_verified) {
-      const ownerPhone = business.owner_notify_phone
-        ? normalizePhone(business.owner_notify_phone, config.defaultCountryCode)
-        : null;
-      if (ownerPhone && forwardedFrom === ownerPhone) {
-        console.log(`[voice/inbound] forwarding verified for business ${business.id}`);
-        updateBusiness(business.id, { forwardingVerified: true }).catch(err =>
-          console.error("[voice/inbound] forwarding verify update error:", err)
-        );
-        business.forwarding_verified = true;
-      }
-    }
-
     // ── Test call detection ──
-    // When Cove places a test call (from the Twilio number to the owner's phone),
-    // if the owner doesn't answer it gets forwarded back here. Detect by:
-    // ForwardedFrom = owner's number AND From = our own Twilio number (calling itself).
+    // When Cove places an outgoing test call (from the Twilio number to the owner's phone),
+    // if it gets forwarded back here, detect by: from === our own Twilio number.
     const isTestCall = forwardedFrom &&
       from === normalizePhone(business.twilio_from_number, config.defaultCountryCode);
     if (isTestCall) {
-      console.log(`[voice/inbound] test call — skipping lead creation for business ${business.id}`);
+      console.log(`[voice/inbound] test call loopback — skipping lead creation for business ${business.id}`);
       return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Hangup/></Response>`);
+    }
+
+    // ── Forwarding detection ──
+    // Mark forwarding_verified on ANY real inbound call (not a test loopback).
+    // ForwardedFrom can be the business number OR the customer number depending on
+    // carrier; we don't need to match it — any real call proves forwarding works.
+    if (!business.forwarding_verified) {
+      console.log(`[voice/inbound] forwarding verified for business ${business.id}`);
+      updateBusiness(business.id, { forwardingVerified: true }).catch(err =>
+        console.error("[voice/inbound] forwarding verify update error:", err)
+      );
+      business.forwarding_verified = true;
     }
 
     // Do SMS work before responding — serverless kills background async after res.send()
@@ -1375,12 +1370,14 @@ app.post("/api/voice/inbound", async (req, res) => {
   }
 });
 
-// ─── Forwarding verification: start test call ───
+// ─── Send test lead SMS ───
+// Sends the first qualification question to the owner's phone, simulating a missed call.
+// This lets owners test the entire SMS flow without needing carrier forwarding set up first.
 
-app.post("/api/me/verify-forwarding/start", requireAuth, async (req, res) => {
+app.post("/api/me/send-test-lead", requireAuth, async (req, res) => {
   try {
     if (!config.twilio.accountSid || !config.twilio.authToken) {
-      return res.status(503).json({ ok: false, error: "Twilio not configured" });
+      return res.status(503).json({ ok: false, error: "SMS not configured" });
     }
     const business = await getBusinessByUserId(req.userId);
     if (!business) return res.status(404).json({ ok: false, error: "No business found" });
@@ -1391,21 +1388,35 @@ app.post("/api/me/verify-forwarding/start", requireAuth, async (req, res) => {
       return res.status(400).json({ ok: false, error: "Cove number not provisioned yet" });
     }
 
-    const client = twilio(config.twilio.accountSid, config.twilio.authToken);
-    // Pass twiml inline so Twilio doesn't need to fetch a URL — avoids any localhost/deployment issues
-    await client.calls.create({
-      to:      business.owner_notify_phone,
-      from:    business.twilio_from_number,
-      twiml:   '<Response><Say voice="Polly.Olivia" language="en-AU">This is a Cove forwarding test. You can hang up — no need to answer next time.</Say><Hangup/></Response>',
-      timeout: 20, // ring 20s then hang up so carrier forwarding kicks in
+    const phone = normalizePhone(business.owner_notify_phone, config.defaultCountryCode);
+
+    // Create a test lead (skip duplicate check — owner testing their own number)
+    const lead = await createLead({
+      businessId: business.id,
+      name: null,
+      phone,
+      email: null,
+      message: "[Test] Simulated missed call",
     });
 
-    console.log(`[verify-forwarding] test call placed to ${business.owner_notify_phone} for business ${business.id}`);
+    await saveMessage({ leadId: lead.id, direction: "system", body: "📞 Test missed call (simulated)" });
+
+    const flowConfig = resolveFlowConfig(lead, business);
+    const firstMsg = buildIntro(flowConfig, null, business.name);
+    await sendSms({ from: business.twilio_from_number, to: phone, body: firstMsg });
+    await saveMessage({ leadId: lead.id, direction: "outbound", body: firstMsg });
+
+    console.log(`[send-test-lead] sent to ${phone} for business ${business.id}`);
     return res.json({ ok: true });
   } catch (err) {
-    console.error("[verify-forwarding/start] error:", err);
-    return res.status(500).json({ ok: false, error: "Could not place test call — " + (err.message || "unknown error") });
+    console.error("[send-test-lead] error:", err);
+    return res.status(500).json({ ok: false, error: "Could not send test — " + (err.message || "unknown error") });
   }
+});
+
+// ─── Legacy: forwarding test call (kept for backwards compat, now a no-op redirect) ───
+app.post("/api/me/verify-forwarding/start", requireAuth, async (req, res) => {
+  return res.status(410).json({ ok: false, error: "This test method has been replaced. Use the test in Lead Sources instead." });
 });
 
 // ─── Forwarding verification: check status ───

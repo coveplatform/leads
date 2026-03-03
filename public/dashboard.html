@@ -215,18 +215,15 @@
           </div>
           <div class="fwd-banner__actions">
             <button class="btn btn--primary btn--sm" id="fwd-banner-setup-btn">Set up forwarding →</button>
-            <button class="btn btn--ghost btn--sm" id="fwd-test-btn">Test it</button>
+            <button class="btn btn--ghost btn--sm" id="fwd-test-btn">Send me a test lead</button>
           </div>
         </div>
-        <!-- calling state -->
+        <!-- sending state -->
         <div class="fwd-banner fwd-banner--calling hidden" id="fwd-state-calling">
           <span class="fwd-banner__dot fwd-banner__dot--pulse"></span>
           <div class="fwd-banner__body">
-            <div class="fwd-banner__title">Calling your phone — let it ring out, don't answer</div>
-            <div class="fwd-banner__sub">Your carrier will forward the unanswered call to Cove. Only works once forwarding is set up on your phone.</div>
-          </div>
-          <div class="fwd-banner__actions">
-            <button class="btn btn--ghost btn--sm" id="fwd-cancel-btn">Cancel</button>
+            <div class="fwd-banner__title">Sending test SMS to your phone…</div>
+            <div class="fwd-banner__sub">You'll get a text in a few seconds — reply to it to see the full flow.</div>
           </div>
         </div>
         <!-- verified state -->
@@ -1141,27 +1138,19 @@
         document.getElementById('fwd-test-btn')?.addEventListener('click', async () => {
           showState('calling');
           try {
-            const res = await fetch('/api/me/verify-forwarding/start', { method: 'POST' });
+            const res = await fetch('/api/me/send-test-lead', { method: 'POST' });
             const r = await res.json().catch(() => ({ ok: false, error: 'Server error — please try again.' }));
             if (!r.ok) {
               showState('idle');
-              // Show error in banner sub-text instead of alert
-              const sub = stateIdle.querySelector('.fwd-banner__sub');
-              if (sub) { sub.textContent = r.error || 'Could not place test call — check your phone number in Settings.'; sub.style.color = 'var(--red,#dc2626)'; }
+              const sub = document.getElementById('fwd-idle-sub');
+              if (sub) { sub.textContent = r.error || 'Could not send test — check your phone number in Settings.'; sub.style.color = 'var(--red,#dc2626)'; }
               return;
             }
-            startPolling();
+            // Show sending state briefly, then show success banner
+            setTimeout(() => showState('verified'), 2000);
           } catch {
-            // Connection error — still start polling in case call was placed
-            startPolling();
+            showState('idle');
           }
-        });
-
-        // Cancel button
-        document.getElementById('fwd-cancel-btn')?.addEventListener('click', () => {
-          if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
-          if (pollTimeout) { clearTimeout(pollTimeout); pollTimeout = null; }
-          showState('idle');
         });
 
         // Dismiss verified state
