@@ -1752,9 +1752,14 @@
       if (desktopSect) desktopSect.classList.toggle('hidden', isMobile);
 
       const buildCode = (carrier, num) => {
-        if (carrier === 'vodafone') return `*61*${num}*11*20#`;
-        return `**61*${num}*11*20#`; // telstra, optus, other
+        // Dial codes need local AU format (04XX) — the + sign breaks the dialler
+        const local = toLocalAU(num);
+        if (carrier === 'vodafone') return `*61*${local}*11*20#`;
+        return `**61*${local}*11*20#`; // telstra, other
       };
+
+      // Convert +61XXXXXXXXX → 04XXXXXXXX for display in carrier app fields
+      const toLocalAU = n => n && n.startsWith('+61') ? '0' + n.slice(3) : n;
 
       let currentCode = '';
 
@@ -1778,7 +1783,7 @@
             optusApp.classList.remove('hidden');
             optusApp.style.display = 'flex';
             const numEl = document.getElementById('dash-optus-cove-num');
-            if (numEl) numEl.textContent = num;
+            if (numEl) numEl.textContent = toLocalAU(num);
           }
         } else {
           // All other carriers: show dial code, hide Optus panel

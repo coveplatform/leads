@@ -1443,12 +1443,12 @@
     let _selectedCarrier = null;
 
     function getDialCode(carrier, num) {
-      const intlNum = num.startsWith('+') ? '0011' + num.slice(1) : num;
+      // Dial codes need local AU format (04XX) — + sign breaks the dialler
+      const local = num.startsWith('+61') ? '0' + num.slice(3) : num;
       switch (carrier) {
-        case 'telstra':  return `**61*${num}*11*20#`;
-        case 'optus':    return `**61*${num}#`;
-        case 'vodafone': return `*61*${num}*11*20#`;
-        default:         return `**61*${intlNum}*11*20#`;
+        case 'telstra':  return `**61*${local}*11*20#`;
+        case 'vodafone': return `*61*${local}*11*20#`;
+        default:         return `**61*${local}*11*20#`;
       }
     }
 
@@ -1500,12 +1500,15 @@
       });
     });
 
+    // Convert +61XXXXXXXXX → 04XXXXXXXX for carrier app fields
+    const toLocalAU = n => n && n.startsWith('+61') ? '0' + n.slice(3) : n;
+
     function fillNumber(num) {
       _coveNumber = num;
       const numBox = document.getElementById('cf-number-text');
       if (numBox) numBox.textContent = num;
       const optusNumEl = document.getElementById('ob-optus-cove-num');
-      if (optusNumEl) optusNumEl.textContent = num;
+      if (optusNumEl) optusNumEl.textContent = toLocalAU(num);
       updateActivateLink();
     }
 
@@ -1527,7 +1530,7 @@
 
         if (isOptus && _coveNumber) {
           const numEl = document.getElementById('ob-optus-cove-num');
-          if (numEl) numEl.textContent = _coveNumber;
+          if (numEl) numEl.textContent = toLocalAU(_coveNumber);
         }
 
         if (!isOptus) updateActivateLink();
