@@ -559,6 +559,7 @@
               <span class="cf-carrier-name">Other</span><span class="cf-carrier-sub">TPG, Boost…</span>
             </button>
           </div>
+          <!-- Dial code action (Telstra / Vodafone / Other) -->
           <div id="dash-cf-action" class="hidden" style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
             <div id="dash-optus-note" class="hidden"></div>
             <!-- Dial code display -->
@@ -580,6 +581,24 @@
               </div>
               <p class="cf-send-status" id="dash-send-status"></p>
             </div>
+          </div>
+
+          <!-- Optus app instructions (shown instead of dial code for Optus) -->
+          <div id="dash-optus-app" class="hidden" style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+            <div style="padding:12px 14px;background:#f0f4ff;border-radius:10px;border:1px solid #c7d7fd;font-size:13px;line-height:1.6">
+              <strong style="display:block;margin-bottom:6px">Optus: set forwarding in the My Optus app</strong>
+              The Optus dial code and the My Optus app are separate systems — the app is more reliable. Follow these steps:
+              <ol style="margin:8px 0 0 16px;padding:0;display:flex;flex-direction:column;gap:4px">
+                <li>Open the <strong>My Optus app</strong> on your phone</li>
+                <li>Go to <strong>My account → My services → Call forwarding</strong></li>
+                <li>Tap <strong>No answer</strong> and enter your Cove number:</li>
+              </ol>
+            </div>
+            <div class="cf-code-row">
+              <span class="cf-code-display" id="dash-optus-cove-num">—</span>
+              <button class="btn btn--ghost btn--sm" id="dash-optus-copy-btn" type="button">Copy</button>
+            </div>
+            <p style="font-size:12px;color:var(--text-muted);margin:0">Set the ring time to <strong>20–25 seconds</strong> so you have time to answer before it forwards.</p>
           </div>
         </div>
 
@@ -1750,23 +1769,36 @@
         grid.querySelectorAll('.cf-carrier-tile').forEach(t => t.classList.remove('active'));
         tile.classList.add('active');
 
-        // Optus: show note about disabling Message Bank first
-        if (optusNote) optusNote.classList.toggle('hidden', carrier !== 'optus');
+        const optusApp = document.getElementById('dash-optus-app');
 
-        // Build dial code
-        currentCode = buildCode(carrier, num);
-        if (dialCodeEl) dialCodeEl.textContent = currentCode;
-        if (activateLink) activateLink.href = 'tel:' + currentCode;
+        if (carrier === 'optus') {
+          // Optus: hide dial code section, show app instructions with Cove number
+          action.classList.add('hidden');
+          if (optusApp) {
+            optusApp.classList.remove('hidden');
+            optusApp.style.display = 'flex';
+            const numEl = document.getElementById('dash-optus-cove-num');
+            if (numEl) numEl.textContent = num;
+          }
+        } else {
+          // All other carriers: show dial code, hide Optus panel
+          if (optusApp) { optusApp.classList.add('hidden'); optusApp.style.display = 'none'; }
 
-        // Pre-fill send-to-phone with registered number
-        const sendPhoneInput = document.getElementById('dash-send-phone');
-        if (sendPhoneInput && !sendPhoneInput.value && business?.owner_notify_phone) {
-          sendPhoneInput.value = business.owner_notify_phone;
+          // Build dial code
+          currentCode = buildCode(carrier, num);
+          if (dialCodeEl) dialCodeEl.textContent = currentCode;
+          if (activateLink) activateLink.href = 'tel:' + currentCode;
+
+          // Pre-fill send-to-phone with registered number
+          const sendPhoneInput = document.getElementById('dash-send-phone');
+          if (sendPhoneInput && !sendPhoneInput.value && business?.owner_notify_phone) {
+            sendPhoneInput.value = business.owner_notify_phone;
+          }
+
+          // Reveal action section
+          action.classList.remove('hidden');
+          action.style.display = 'flex';
         }
-
-        // Reveal action section
-        action.classList.remove('hidden');
-        action.style.display = 'flex';
       });
 
       // Copy code to clipboard
@@ -1789,6 +1821,17 @@
           });
         });
       }
+
+      // Copy Optus Cove number
+      document.getElementById('dash-optus-copy-btn')?.addEventListener('click', () => {
+        const num = document.getElementById('dash-optus-cove-num')?.textContent;
+        if (!num || num === '—') return;
+        const btn = document.getElementById('dash-optus-copy-btn');
+        navigator.clipboard.writeText(num).catch(() => {}).finally(() => {
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+        });
+      });
 
       // Desktop: send code to phone via SMS
       if (sendBtn) {
