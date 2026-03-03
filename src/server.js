@@ -100,6 +100,56 @@ import { sendSms } from "./sms.js";
 import { day1Email, day4Email, day11Email } from "./trial-emails.js";
 import twilio from "twilio";
 
+// ─── Cove self-qualification flow (used for contact form leads) ───
+const COVE_QUALIFICATION_FLOW = {
+  intro: "Hi {firstName}! Thanks for reaching out to Cove. A couple of quick questions so we can make the most of our call.",
+  completion: "Perfect — Kris from Cove will be in touch soon. Talk shortly!",
+  steps: [
+    {
+      id: "biz_type",
+      key: "biz_type",
+      question: "What type of business do you run?\nA) Trades (plumber, electrician, builder etc)\nB) Dental / Allied health\nC) Other service business",
+      invalid_text: "Please reply A, B or C.",
+      options: [
+        { value: "A", label: "Trades" },
+        { value: "B", label: "Dental / Allied health" },
+        { value: "C", label: "Other service business" },
+      ],
+      urgent_values: [],
+    },
+    {
+      id: "missed_calls",
+      key: "missed_calls",
+      question: "Roughly how many missed calls does your business get per week?\nA) 1–5\nB) 6–15\nC) 15+",
+      invalid_text: "Please reply A, B or C.",
+      options: [
+        { value: "A", label: "1–5 missed calls/week" },
+        { value: "B", label: "6–15 missed calls/week" },
+        { value: "C", label: "15+ missed calls/week" },
+      ],
+      urgent_values: ["C"],
+    },
+    {
+      id: "owner",
+      key: "owner",
+      question: "Are you the business owner?\nA) Yes — it's my business\nB) No — I manage it",
+      invalid_text: "Please reply A or B.",
+      options: [
+        { value: "A", label: "Business owner" },
+        { value: "B", label: "Manager" },
+      ],
+      urgent_values: [],
+    },
+  ],
+};
+
+// Helper: resolve per-lead flow_config (stored in answers) or fall back to business
+function resolveFlowConfig(lead, business) {
+  const stored = lead?.answers?._flow_config;
+  if (stored && Array.isArray(stored.steps) && stored.steps.length > 0) return stored;
+  return getFlowConfig(business);
+}
+
 const app = express();
 
 // ─── Stripe webhook must receive raw body — register before json parser ───
@@ -1126,16 +1176,62 @@ app.post("/api/website-inquiry", async (req, res) => {
       ].filter(Boolean).join("\n"),
     }).catch((err) => console.error("Inquiry email error:", err));
 
-    // SMS backup notification
-    const ownerPhone = process.env.OWNER_NOTIFY_PHONE;
-    const smsFrom = process.env.DEMO_TWILIO_NUMBER;
-    if (ownerPhone && smsFrom && config.twilio.accountSid) {
-      const normalized = normalizePhone(ownerPhone, config.defaultCountryCode);
-      if (normalized) {
+    // ─── Fire Cove SMS qualification flow if phone provided ───
+    if (normalizedPhone && process.env.DEMO_TWILIO_NUMBER && config.twilio.accountSid) {
+      try {
+        const demoFromNumber = normalizePhone(process.env.DEMO_TWILIO_NUMBER, config.defaultCountryCode);
+        if (demoFromNumber) {
+          let coveBusiness = await getBusinessByTwilioNumber(demoFromNumber);
+          if (!coveBusiness) {
+            coveBusiness = await createBusiness({
+              name: "Cove",
+              twilioFromNumber: demoFromNumber,
+              ownerNotifyPhone: "+61403720218",
+              industry: "general",
+            });
+          }
+
+          const optedOut = await hasPhoneOptedOut(coveBusiness.id, normalizedPhone);
+          if (!optedOut) {
+            const existingLead = await checkDuplicateLead(normalizedPhone, 60);
+            if (!existingLead) {
+              const inquiryLead = await createLead({
+                businessId: coveBusiness.id,
+                name,
+                phone: normalizedPhone,
+                email: email || null,
+                message: `Website inquiry — ${businessName}`,
+              });
+              // Store the Cove qualification flow per-lead so it never conflicts with demo leads
+              await updateLead(inquiryLead.id, { answers: { _flow_config: COVE_QUALIFICATION_FLOW } });
+
+              const firstName = name.trim().split(" ")[0] || "there";
+              const firstMsg = COVE_QUALIFICATION_FLOW.intro.replace(/{firstName}/g, firstName) +
+                "\n\n" + COVE_QUALIFICATION_FLOW.steps[0].question;
+              await sendSms({ from: demoFromNumber, to: normalizedPhone, body: firstMsg });
+            }
+          }
+        }
+      } catch (smsErr) {
+        console.error("Inquiry flow SMS error:", smsErr);
+        // Don't fail the inquiry — fall back to plain notification below
+        const smsFrom = process.env.DEMO_TWILIO_NUMBER;
+        const normalized = normalizePhone("+61403720218", config.defaultCountryCode);
+        if (normalized && smsFrom) {
+          sendSms({
+            from: smsFrom, to: normalized,
+            body: `New Cove enquiry\nFrom: ${name}\nEmail: ${email}\nPhone: ${phone || "—"}\nBusiness: ${businessName}`,
+          }).catch(() => {});
+        }
+      }
+    } else {
+      // No phone — just send Kris a plain SMS alert
+      const smsFrom = process.env.DEMO_TWILIO_NUMBER;
+      const normalized = normalizePhone("+61403720218", config.defaultCountryCode);
+      if (normalized && smsFrom && config.twilio.accountSid) {
         sendSms({
-          from: smsFrom,
-          to: normalized,
-          body: `New Cove enquiry\nFrom: ${name}\nEmail: ${email}\nPhone: ${phone || "—"}\nBusiness: ${businessName}\n${websiteUrl ? `Website: ${websiteUrl}` : ""}`,
+          from: smsFrom, to: normalized,
+          body: `New Cove enquiry (no phone)\nFrom: ${name}\nEmail: ${email}\nBusiness: ${businessName}`,
         }).catch((err) => console.error("Inquiry SMS error:", err));
       }
     }
@@ -1353,7 +1449,7 @@ app.post("/api/sms/inbound", async (req, res) => {
       return res.status(200).send("OK");
     }
 
-    const flowConfig = getFlowConfig(business);
+    const flowConfig = resolveFlowConfig(lead, business);
     const step = getFlowStep(flowConfig, lead.current_step);
     if (!step) return res.status(200).send("OK");
 
@@ -1547,30 +1643,24 @@ app.post("/api/demo", async (req, res) => {
       demoBusiness = await createBusiness({
         name: "Cove Demo",
         twilioFromNumber: normalizedDemoNumber,
-        ownerNotifyPhone: normalizedPhone,
+        ownerNotifyPhone: "+61403720218",
         industry: "dental",
       });
-    } else {
-      // Reset to dental template and point notifications to current demo user
-      await updateBusiness(demoBusiness.id, {
-        ownerNotifyPhone: normalizedPhone,
-        flowConfig: null,
-        industry: "dental",
-      });
-      demoBusiness.owner_notify_phone = normalizedPhone;
-      demoBusiness.flow_config = null;
-      demoBusiness.industry = "dental";
     }
 
+    // Use the dental template locally for this demo — stored per-lead so it
+    // never overwrites the business flow_config (which the contact form uses)
+    const demoFlowConfig = INDUSTRY_TEMPLATES.dental;
     const lead = await createLead({
       businessId: demoBusiness.id,
       name: "Demo User",
       phone: normalizedPhone,
       message: "Demo request from website",
     });
+    // Store dental flow on the lead so the inbound handler uses it for this lead
+    await updateLead(lead.id, { answers: { _flow_config: demoFlowConfig } });
 
-    const flowConfig = getFlowConfig(demoBusiness);
-    const demoMessage = `Hi! This is a Cove demo. You'll get the exact SMS your leads receive.\n\n${flowConfig.steps[0].question}`;
+    const demoMessage = `Hi! This is a Cove demo. You'll get the exact SMS your leads receive.\n\n${demoFlowConfig.steps[0].question}`;
 
     await sendSms({ from: demoFromNumber, to: normalizedPhone, body: demoMessage });
 
