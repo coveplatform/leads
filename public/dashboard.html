@@ -895,6 +895,12 @@
     let currentLeadsDays = 7;
     let currentThreadLeadId = null;
 
+    // Per-user localStorage keys — prevents one account's dismissals affecting another
+    function lsKey(k) { return user?.id ? `${k}_${user.id}` : k; }
+    function lsGet(k) { return localStorage.getItem(lsKey(k)); }
+    function lsSet(k, v) { localStorage.setItem(lsKey(k), v); }
+    function lsRemove(k) { localStorage.removeItem(lsKey(k)); }
+
     // ─── Navigation ───
     const views = ['overview', 'leads', 'flow', 'notifications', 'integrations', 'billing', 'settings', 'help'];
 
@@ -1112,7 +1118,7 @@
         // Dismiss verified state
         document.getElementById('fwd-dismiss-btn')?.addEventListener('click', () => {
           banner.classList.add('hidden');
-          localStorage.setItem('cf-dismissed', '1');
+          lsSet('cf-dismissed', '1');
         });
       })();
 
@@ -1142,7 +1148,7 @@
     function updateGetStartedPanel() {
       const panel = document.getElementById('gs-panel');
       if (!panel) return;
-      if (localStorage.getItem('gs_dismissed')) return;
+      if (lsGet('gs_dismissed')) return;
 
       let doneCount = 1; // Account always done
 
@@ -1151,27 +1157,27 @@
       if (hasNotif) { document.getElementById('gs-step-notif')?.classList.add('gs-step--done'); doneCount++; }
 
       // Step: flow reviewed — tracked in localStorage
-      if (localStorage.getItem('gs_flow_done')) { document.getElementById('gs-step-flow')?.classList.add('gs-step--done'); doneCount++; }
+      if (lsGet('gs_flow_done')) { document.getElementById('gs-step-flow')?.classList.add('gs-step--done'); doneCount++; }
 
-      // Step: call forwarding — at least one lead has come in
-      if (leadsData.length > 0) { document.getElementById('gs-step-forward')?.classList.add('gs-step--done'); doneCount++; }
+      // Step: call forwarding — forwarding verified or at least one lead has come in
+      if (business.forwarding_verified || leadsData.length > 0) { document.getElementById('gs-step-forward')?.classList.add('gs-step--done'); doneCount++; }
 
       const countEl = document.getElementById('gs-done-count');
       if (countEl) countEl.textContent = doneCount;
 
-      if (doneCount >= 4) { localStorage.setItem('gs_dismissed', '1'); return; }
+      if (doneCount >= 4) { lsSet('gs_dismissed', '1'); return; }
 
       panel.style.display = 'block';
 
       document.getElementById('gs-dismiss')?.addEventListener('click', () => {
         panel.style.display = 'none';
-        localStorage.setItem('gs_dismissed', '1');
+        lsSet('gs_dismissed', '1');
       });
 
       panel.querySelectorAll('.gs-step__action[data-view]').forEach(btn => {
         btn.addEventListener('click', () => {
           showView(btn.dataset.view);
-          if (btn.dataset.view === 'flow') localStorage.setItem('gs_flow_done', '1');
+          if (btn.dataset.view === 'flow') lsSet('gs_flow_done', '1');
           // If a specific tab is requested, activate it
           if (btn.dataset.itab) {
             const tabBtn = document.querySelector(`.int-tab[data-itab="${btn.dataset.itab}"]`);
@@ -1221,18 +1227,18 @@
       const banner = document.getElementById('forwarding-banner');
       if (banner && business?.is_active && business?.twilio_from_number) {
         const alreadyVerified = business.forwarding_verified;
-        const dismissed = localStorage.getItem('cf-dismissed');
+        const dismissed = lsGet('cf-dismissed');
         if (alreadyVerified || total > 0 || dismissed) {
           banner.classList.add('hidden');
-          if (total > 0) localStorage.removeItem('cf-dismissed');
+          if (total > 0) lsRemove('cf-dismissed');
         } else {
           banner.classList.remove('hidden');
         }
       }
 
       // First lead celebration
-      if (total > 0 && !localStorage.getItem('first_lead_celebrated')) {
-        localStorage.setItem('first_lead_celebrated', '1');
+      if (total > 0 && !lsGet('first_lead_celebrated')) {
+        lsSet('first_lead_celebrated', '1');
         const celebBanner = document.getElementById('first-lead-banner');
         if (celebBanner) {
           celebBanner.classList.remove('hidden');
