@@ -489,6 +489,17 @@ app.patch("/api/auth/update-profile", requireAuth, async (req, res) => {
   }
 });
 
+// ─── Mark onboarding complete (called when user clicks "Go to dashboard") ───
+app.post("/api/onboarding/complete", requireAuth, async (req, res) => {
+  try {
+    await updateUser(req.userId, { onboardingComplete: true });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("Onboarding complete error:", err);
+    return res.status(500).json({ ok: false });
+  }
+});
+
 // ─── Reset onboarding ───
 app.post("/api/auth/reset-onboarding", requireAuth, async (req, res) => {
   try {

@@ -2204,7 +2204,9 @@
     payBtn.addEventListener('click', startCheckout);
 
     // ─── Complete → Dashboard ───
-    document.getElementById('go-dashboard').addEventListener('click', () => {
+    document.getElementById('go-dashboard').addEventListener('click', async () => {
+      // Mark onboarding complete before redirecting — don't rely on Stripe webhook alone
+      await fetch('/api/onboarding/complete', { method: 'POST' }).catch(() => {});
       location.href = '/dashboard';
     });
 
