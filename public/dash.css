@@ -907,6 +907,50 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
   50% { opacity: .8; }
 }
 
+/* Called-back badge */
+.lead-badge--called {
+  background: #dcfce7; color: #15803d;
+}
+
+/* Leads filter tabs */
+.leads-filter-tabs {
+  display: flex; gap: 4px;
+  margin-bottom: 16px;
+}
+.leads-filter-btn {
+  padding: 6px 14px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text-muted);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.leads-filter-btn:hover { background: var(--bg); color: var(--text); }
+.leads-filter-btn--active {
+  background: var(--accent-faint); color: var(--accent);
+  border-color: var(--accent-border, var(--accent));
+  font-weight: 600;
+}
+
+/* Thread footer */
+.thread-footer {
+  flex-shrink: 0; padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+.thread-mark-called-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 14px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  width: 100%; justify-content: center;
+  transition: background .12s, color .12s;
+}
+.thread-mark-called-btn:hover:not(:disabled) { background: var(--bg); }
+.thread-mark-called-btn--done {
+  background: #dcfce7; color: #15803d; border-color: #bbf7d0;
+}
+.thread-mark-called-btn:disabled { opacity: .7; cursor: default; }
+
 .leads-empty {
   text-align: center;
   padding: 40px 24px;

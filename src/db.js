@@ -62,14 +62,22 @@ export async function getBusinessByUserId(userId) {
 }
 
 export async function getRecentLeadsByBusinessId(businessId, days = 7) {
-  const rows = await sql`
-    SELECT id, name, phone, status, current_step, answers, created_at, finished_at
-    FROM leads
-    WHERE business_id = ${businessId}
-      AND created_at > NOW() - ${days + ' days'}::interval
-    ORDER BY created_at DESC
-    LIMIT 50
-  `;
+  const rows = days == null
+    ? await sql`
+        SELECT id, name, phone, status, current_step, answers, created_at, finished_at
+        FROM leads
+        WHERE business_id = ${businessId}
+        ORDER BY created_at DESC
+        LIMIT 200
+      `
+    : await sql`
+        SELECT id, name, phone, status, current_step, answers, created_at, finished_at
+        FROM leads
+        WHERE business_id = ${businessId}
+          AND created_at > NOW() - ${days + ' days'}::interval
+        ORDER BY created_at DESC
+        LIMIT 200
+      `;
   return rows;
 }
 

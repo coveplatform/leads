@@ -216,6 +216,30 @@
     .ob-spec-chip:hover { border-color: #fbcaaa; color: #e8540a; background: #fff8f4; }
     .ob-spec-chip.selected { border-color: #e8540a; background: #fff2ea; color: #e8540a; }
 
+    /* ── Plan toggle ── */
+    .ob-plan-toggle {
+      display: flex; gap: 6px;
+      background: #F4F4F5; border-radius: 10px; padding: 4px;
+      margin-bottom: 1.25rem;
+    }
+    .ob-toggle-btn {
+      flex: 1; padding: .5rem 1rem;
+      font-size: .875rem; font-weight: 600; font-family: inherit;
+      border: none; border-radius: 7px; cursor: pointer;
+      background: transparent; color: #71717A;
+      transition: background .15s, color .15s, box-shadow .15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .ob-toggle-btn--active {
+      background: #fff; color: #18181B;
+      box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    }
+    .ob-toggle-save {
+      font-size: .72rem; font-weight: 700; letter-spacing: .02em;
+      background: #dcfce7; color: #15803d;
+      padding: 2px 6px; border-radius: 99px;
+    }
+
     /* ── Payment card ── */
     .ob-plan-card {
       background: #fff; border: 1.5px solid #E4E4E7; border-radius: 16px;
@@ -1014,12 +1038,17 @@
       <div id="step-4" class="ob-form-inner hidden">
         <div class="ob-step-label">Last step</div>
         <h1 class="ob-heading">You're almost live.</h1>
-        <p class="ob-sub">No charge for 7 days. After that, $89/mo — cancel anytime. If Cove doesn't pay for itself in your first paid month, we'll refund you in full.</p>
+        <p class="ob-sub">No charge for 7 days. If Cove doesn't pay for itself in your first paid month, we'll refund you in full.</p>
+
+        <div class="ob-plan-toggle">
+          <button class="ob-toggle-btn ob-toggle-btn--active" id="toggle-monthly" type="button">Monthly</button>
+          <button class="ob-toggle-btn" id="toggle-annual" type="button">Annual <span class="ob-toggle-save">2 months free</span></button>
+        </div>
 
         <div class="ob-plan-card">
           <div class="ob-plan-top">
-            <div class="ob-plan-price">$89<span>/month</span></div>
-            <div class="ob-plan-note">7-day free trial · 7-day money-back guarantee</div>
+            <div class="ob-plan-price" id="plan-display-price">$89<span>/month</span></div>
+            <div class="ob-plan-note" id="plan-display-note">7-day free trial · cancel anytime</div>
           </div>
           <div class="ob-plan-items">
             <div class="ob-plan-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Your own dedicated AU SMS number</div>
@@ -1058,8 +1087,8 @@
           </div>
         </div>
 
-        <h1 class="ob-heading" style="font-size:1.5rem">Forward your missed calls.</h1>
-        <p class="ob-sub">Takes 30 seconds on your phone. Pick your carrier and tap the button — that's it.</p>
+        <h1 class="ob-heading" style="font-size:1.5rem">One last thing — forward your missed calls.</h1>
+        <p class="ob-sub">Your existing number stays exactly the same. Cove works in the background — when you don't answer, your carrier quietly forwards the call to Cove, which texts the caller back within seconds.</p>
 
         <!-- Cove number -->
         <div class="cf-num-box">
@@ -1068,14 +1097,15 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             </div>
             <div>
-              <div class="cf-num-box-label">Your Cove number</div>
+              <div class="cf-num-box-label">Your Cove number — forward missed calls here</div>
               <div class="cf-num-box-number" id="cf-number-text"><span class="cf-num-loading">Setting up…</span></div>
             </div>
           </div>
         </div>
 
         <!-- Carrier tiles -->
-        <div style="font-size:.82rem;font-weight:700;color:#3F3F46;margin:1.25rem 0 .6rem;letter-spacing:-.01em">Who's your carrier?</div>
+        <div style="font-size:.82rem;font-weight:700;color:#3F3F46;margin:1.25rem 0 .25rem;letter-spacing:-.01em">Who's your carrier?</div>
+        <p style="font-size:.78rem;color:#A1A1AA;margin:0 0 .6rem;line-height:1.5">This sets up <strong style="color:#3F3F46">no-answer forwarding only</strong> — calls you pick up work exactly as normal. Cove only gets involved when you don't answer.</p>
         <div class="cf-carrier-grid">
           <button class="cf-carrier-tile" data-carrier="telstra" type="button">
             <span class="cf-carrier-name">Telstra</span>
@@ -1109,7 +1139,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             Tap to activate forwarding
           </a>
-          <p id="cf-activate-sub" style="text-align:center;font-size:.78rem;color:#A1A1AA;margin:.3rem 0 1.1rem;line-height:1.5">Opens your phone dialler with the code pre-filled. Just tap <strong style="color:#3F3F46">Call</strong> — done.</p>
+          <p id="cf-activate-sub" style="text-align:center;font-size:.78rem;color:#A1A1AA;margin:.3rem 0 1.1rem;line-height:1.5">Opens your phone dialler with the code pre-filled. Just tap <strong style="color:#3F3F46">Call</strong> — you'll hear a confirmation tone when it's active.</p>
 
           <!-- Send to phone -->
           <button class="cf-send-phone-btn" id="cf-send-phone-btn" type="button">
@@ -1348,6 +1378,18 @@
     const params = new URLSearchParams(location.search);
     if (params.get('step') === 'complete') {
       showStep('complete');
+
+      // If coming from Stripe, use the session_id to activate the account immediately
+      // (don't rely on webhook alone — it may not have fired yet)
+      const sessionId = params.get('session_id');
+      if (sessionId) {
+        fetch('/api/billing/verify-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId }),
+        }).catch(() => {});
+      }
+
       fetch('/api/auth/me').then(r => r.json()).then(data => {
         const num = data.business?.twilio_from_number;
         if (num) { fillNumber(num); }
@@ -1413,7 +1455,7 @@
         link.href = 'tel:' + encodeURIComponent(code);
         delete link.dataset.dialCode;
         link.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Tap to activate forwarding`;
-        if (sub) sub.innerHTML = 'Opens your phone dialler with the code pre-filled. Just tap <strong style="color:#3F3F46">Call</strong> — done.';
+        if (sub) sub.innerHTML = 'Opens your phone dialler with the code pre-filled. Just tap <strong style="color:#3F3F46">Call</strong> — you\'ll hear a confirmation tone when it\'s active.';
       }
     }
 
@@ -2107,6 +2149,24 @@
     // ─── Step 4 → Stripe (or free bypass in dev) ───
     document.getElementById('step4-back').addEventListener('click', () => showStep(3));
 
+    let selectedPlan = 'monthly';
+
+    document.getElementById('toggle-monthly').addEventListener('click', () => {
+      selectedPlan = 'monthly';
+      document.getElementById('toggle-monthly').classList.add('ob-toggle-btn--active');
+      document.getElementById('toggle-annual').classList.remove('ob-toggle-btn--active');
+      document.getElementById('plan-display-price').innerHTML = '$89<span>/month</span>';
+      document.getElementById('plan-display-note').textContent = '7-day free trial · cancel anytime';
+    });
+
+    document.getElementById('toggle-annual').addEventListener('click', () => {
+      selectedPlan = 'annual';
+      document.getElementById('toggle-annual').classList.add('ob-toggle-btn--active');
+      document.getElementById('toggle-monthly').classList.remove('ob-toggle-btn--active');
+      document.getElementById('plan-display-price').innerHTML = '$890<span>/year</span>';
+      document.getElementById('plan-display-note').textContent = '$74/mo · 2 months free · cancel anytime';
+    });
+
     async function startCheckout() {
       const btn = document.getElementById('step4-pay');
       const err = document.getElementById('step4-error');
@@ -2117,6 +2177,7 @@
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: selectedPlan }),
       }).then(r => r.json());
 
       if (res.ok && res.url) {

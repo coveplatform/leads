@@ -24,6 +24,7 @@ import {
   createBillingPortalSession,
   constructWebhookEvent,
   isStripeConfigured,
+  getCheckoutSession,
 } from "./stripe.js";
 import {
   getFlowConfig,
@@ -575,7 +576,9 @@ app.get("/api/me/leads", requireAuth, async (req, res) => {
   try {
     const business = await getBusinessByUserId(req.userId);
     if (!business) return res.json({ ok: true, leads: [] });
-    const leads = await getRecentLeadsByBusinessId(business.id, 7);
+    const daysParam = req.query.days;
+    const days = daysParam === 'all' ? null : (Number(daysParam) || 7);
+    const leads = await getRecentLeadsByBusinessId(business.id, days);
     return res.json({ ok: true, leads });
   } catch (err) {
     console.error("Get leads error:", err);
@@ -633,6 +636,29 @@ app.get("/api/me/leads/:leadId/messages", requireAuth, async (req, res) => {
   } catch (err) {
     console.error("Get messages error:", err);
     return res.status(500).json({ ok: false, error: "Could not fetch messages" });
+  }
+});
+
+app.post("/api/me/leads/:leadId/mark-called", requireAuth, async (req, res) => {
+  try {
+    const business = await getBusinessByUserId(req.userId);
+    if (!business) return res.status(404).json({ ok: false, error: "No business" });
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(config.databaseUrl);
+    const rows = await sql`
+      SELECT id, answers FROM leads
+      WHERE id = ${req.params.leadId} AND business_id = ${business.id}
+      LIMIT 1
+    `;
+    if (!rows.length) return res.status(404).json({ ok: false, error: "Lead not found" });
+    const answers = rows[0].answers || {};
+    answers._called_back = true;
+    answers._called_back_at = new Date().toISOString();
+    await sql`UPDATE leads SET answers = ${JSON.stringify(answers)}::jsonb WHERE id = ${rows[0].id}`;
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("Mark called error:", err);
+    return res.status(500).json({ ok: false, error: "Could not mark lead" });
   }
 });
 
@@ -745,8 +771,14 @@ app.post("/api/billing/checkout", requireAuth, async (req, res) => {
       await updateUser(req.userId, { stripeCustomerId: customerId });
     }
 
+    const { plan } = req.body || {};
+    const priceId = plan === "annual" && config.stripe.priceIdAnnual
+      ? config.stripe.priceIdAnnual
+      : config.stripe.priceId;
+
     const session = await createCheckoutSession({
       customerId,
+      priceId,
       successUrl: `${config.baseUrl}/onboarding?step=complete&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${config.baseUrl}/onboarding?step=billing&cancelled=1`,
     });
@@ -755,6 +787,30 @@ app.post("/api/billing/checkout", requireAuth, async (req, res) => {
   } catch (err) {
     console.error("Checkout error:", err);
     return res.status(500).json({ ok: false, error: "Could not create checkout session" });
+  }
+});
+
+// ─── Verify checkout session → activate account without waiting for webhook ───
+app.post("/api/billing/verify-session", requireAuth, async (req, res) => {
+  try {
+    const { sessionId } = req.body || {};
+    if (!sessionId) return res.status(400).json({ ok: false, error: "sessionId required" });
+    if (!isStripeConfigured()) return res.status(503).json({ ok: false, error: "Billing not configured" });
+
+    const session = await getCheckoutSession(sessionId);
+    if (!session || session.mode !== "subscription") {
+      return res.status(400).json({ ok: false, error: "Invalid session" });
+    }
+
+    if (session.payment_status === "paid" || session.status === "complete") {
+      await activateSubscription(session.customer, session.subscription);
+      return res.json({ ok: true, activated: true });
+    }
+
+    return res.json({ ok: true, activated: false });
+  } catch (err) {
+    console.error("Verify session error:", err);
+    return res.status(500).json({ ok: false, error: "Could not verify session" });
   }
 });
 
@@ -881,6 +937,24 @@ async function syncSubscriptionStatus(stripeCustomerId, subscriptionId, status) 
       updated_at = now()
     WHERE stripe_customer_id = ${stripeCustomerId}
   `;
+
+  // Deactivate business immediately when subscription is cancelled or payment fails
+  const inactive = status === "canceled" || status === "past_due" || status === "unpaid";
+  if (inactive) {
+    const users = await sql`SELECT id FROM users WHERE stripe_customer_id = ${stripeCustomerId} LIMIT 1`;
+    if (users[0]) {
+      await sql`UPDATE businesses SET is_active = false, updated_at = now() WHERE user_id = ${users[0].id}`;
+      console.log(`[syncSubscriptionStatus] Deactivated business for user ${users[0].id} (status: ${status})`);
+    }
+  }
+
+  // Reactivate if subscription comes back to active (e.g. payment recovered)
+  if (status === "active") {
+    const users = await sql`SELECT id FROM users WHERE stripe_customer_id = ${stripeCustomerId} LIMIT 1`;
+    if (users[0]) {
+      await sql`UPDATE businesses SET is_active = true, updated_at = now() WHERE user_id = ${users[0].id}`;
+    }
+  }
 }
 
 async function provisionTwilioNumber(businessId) {
@@ -902,6 +976,16 @@ async function provisionTwilioNumber(businessId) {
     const bundleSid          = process.env.TWILIO_BUNDLE_SID           || null;
     const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID || null;
 
+    // Fetch business name for the Twilio friendly name
+    const bizRows = await (async () => {
+      try {
+        const { neon } = await import("@neondatabase/serverless");
+        const s = neon(config.databaseUrl);
+        return await s`SELECT name FROM businesses WHERE id = ${businessId} LIMIT 1`;
+      } catch { return []; }
+    })();
+    const friendlyName = bizRows[0]?.name ? `Cove — ${bizRows[0].name}` : "Cove";
+
     // Try AU mobile first (needs regulatory bundle), then AU local
     let phoneNumber = null;
     for (const [country, type] of [["AU", "mobile"], ["AU", "local"]]) {
@@ -910,7 +994,7 @@ async function provisionTwilioNumber(businessId) {
           console.warn("[provision] Skipping AU mobile — TWILIO_BUNDLE_SID not set");
           continue;
         }
-        const list = await client.availablePhoneNumbers(country)[type].list({ smsEnabled: true, limit: 20 });
+        const list = await client.availablePhoneNumbers(country)[type].list({ smsEnabled: true, mmsEnabled: true, limit: 20 });
         if (!list.length) { console.warn(`[provision] No ${country} ${type} numbers available`); continue; }
         const pick = list.find(n => !n.beta) || list[0];
         phoneNumber = pick.phoneNumber;
@@ -927,6 +1011,7 @@ async function provisionTwilioNumber(businessId) {
     // Purchase the number with voice + SMS webhooks
     const createParams = {
       phoneNumber,
+      friendlyName,
       smsUrl,
       smsMethod: "POST",
       voiceUrl,
@@ -1081,13 +1166,18 @@ app.post("/api/voice/inbound", async (req, res) => {
 
     if (!from || !to) {
       console.log("[voice/inbound] invalid from/to, skipping");
-      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="Polly.Olivia" language="en-AU">Thanks for calling. We will send you a text message shortly.</Say></Response>`);
+      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">Thanks for calling. We'll send you a text message shortly.</Say><Hangup/></Response>`);
     }
 
     const business = await getBusinessByTwilioNumber(to);
     if (!business) {
       console.log(`[voice/inbound] no active business found for ${to}`);
-      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="Polly.Olivia" language="en-AU">Thanks for calling. We will send you a text message shortly.</Say></Response>`);
+      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">Thanks for calling. We'll send you a text message shortly.</Say><Hangup/></Response>`);
+    }
+
+    if (!business.is_active) {
+      console.log(`[voice/inbound] business ${business.id} is inactive, dropping call`);
+      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">Thanks for calling. This service is currently unavailable. Please try again later.</Say><Hangup/></Response>`);
     }
 
     console.log(`[voice/inbound] business=${business.name} id=${business.id}`);
@@ -1153,17 +1243,28 @@ app.post("/api/voice/inbound", async (req, res) => {
           await saveMessage({ leadId: lead.id, direction: "outbound", body: firstMessage });
           console.log(`[voice/inbound] SMS sent to ${from}`);
         }
+
+        // Notify owner immediately so they know a call came in
+        if (business.owner_notify_phone) {
+          const ownerPhone = normalizePhone(business.owner_notify_phone, config.defaultCountryCode);
+          if (ownerPhone) {
+            const missedMsg = `📞 Missed call from ${from} — Cove is qualifying them now. You'll get a full summary once they reply.`;
+            sendSms({ from: business.twilio_from_number, to: ownerPhone, body: missedMsg }).catch(err =>
+              console.error("[voice/inbound] owner notify error:", err)
+            );
+          }
+        }
       }
       } // end opted-out else
     } catch (err) {
       console.error("[voice/inbound] SMS flow error:", err);
     }
 
-    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="Polly.Olivia" language="en-AU">Thanks for calling. We will send you a text message shortly.</Say></Response>`);
+    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">Thanks for calling. We'll send you a text message shortly.</Say><Hangup/></Response>`);
   } catch (err) {
     console.error("[voice/inbound] error:", err);
     res.set("Content-Type", "text/xml");
-    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="Polly.Olivia" language="en-AU">Thanks for calling. We will send you a text message shortly.</Say></Response>`);
+    return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">Thanks for calling. We'll send you a text message shortly.</Say><Hangup/></Response>`);
   }
 });
 
@@ -1219,7 +1320,15 @@ app.post("/api/sms/inbound", async (req, res) => {
   try {
     const fromRaw = String(req.body?.From || "");
     const toRaw = String(req.body?.To || "");
-    const bodyRaw = String(req.body?.Body || "").trim();
+    const numMedia = Number(req.body?.NumMedia || 0);
+    const mediaUrl = req.body?.MediaUrl0 || null;
+    let bodyRaw = String(req.body?.Body || "").trim();
+
+    // If this is an MMS with no text body, treat it as "sent a photo"
+    // so the flow can respond meaningfully instead of seeing a blank reply
+    if (numMedia > 0 && !bodyRaw) {
+      bodyRaw = "[photo]";
+    }
 
     const from = normalizePhone(fromRaw, config.defaultCountryCode);
     const to = normalizePhone(toRaw, config.defaultCountryCode);
@@ -1227,7 +1336,7 @@ app.post("/api/sms/inbound", async (req, res) => {
     if (!from || !to) return res.status(400).send("Invalid Twilio payload");
 
     const business = await getBusinessByTwilioNumber(to);
-    if (!business) return res.status(200).send("OK");
+    if (!business || !business.is_active) return res.status(200).send("OK");
 
     const lead = await getLatestActiveLeadByBusinessAndPhone({ businessId: business.id, phone: from });
     if (!lead) return res.status(200).send("OK");
@@ -1442,9 +1551,15 @@ app.post("/api/demo", async (req, res) => {
         industry: "dental",
       });
     } else {
-      // Point the owner notification back to whoever is currently demoing
-      await updateBusiness(demoBusiness.id, { ownerNotifyPhone: normalizedPhone });
+      // Reset to dental template and point notifications to current demo user
+      await updateBusiness(demoBusiness.id, {
+        ownerNotifyPhone: normalizedPhone,
+        flowConfig: null,
+        industry: "dental",
+      });
       demoBusiness.owner_notify_phone = normalizedPhone;
+      demoBusiness.flow_config = null;
+      demoBusiness.industry = "dental";
     }
 
     const lead = await createLead({

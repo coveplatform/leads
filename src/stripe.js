@@ -11,7 +11,7 @@ export async function createStripeCustomer({ email, name }) {
   return stripe.customers.create({ email, name });
 }
 
-export async function createCheckoutSession({ customerId, successUrl, cancelUrl }) {
+export async function createCheckoutSession({ customerId, successUrl, cancelUrl, priceId }) {
   const stripe = getStripe();
   return stripe.checkout.sessions.create({
     customer: customerId,
@@ -19,7 +19,7 @@ export async function createCheckoutSession({ customerId, successUrl, cancelUrl 
     mode: "subscription",
     line_items: [
       {
-        price: config.stripe.priceId,
+        price: priceId || config.stripe.priceId,
         quantity: 1,
       },
     ],
@@ -54,6 +54,11 @@ export function constructWebhookEvent(payload, signature) {
 export async function getSubscription(subscriptionId) {
   const stripe = getStripe();
   return stripe.subscriptions.retrieve(subscriptionId);
+}
+
+export async function getCheckoutSession(sessionId) {
+  const stripe = getStripe();
+  return stripe.checkout.sessions.retrieve(sessionId);
 }
 
 export function isStripeConfigured() {
