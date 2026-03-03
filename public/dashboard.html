@@ -550,7 +550,7 @@
               <span class="cf-carrier-name">Telstra</span><span class="cf-carrier-sub">Dial code</span>
             </button>
             <button class="cf-carrier-tile" data-carrier="optus">
-              <span class="cf-carrier-name">Optus</span><span class="cf-carrier-sub">App or dial</span>
+              <span class="cf-carrier-name">Optus</span><span class="cf-carrier-sub">Dial code</span>
             </button>
             <button class="cf-carrier-tile" data-carrier="vodafone">
               <span class="cf-carrier-name">Vodafone</span><span class="cf-carrier-sub">Dial code</span>
@@ -583,22 +583,9 @@
             </div>
           </div>
 
-          <!-- Optus app instructions (shown instead of dial code for Optus) -->
-          <div id="dash-optus-app" class="hidden" style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
-            <div style="padding:12px 14px;background:#f0f4ff;border-radius:10px;border:1px solid #c7d7fd;font-size:13px;line-height:1.6">
-              <strong style="display:block;margin-bottom:6px">Optus: set forwarding in the My Optus app</strong>
-              The Optus dial code and the My Optus app are separate systems — the app is more reliable. Follow these steps:
-              <ol style="margin:8px 0 0 16px;padding:0;display:flex;flex-direction:column;gap:4px">
-                <li>Open the <strong>My Optus app</strong> on your phone</li>
-                <li>Go to <strong>My account → My services → Call forwarding</strong></li>
-                <li>Tap <strong>No answer</strong> and enter your Cove number:</li>
-              </ol>
-            </div>
-            <div class="cf-code-row">
-              <span class="cf-code-display" id="dash-optus-cove-num">—</span>
-              <button class="btn btn--ghost btn--sm" id="dash-optus-copy-btn" type="button">Copy</button>
-            </div>
-            <p style="font-size:12px;color:var(--text-muted);margin:0">Set the ring time to <strong>20–25 seconds</strong> so you have time to answer before it forwards.</p>
+          <!-- Optus fallback note (shown below dial code when Optus is selected) -->
+          <div id="dash-optus-app" class="hidden" style="margin-top:8px;padding:10px 12px;background:#f8f8ff;border-radius:8px;border:1px solid #e0e0f0;font-size:12.5px;line-height:1.5;color:var(--text-muted)">
+            <strong style="color:var(--text)">Optus tip:</strong> If this doesn't show as active in your My Optus app, go to <strong>My account → My services → Call forwarding → No answer</strong> and enter <span id="dash-optus-cove-num" style="font-weight:700;color:var(--text)">—</span> manually. <button id="dash-optus-copy-btn" style="background:none;border:none;padding:0;font:inherit;font-size:11.5px;color:var(--orange);cursor:pointer;font-weight:600">Copy number</button>
           </div>
         </div>
 
@@ -1776,33 +1763,27 @@
 
         const optusApp = document.getElementById('dash-optus-app');
 
-        if (carrier === 'optus') {
-          // Optus: hide dial code section, show app instructions with Cove number
-          action.classList.add('hidden');
-          if (optusApp) {
-            optusApp.classList.remove('hidden');
-            optusApp.style.display = 'flex';
+        // All carriers: show dial code
+        currentCode = buildCode(carrier, num);
+        if (dialCodeEl) dialCodeEl.textContent = currentCode;
+        if (activateLink) activateLink.href = 'tel:' + currentCode;
+
+        const sendPhoneInput = document.getElementById('dash-send-phone');
+        if (sendPhoneInput && !sendPhoneInput.value && business?.owner_notify_phone) {
+          sendPhoneInput.value = business.owner_notify_phone;
+        }
+
+        action.classList.remove('hidden');
+        action.style.display = 'flex';
+
+        // Optus: also show fallback note with local number
+        if (optusApp) {
+          const isOptus = carrier === 'optus';
+          optusApp.classList.toggle('hidden', !isOptus);
+          if (isOptus) {
             const numEl = document.getElementById('dash-optus-cove-num');
             if (numEl) numEl.textContent = toLocalAU(num);
           }
-        } else {
-          // All other carriers: show dial code, hide Optus panel
-          if (optusApp) { optusApp.classList.add('hidden'); optusApp.style.display = 'none'; }
-
-          // Build dial code
-          currentCode = buildCode(carrier, num);
-          if (dialCodeEl) dialCodeEl.textContent = currentCode;
-          if (activateLink) activateLink.href = 'tel:' + currentCode;
-
-          // Pre-fill send-to-phone with registered number
-          const sendPhoneInput = document.getElementById('dash-send-phone');
-          if (sendPhoneInput && !sendPhoneInput.value && business?.owner_notify_phone) {
-            sendPhoneInput.value = business.owner_notify_phone;
-          }
-
-          // Reveal action section
-          action.classList.remove('hidden');
-          action.style.display = 'flex';
         }
       });
 

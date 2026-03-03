@@ -1113,7 +1113,7 @@
           </button>
           <button class="cf-carrier-tile" data-carrier="optus" type="button">
             <span class="cf-carrier-name">Optus</span>
-            <span class="cf-carrier-sub">App or dial</span>
+            <span class="cf-carrier-sub">Dial code</span>
           </button>
           <button class="cf-carrier-tile" data-carrier="vodafone" type="button">
             <span class="cf-carrier-name">Vodafone</span>
@@ -1128,40 +1128,24 @@
         <!-- Carrier-specific section (revealed after selection) -->
         <div id="cf-carrier-section" style="display:none">
 
-          <!-- Optus: use app, not dial code -->
-          <div id="cf-optus-section" style="display:none">
-            <div style="padding:12px 14px;background:#f0f4ff;border-radius:10px;border:1px solid #c7d7fd;font-size:13px;line-height:1.6;margin-bottom:10px">
-              <strong style="display:block;margin-bottom:6px">Optus: set this up in the My Optus app</strong>
-              The Optus dial code and the My Optus app use different systems — the app is more reliable. Follow these steps:
-              <ol style="margin:8px 0 0 16px;padding:0;display:flex;flex-direction:column;gap:4px">
-                <li>Open <strong>My Optus app</strong> on your phone</li>
-                <li>Go to <strong>My account → My services → Call forwarding</strong></li>
-                <li>Tap <strong>No answer</strong> and paste your Cove number:</li>
-              </ol>
-            </div>
-            <div class="cf-code-row" style="display:flex;align-items:center;gap:8px">
-              <span class="cf-code-display" id="ob-optus-cove-num" style="font-size:1.1rem;font-weight:700;letter-spacing:.02em">—</span>
-              <button class="btn btn--ghost btn--sm" id="ob-optus-copy-btn" type="button">Copy</button>
-            </div>
-            <p style="font-size:12px;color:#A1A1AA;margin:6px 0 0">Set ring time to <strong style="color:#3F3F46">20–25 seconds</strong> before it forwards.</p>
+          <!-- Tap-to-activate (all carriers including Optus) -->
+          <a class="cf-activate-btn" id="cf-activate-link" href="#">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Tap to activate forwarding
+          </a>
+          <p id="cf-activate-sub" style="text-align:center;font-size:.78rem;color:#A1A1AA;margin:.3rem 0 1.1rem;line-height:1.5">Opens your phone dialler with the code pre-filled. Just tap <strong style="color:#3F3F46">Call</strong> — you'll hear a confirmation tone when it's active.</p>
+
+          <!-- Optus fallback note -->
+          <div id="cf-optus-section" style="display:none;padding:10px 12px;background:#f8f8ff;border-radius:8px;border:1px solid #e0e0f0;font-size:12px;line-height:1.5;color:#71717A;margin-bottom:.5rem">
+            <strong style="color:#3F3F46">Optus tip:</strong> If it doesn't show as active in the My Optus app, go to <strong>My account → My services → Call forwarding → No answer</strong> and enter <span id="ob-optus-cove-num" style="font-weight:700;color:#3F3F46">—</span> manually. <button id="ob-optus-copy-btn" style="background:none;border:none;padding:0;font:inherit;font-size:11.5px;color:#e8540a;cursor:pointer;font-weight:600">Copy</button>
           </div>
 
-          <!-- Non-Optus: tap/copy dial code -->
-          <div id="cf-dialcode-section">
-            <!-- Hero tap-to-activate button -->
-            <a class="cf-activate-btn" id="cf-activate-link" href="#">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              Tap to activate forwarding
-            </a>
-            <p id="cf-activate-sub" style="text-align:center;font-size:.78rem;color:#A1A1AA;margin:.3rem 0 1.1rem;line-height:1.5">Opens your phone dialler with the code pre-filled. Just tap <strong style="color:#3F3F46">Call</strong> — you'll hear a confirmation tone when it's active.</p>
-
-            <!-- Send to phone -->
-            <button class="cf-send-phone-btn" id="cf-send-phone-btn" type="button">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              Send setup to my phone instead
-            </button>
-            <div id="cf-send-status" style="font-size:.8rem;min-height:1.1rem;margin:.4rem 0 .25rem;text-align:center"></div>
-          </div>
+          <!-- Send to phone -->
+          <button class="cf-send-phone-btn" id="cf-send-phone-btn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Send setup to my phone instead
+          </button>
+          <div id="cf-send-status" style="font-size:.8rem;min-height:1.1rem;margin:.4rem 0 .25rem;text-align:center"></div>
 
         </div>
 
@@ -1522,18 +1506,19 @@
         const section = document.getElementById('cf-carrier-section');
         if (section) section.style.display = 'block';
 
+        // All carriers: show tap-to-activate
+        updateActivateLink();
+
+        // Optus: also show fallback note with local number
         const isOptus = _selectedCarrier === 'optus';
         const optusSection = document.getElementById('cf-optus-section');
-        const dialSection = document.getElementById('cf-dialcode-section');
-        if (optusSection) optusSection.style.display = isOptus ? 'block' : 'none';
-        if (dialSection) dialSection.style.display = isOptus ? 'none' : 'block';
-
-        if (isOptus && _coveNumber) {
-          const numEl = document.getElementById('ob-optus-cove-num');
-          if (numEl) numEl.textContent = toLocalAU(_coveNumber);
+        if (optusSection) {
+          optusSection.style.display = isOptus ? 'block' : 'none';
+          if (isOptus && _coveNumber) {
+            const numEl = document.getElementById('ob-optus-cove-num');
+            if (numEl) numEl.textContent = toLocalAU(_coveNumber);
+          }
         }
-
-        if (!isOptus) updateActivateLink();
       });
     });
 
