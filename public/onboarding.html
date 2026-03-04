@@ -1145,6 +1145,24 @@
 
         </div>
 
+        <!-- Forwarding verification — shown after tapping activate -->
+        <div id="ob-fwd-check" style="display:none;flex-direction:column;gap:8px;margin-top:4px">
+          <div id="ob-fwd-listening" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#f4f4f5;border-radius:10px;border:1px solid #e4e4e7">
+            <span class="fwd-banner__dot" style="flex-shrink:0"></span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#18181B;line-height:1.3">Now call your number from another phone</div>
+              <div style="font-size:12px;color:#71717a;margin-top:2px">Cove will pick up — confirmation appears here instantly.</div>
+            </div>
+          </div>
+          <div id="ob-fwd-success" style="display:none;align-items:center;gap:12px;padding:12px 14px;background:#dcfce7;border-radius:10px;border:1px solid #bbf7d0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#15803d">Forwarding confirmed — Cove is live</div>
+              <div style="font-size:12px;color:#166534;margin-top:2px">Missed calls will now be captured and qualified automatically.</div>
+            </div>
+          </div>
+        </div>
+
         <div class="ob-actions ob-actions--right" style="margin-top:1.5rem">
           <button class="btn btn--primary btn--lg" id="go-dashboard" type="button">
             Go to my dashboard
@@ -1454,6 +1472,28 @@
         if (sub) sub.innerHTML = 'Opens your phone dialler with the code pre-filled. Just tap <strong style="color:#3F3F46">Call</strong> — you\'ll hear a confirmation tone when it\'s active.';
       }
     }
+
+    // Start inline forwarding verification after tapping activate (mobile + desktop)
+    let _obFwdPoll = null;
+    document.getElementById('cf-activate-link')?.addEventListener('click', function() {
+      const check = document.getElementById('ob-fwd-check');
+      if (check) check.style.display = 'flex';
+      if (_obFwdPoll) return;
+      _obFwdPoll = setInterval(async () => {
+        try {
+          const r = await fetch('/api/me/forwarding-status').then(x => x.json());
+          if (r.forwarding_verified) {
+            clearInterval(_obFwdPoll); _obFwdPoll = null;
+            document.getElementById('ob-fwd-listening').style.display = 'none';
+            const success = document.getElementById('ob-fwd-success');
+            if (success) success.style.display = 'flex';
+            const btn = document.getElementById('go-dashboard');
+            if (btn) btn.textContent = "You're live — go to dashboard →";
+          }
+        } catch { /* silent */ }
+      }, 3000);
+      setTimeout(() => { if (_obFwdPoll) { clearInterval(_obFwdPoll); _obFwdPoll = null; } }, 180000);
+    });
 
     // Copy-to-clipboard handler for desktop
     document.getElementById('cf-activate-link')?.addEventListener('click', async function(e) {

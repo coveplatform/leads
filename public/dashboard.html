@@ -210,21 +210,22 @@
         <div class="fwd-banner" id="fwd-state-idle">
           <span class="fwd-banner__dot"></span>
           <div class="fwd-banner__body">
-            <div class="fwd-banner__title">One last step — forward your missed calls</div>
-            <div class="fwd-banner__sub" id="fwd-idle-sub">Cove is live, but needs missed call forwarding on your phone to start qualifying leads.</div>
+            <div class="fwd-banner__title">One last step — activate call forwarding</div>
+            <div class="fwd-banner__sub" id="fwd-idle-sub">Cove is ready, but needs call forwarding set up on your phone to start capturing leads.</div>
           </div>
           <div class="fwd-banner__actions">
-            <button class="btn btn--primary btn--sm" id="fwd-banner-setup-btn">Set up forwarding →</button>
-            <button class="btn btn--ghost btn--sm" id="fwd-test-btn">Send me a test lead</button>
+            <button class="btn btn--primary btn--sm" id="fwd-banner-setup-btn">Set up →</button>
+            <button class="btn btn--ghost btn--sm" id="fwd-test-btn">Test forwarding</button>
           </div>
         </div>
-        <!-- sending state -->
+        <!-- listening state -->
         <div class="fwd-banner fwd-banner--calling hidden" id="fwd-state-calling">
           <span class="fwd-banner__dot fwd-banner__dot--pulse"></span>
           <div class="fwd-banner__body">
-            <div class="fwd-banner__title">Sending test SMS to your phone…</div>
-            <div class="fwd-banner__sub">You'll get a text in a few seconds — reply to it to see the full flow.</div>
+            <div class="fwd-banner__title">Listening for forwarded call…</div>
+            <div class="fwd-banner__sub">Call your business number from another phone — Cove will pick up and confirm here.</div>
           </div>
+          <button class="btn btn--ghost btn--sm" id="fwd-cancel-listen-btn" style="flex-shrink:0">Cancel</button>
         </div>
         <!-- verified state -->
         <div class="fwd-banner fwd-banner--verified hidden" id="fwd-state-verified">
@@ -1124,35 +1125,29 @@
               }
             } catch { /* silent */ }
           }, 3000);
-          // Give up after 2 minutes — carrier forwarding must not be set up yet
+          // Give up after 2 minutes
           pollTimeout = setTimeout(() => {
             clearInterval(pollInterval); pollInterval = null; pollTimeout = null;
             showState('idle');
             const sub = document.getElementById('fwd-idle-sub');
             if (sub) {
-              sub.textContent = "Forwarding not detected. Make sure you've done the carrier setup first, then test again.";
+              sub.textContent = "No call detected. Make sure you've activated the carrier code, then try again.";
               sub.style.color = 'var(--amber, #d97706)';
             }
           }, 120000);
         }
 
-        // "Verify it's working" button
-        document.getElementById('fwd-test-btn')?.addEventListener('click', async () => {
+        // "Test forwarding" button — listen for a real forwarded call
+        document.getElementById('fwd-test-btn')?.addEventListener('click', () => {
           showState('calling');
-          try {
-            const res = await fetch('/api/me/send-test-lead', { method: 'POST' });
-            const r = await res.json().catch(() => ({ ok: false, error: 'Server error — please try again.' }));
-            if (!r.ok) {
-              showState('idle');
-              const sub = document.getElementById('fwd-idle-sub');
-              if (sub) { sub.textContent = r.error || 'Could not send test — check your phone number in Settings.'; sub.style.color = 'var(--red,#dc2626)'; }
-              return;
-            }
-            // Show sending state briefly, then show success banner
-            setTimeout(() => showState('verified'), 2000);
-          } catch {
-            showState('idle');
-          }
+          startPolling();
+        });
+
+        // Cancel listening
+        document.getElementById('fwd-cancel-listen-btn')?.addEventListener('click', () => {
+          clearInterval(pollInterval); clearTimeout(pollTimeout);
+          pollInterval = pollTimeout = null;
+          showState('idle');
         });
 
         // Dismiss verified state
