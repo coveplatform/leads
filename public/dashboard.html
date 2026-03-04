@@ -550,7 +550,7 @@
               <span class="cf-carrier-name">Telstra</span><span class="cf-carrier-sub">Dial code</span>
             </button>
             <button class="cf-carrier-tile" data-carrier="optus">
-              <span class="cf-carrier-name">Optus</span><span class="cf-carrier-sub">2 quick steps</span>
+              <span class="cf-carrier-name">Optus</span><span class="cf-carrier-sub">Dial code</span>
             </button>
             <button class="cf-carrier-tile" data-carrier="vodafone">
               <span class="cf-carrier-name">Vodafone</span><span class="cf-carrier-sub">Dial code</span>
@@ -583,42 +583,6 @@
             </div>
           </div>
 
-          <!-- Optus: two-step approach (shown instead of dial code) -->
-          <div id="dash-optus-app" class="hidden" style="margin-top:10px;display:flex;flex-direction:column;gap:10px">
-            <!-- Step 1: Clear Message Bank -->
-            <div style="background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;padding:12px 14px;font-size:13px;line-height:1.6">
-              <strong style="display:block;margin-bottom:3px;color:#15803d">Step 1 — Clear Message Bank</strong>
-              <span style="color:var(--text-muted)">Optus voicemail intercepts missed calls before Cove can — clear it first. Open your dialler, paste this code and tap Call:</span>
-              <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-                <code style="font-weight:700;font-size:.95rem;color:var(--text);background:var(--bg);padding:3px 10px;border-radius:6px;letter-spacing:.05em">##002#</code>
-                <button class="btn btn--ghost btn--sm" id="dash-optus-mb-copy-btn" type="button">Copy</button>
-              </div>
-            </div>
-            <!-- Step 2: Activate Cove forwarding -->
-            <div style="background:#fff8f5;border-radius:10px;border:1px solid var(--orange-border);padding:12px 14px;font-size:13px;line-height:1.6">
-              <strong style="display:block;margin-bottom:3px;color:var(--orange)">Step 2 — Activate Cove forwarding</strong>
-              <span style="color:var(--text-muted)">Tap to set Cove as your no-answer destination:</span>
-              <div style="margin-top:8px">
-                <a id="dash-optus-fwd-link" class="cf-activate-btn" href="#" style="font-size:.88rem;padding:.65rem 1rem">Tap to activate forwarding</a>
-              </div>
-            </div>
-            <!-- App fallback -->
-            <details style="border:1px solid var(--border);border-radius:10px">
-              <summary style="padding:10px 14px;font-size:12.5px;font-weight:600;color:var(--text-muted);cursor:pointer;list-style:none">Didn't work? Use the My Optus app instead ↓</summary>
-              <div style="padding:0 14px 12px;font-size:12.5px;line-height:1.6;color:var(--text-muted)">
-                <ol style="margin:8px 0 8px 16px;padding:0;display:flex;flex-direction:column;gap:4px">
-                  <li>Open the <strong style="color:var(--text)">My Optus app</strong></li>
-                  <li>Go to <strong style="color:var(--text)">My account → My services → Call forwarding</strong></li>
-                  <li>Tap <strong style="color:var(--text)">No answer</strong> → enter your Cove number:</li>
-                </ol>
-                <div class="cf-code-row">
-                  <span class="cf-code-display" id="dash-optus-cove-num">—</span>
-                  <button class="btn btn--ghost btn--sm" id="dash-optus-copy-btn" type="button">Copy</button>
-                </div>
-                <p style="font-size:11.5px;color:var(--text-muted);margin:6px 0 0">Set ring time to <strong style="color:var(--text)">20–25 seconds</strong> before it forwards.</p>
-              </div>
-            </details>
-          </div>
         </div>
 
         <!-- Test forwarding -->
@@ -628,7 +592,7 @@
 
             <!-- Idle -->
             <div id="int-fwd-idle">
-              <p class="int-section__desc" style="margin-bottom:12px">Once you've set up the carrier code, test it here. Call your own business number from another phone and <strong>don't answer</strong>. Cove will detect when the call is forwarded through.</p>
+              <p class="int-section__desc" style="margin-bottom:12px">Tap the code above, then call your business number from any other phone. Cove will pick up and you'll get a confirmation here within seconds.</p>
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                 <button class="btn btn--secondary btn--sm" id="int-fwd-start-btn" type="button">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:5px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.73 12 19.79 19.79 0 0 1 1.66 3.38 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 13 13.91l.27-.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 20 16z"/></svg>
@@ -644,7 +608,7 @@
                 <div class="setup-step__dot setup-step__dot--spin" style="width:10px;height:10px;flex-shrink:0"></div>
                 <span style="font-size:13.5px;font-weight:500">Listening for forwarded call… <span id="int-fwd-timer">2:00</span></span>
               </div>
-              <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 10px">Call your business number from another phone now and don't answer — let it ring through.</p>
+              <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 10px">Call your business number from another phone now — Cove will pick up and you'll see confirmation here.</p>
               <button class="btn btn--ghost btn--sm" id="int-fwd-cancel-btn" type="button">Cancel</button>
             </div>
 
@@ -1773,6 +1737,7 @@
       const buildCode = (carrier, num) => {
         // Dial codes need local AU format (04XX) — the + sign breaks the dialler
         const local = toLocalAU(num);
+        if (carrier === 'optus')    return `**21*${local}#`; // unconditional — bypasses Message Bank
         if (carrier === 'vodafone') return `*61*${local}*11*20#`;
         return `**61*${local}*11*20#`; // telstra, other
       };
@@ -1793,26 +1758,8 @@
         grid.querySelectorAll('.cf-carrier-tile').forEach(t => t.classList.remove('active'));
         tile.classList.add('active');
 
-        const optusApp = document.getElementById('dash-optus-app');
-
-        if (carrier === 'optus') {
-          action.classList.add('hidden');
-          if (optusApp) {
-            optusApp.classList.remove('hidden');
-            optusApp.style.display = 'flex';
-            const local = toLocalAU(num);
-            const numEl = document.getElementById('dash-optus-cove-num');
-            if (numEl) numEl.textContent = local;
-            const fwdCode = buildCode('optus', num);
-            const fwdLink = document.getElementById('dash-optus-fwd-link');
-            if (fwdLink) {
-              fwdLink.dataset.dialCode = fwdCode;
-              fwdLink.href = isMobile ? 'tel:' + fwdCode : '#';
-            }
-          }
-        } else {
-          // All other carriers: show dial code
-          if (optusApp) optusApp.classList.add('hidden');
+        {
+          // All carriers: show dial code
           currentCode = buildCode(carrier, num);
           if (dialCodeEl) dialCodeEl.textContent = currentCode;
           if (activateLink) activateLink.href = 'tel:' + currentCode;
@@ -1848,42 +1795,23 @@
         });
       }
 
-      // Optus: copy Message Bank clear code
-      document.getElementById('dash-optus-mb-copy-btn')?.addEventListener('click', () => {
-        const btn = document.getElementById('dash-optus-mb-copy-btn');
-        navigator.clipboard.writeText('##002#').catch(() => {}).finally(() => {
-          btn.textContent = 'Copied!';
-          setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
-        });
-      });
+      // After tapping activate or copying code, auto-start the forwarding test listener
+      function autoStartFwdTest() {
+        if (business?.forwarding_verified) return;
+        setTimeout(() => {
+          const startBtn = document.getElementById('int-fwd-start-btn');
+          const testSection = document.getElementById('int-fwd-test-wrap');
+          if (startBtn) startBtn.click();
+          if (testSection) testSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 1200);
+      }
 
-      // Optus: step 2 forward link — desktop copies code, mobile opens dialler
-      document.getElementById('dash-optus-fwd-link')?.addEventListener('click', async function(e) {
-        const code = this.dataset.dialCode;
-        if (!code) return;
-        if (!isMobile) {
-          e.preventDefault();
-          try {
-            await navigator.clipboard.writeText(code);
-            const orig = this.textContent;
-            this.textContent = 'Copied!';
-            setTimeout(() => { this.textContent = orig; }, 2000);
-          } catch {
-            window.prompt('Copy this dial code:', code);
-          }
-        }
-      });
-
-      // Optus: app fallback number copy
-      document.getElementById('dash-optus-copy-btn')?.addEventListener('click', () => {
-        const num = document.getElementById('dash-optus-cove-num')?.textContent;
-        if (!num || num === '—') return;
-        const btn = document.getElementById('dash-optus-copy-btn');
-        navigator.clipboard.writeText(num).catch(() => {}).finally(() => {
-          btn.textContent = 'Copied!';
-          setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
-        });
-      });
+      if (activateLink) {
+        activateLink.addEventListener('click', autoStartFwdTest);
+      }
+      if (copyCodeBtn) {
+        copyCodeBtn.addEventListener('click', autoStartFwdTest);
+      }
 
       // Desktop: send code to phone via SMS
       if (sendBtn) {
