@@ -157,6 +157,31 @@
     .notif-add { background: none; border: 1px dashed #27272a; color: #52525b; padding: .3rem .5rem; border-radius: 5px; font-size: .7rem; cursor: pointer; width: 100%; font-family: inherit; }
     .notif-add:hover { border-color: #6366f1; color: #71717a; }
 
+    /* ─── Funnel ─── */
+    .funnel-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: .5rem; margin-bottom: 1.75rem; }
+    .funnel-step { background: #111116; border: 1px solid #1e1e24; border-radius: 10px; padding: .85rem 1rem; text-align: center; }
+    .funnel-step__num { font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: -.02em; background: linear-gradient(135deg, #6366f1, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .funnel-step__label { font-size: .62rem; font-weight: 600; color: #52525b; text-transform: uppercase; letter-spacing: .06em; margin-top: .25rem; }
+    .funnel-table { width: 100%; border-collapse: collapse; }
+    .funnel-table th { text-align: left; font-size: .7rem; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: .08em; padding: .75rem 1rem; border-bottom: 1px solid #1e1e24; white-space: nowrap; }
+    .funnel-table td { padding: .85rem 1rem; border-bottom: 1px solid #1e1e24; font-size: .8rem; vertical-align: middle; }
+    .funnel-table tr:last-child td { border-bottom: none; }
+    .funnel-table tr:hover td { background: rgba(99,102,241,.03); }
+    .stage-badge { display: inline-flex; align-items: center; font-size: .7rem; font-weight: 600; padding: .2rem .6rem; border-radius: 20px; white-space: nowrap; }
+    .stage-badge--0 { background: rgba(113,113,122,.1); color: #71717a; }
+    .stage-badge--1 { background: rgba(99,102,241,.1); color: #818cf8; }
+    .stage-badge--2 { background: rgba(245,158,11,.1); color: #f59e0b; }
+    .stage-badge--3 { background: rgba(6,182,212,.1); color: #22d3ee; }
+    .stage-badge--4 { background: rgba(168,85,247,.1); color: #c084fc; }
+    .stage-badge--5 { background: rgba(16,185,129,.1); color: #10b981; }
+    .stage-badge--6 { background: rgba(20,184,166,.15); color: #2dd4bf; }
+    .sub-badge { display: inline-flex; font-size: .65rem; font-weight: 600; padding: .15rem .5rem; border-radius: 20px; }
+    .sub-badge--active { background: rgba(16,185,129,.1); color: #10b981; }
+    .sub-badge--trialing { background: rgba(99,102,241,.1); color: #818cf8; }
+    .sub-badge--past_due { background: rgba(239,68,68,.1); color: #ef4444; }
+    .sub-badge--canceled { background: rgba(113,113,122,.1); color: #71717a; }
+    .sub-badge--none { background: rgba(113,113,122,.08); color: #52525b; }
+
     /* ─── Responsive ─── */
     @media (max-width: 900px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
@@ -233,6 +258,10 @@
       <button class="tab" onclick="showTab('add', this)">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         + New Business
+      </button>
+      <button class="tab" onclick="showTab('funnel', this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        Funnel
       </button>
     </div>
 
@@ -318,6 +347,35 @@
             <button type="reset" class="btn btn--ghost">Clear</button>
           </div>
         </form>
+      </div>
+    </div>
+    <!-- ─── Funnel Tab ─── -->
+    <div id="tab-funnel" class="tab-content hidden">
+      <!-- Stage summary strip -->
+      <div class="funnel-strip">
+        <div class="funnel-step"><div class="funnel-step__num" id="funnel-n0">—</div><div class="funnel-step__label">Signed Up</div></div>
+        <div class="funnel-step"><div class="funnel-step__num" id="funnel-n1">—</div><div class="funnel-step__label">Business Saved</div></div>
+        <div class="funnel-step"><div class="funnel-step__num" id="funnel-n2">—</div><div class="funnel-step__label">Paid / Trial</div></div>
+        <div class="funnel-step"><div class="funnel-step__num" id="funnel-n3">—</div><div class="funnel-step__label">Number Set</div></div>
+        <div class="funnel-step"><div class="funnel-step__num" id="funnel-n4">—</div><div class="funnel-step__label">Onboarded</div></div>
+        <div class="funnel-step"><div class="funnel-step__num" id="funnel-n5">—</div><div class="funnel-step__label">Fwd Live</div></div>
+        <div class="funnel-step"><div class="funnel-step__num" id="funnel-n6">—</div><div class="funnel-step__label">Getting Leads</div></div>
+      </div>
+      <!-- User table -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="card__header" style="padding:1.25rem 1.5rem;">
+          <div>
+            <div class="card__title">Signup Funnel</div>
+            <div class="card__subtitle">Every user and how far they've got through onboarding</div>
+          </div>
+          <button class="btn btn--ghost btn--sm" onclick="loadFunnel()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
+        </div>
+        <div style="overflow-x:auto;" id="funnel-table-wrap">
+          <div class="leads-empty"><p>Loading funnel data…</p></div>
+        </div>
       </div>
     </div>
   </div>
@@ -543,6 +601,7 @@
       if (btn) btn.classList.add('active');
       document.getElementById(`tab-${tab}`).classList.remove('hidden');
       if (tab === 'leads') loadLeads();
+      if (tab === 'funnel') loadFunnel();
     }
 
     // ─── Load Stats ───
@@ -895,6 +954,70 @@ document.getElementById('contact-form').addEventListener('submit', async (e) => 
 
     document.getElementById('settings-modal').addEventListener('click', function(e) { if (e.target === this) closeSettings(); });
     document.getElementById('embed-modal').addEventListener('click', function(e) { if (e.target === this) closeEmbed(); });
+
+    // ─── Load Funnel ───
+    async function loadFunnel() {
+      const wrap = document.getElementById('funnel-table-wrap');
+      wrap.innerHTML = '<div class="leads-empty"><p>Loading…</p></div>';
+      try {
+        const res = await fetch('/api/admin/funnel');
+        const data = await res.json();
+        const rows = data.rows || [];
+
+        function getStage(r) {
+          if (r.lead_count > 0)       return 6;
+          if (r.forwarding_verified)  return 5;
+          if (r.onboarding_complete)  return 4;
+          if (r.twilio_from_number)   return 3;
+          if (r.subscription_status === 'active' || r.subscription_status === 'trialing') return 2;
+          if (r.business_id)          return 1;
+          return 0;
+        }
+
+        const stageLabels = ['Signed up', 'Business saved', 'Paid / Trial', 'Number set', 'Onboarded', 'Fwd live', 'Getting leads'];
+        const counts = [0, 0, 0, 0, 0, 0, 0];
+        rows.forEach(r => { const s = getStage(r); for (let i = 0; i <= s; i++) counts[i]++; });
+        for (let i = 0; i < 7; i++) {
+          const el = document.getElementById(`funnel-n${i}`);
+          if (el) el.textContent = counts[i];
+        }
+
+        if (rows.length === 0) {
+          wrap.innerHTML = '<div class="leads-empty"><p>No signups yet.</p></div>';
+          return;
+        }
+
+        const subClass = s => ({ active: 'sub-badge--active', trialing: 'sub-badge--trialing', past_due: 'sub-badge--past_due', canceled: 'sub-badge--canceled' }[s] || 'sub-badge--none');
+        const tick = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+        const cross = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3f3f46" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+
+        wrap.innerHTML = `<table class="funnel-table">
+          <thead><tr>
+            <th>User</th><th>Signed Up</th><th>Stage</th><th>Business</th><th>Sub</th><th>Fwd</th><th>Leads</th>
+          </tr></thead>
+          <tbody>
+            ${rows.map(r => {
+              const stage = getStage(r);
+              const date = r.signed_up_at ? new Date(r.signed_up_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: '2-digit' }) : '—';
+              return `<tr>
+                <td>
+                  <div style="font-weight:600;color:#e5e7eb;">${r.name || '—'}</div>
+                  <div style="color:#52525b;font-size:.73rem;">${r.email}</div>
+                </td>
+                <td style="color:#71717a;">${date}</td>
+                <td><span class="stage-badge stage-badge--${stage}">${stageLabels[stage]}</span></td>
+                <td style="color:#a1a1aa;">${r.business_name || '—'}</td>
+                <td><span class="sub-badge ${subClass(r.subscription_status)}">${r.subscription_status || 'none'}</span></td>
+                <td>${r.forwarding_verified ? tick : cross}</td>
+                <td style="color:${r.lead_count > 0 ? '#10b981' : '#3f3f46'};font-weight:${r.lead_count > 0 ? '700' : '400'};">${r.lead_count}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>`;
+      } catch (e) {
+        wrap.innerHTML = `<div class="leads-empty"><p style="color:#ef4444;">Error: ${e.message}</p></div>`;
+      }
+    }
 
     // ─── Init ───
     loadBusinesses();

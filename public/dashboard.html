@@ -331,6 +331,24 @@
               Add question
             </button>
           </div>
+          <!-- Final message -->
+          <div class="section" style="margin-top:1.25rem;">
+            <div class="section__title-row">
+              <span class="section__title section__title--flush">Final message</span>
+            </div>
+            <p class="section__sub">Sent to the lead after they answer all questions.</p>
+            <div class="flow-setup__msg-row" style="margin-bottom:.5rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Standard</span>
+            </div>
+            <textarea id="flow-completion" class="flow-intro-ta textarea--noresize" placeholder="Thanks! {businessName} will be in touch shortly."></textarea>
+            <div class="flow-setup__msg-row" style="margin-top:.75rem;margin-bottom:.5rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>With booking link (if you have one set)</span>
+            </div>
+            <textarea id="flow-completion-booking" class="flow-intro-ta textarea--noresize" placeholder="Thanks! {businessName} will be in touch shortly. Book directly: {bookingLink}"></textarea>
+            <p class="flow-setup__hint">Use <code class="inline-code">{businessName}</code> and <code class="inline-code">{bookingLink}</code> as placeholders.</p>
+          </div>
         </div><!-- /flow-layout__editor -->
 
         <!-- Right: live preview -->
@@ -707,6 +725,10 @@
         <h1 class="page-header__title">Billing</h1>
         <p class="page-header__sub">Manage your subscription and payment details.</p>
       </div>
+      <div id="billing-reactivated-banner" class="hidden" style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:10px;padding:.85rem 1.1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:.75rem;font-size:.875rem;color:#15803d;font-weight:500;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Subscription reactivated — welcome back! Cove is live again.
+      </div>
 
       <div class="card">
         <div class="card__section">
@@ -719,10 +741,15 @@
               <span id="billing-status-text" class="plan-display__status-text"></span>
             </div>
           </div>
-          <button class="btn btn--secondary" id="billing-portal-btn">
-            Manage billing
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </button>
+          <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
+            <button class="btn btn--secondary" id="billing-portal-btn">
+              Manage billing
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </button>
+            <button class="btn btn--primary hidden" id="billing-reactivate-btn">
+              Reactivate subscription →
+            </button>
+          </div>
         </div>
 
         <div class="card__divider"></div>
@@ -1044,9 +1071,17 @@
         user = meData.user;
         business = meData.business;
 
-        if (!user.onboarding_complete || !business?.is_active) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const reactivated = urlParams.has('reactivated');
+
+        if (!reactivated && (!user.onboarding_complete || !business?.is_active)) {
           location.href = '/onboarding';
           return;
+        }
+
+        // Clean up query params from URL without reloading
+        if (urlParams.has('reactivated') || urlParams.has('billing')) {
+          history.replaceState(null, '', '/dashboard');
         }
 
         // Sidebar
@@ -1062,6 +1097,18 @@
         await loadLeads();
         setInterval(async () => { try { await loadLeads(); } catch {} }, 30000);
         updateGetStartedPanel();
+
+        // Handle return from Stripe
+        if (reactivated) {
+          showView('billing');
+          document.querySelectorAll('.sidebar__item').forEach(el => el.classList.remove('active'));
+          document.querySelector('.sidebar__item[data-view="billing"]')?.classList.add('active');
+          document.getElementById('billing-reactivated-banner')?.classList.remove('hidden');
+        } else if (urlParams.has('billing')) {
+          showView('billing');
+          document.querySelectorAll('.sidebar__item').forEach(el => el.classList.remove('active'));
+          document.querySelector('.sidebar__item[data-view="billing"]')?.classList.add('active');
+        }
 
         // Fire trial email check in background — never blocks UI
         fetch('/api/trial/check', { method: 'POST' }).catch(() => {});
@@ -1340,6 +1387,11 @@
       // Capture intro
       const introEl = document.getElementById('flow-intro');
       if (introEl) flow.intro = introEl.value.trim();
+      // Capture completion messages
+      const compEl = document.getElementById('flow-completion');
+      if (compEl) flow.completion = compEl.value.trim();
+      const compBookEl = document.getElementById('flow-completion-booking');
+      if (compBookEl) flow.completion_with_booking = compBookEl.value.trim();
       flowEdited = JSON.parse(JSON.stringify(flow));
     }
 
@@ -1359,6 +1411,19 @@
         introEl.value = flow.intro || '';
         requestAnimationFrame(() => { introEl.style.height = 'auto'; introEl.style.height = introEl.scrollHeight + 'px'; });
         introEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; updateFlowPreview(); }, { once: false });
+      }
+      // Populate completion fields
+      const compEl = document.getElementById('flow-completion');
+      if (compEl) {
+        compEl.value = flow.completion || '';
+        requestAnimationFrame(() => { compEl.style.height = 'auto'; compEl.style.height = compEl.scrollHeight + 'px'; });
+        compEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; updateFlowPreview(); }, { once: false });
+      }
+      const compBookEl = document.getElementById('flow-completion-booking');
+      if (compBookEl) {
+        compBookEl.value = flow.completion_with_booking || '';
+        requestAnimationFrame(() => { compBookEl.style.height = 'auto'; compBookEl.style.height = compBookEl.scrollHeight + 'px'; });
+        compBookEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; }, { once: false });
       }
       document.getElementById('flow-biz-name').addEventListener('input', updateFlowPreview, { once: true });
 
@@ -1504,7 +1569,11 @@
         html += mkBubble('in', msg);
         html += mkBubble('out', step.free_text ? '<em>Their reply…</em>' : esc(step.options?.[0]?.value || 'A'));
       });
-      html += mkBubble('in', '✅ Got it! We\'ll be in touch shortly.');
+      const completionTpl = document.getElementById('flow-completion')?.value.trim()
+        || flow.completion
+        || 'Thanks! {businessName} will be in touch shortly.';
+      const completionMsg = completionTpl.replace(/{businessName}/g, bizName).replace(/{firstName}/g, 'Sarah');
+      html += mkBubble('in', esc(completionMsg));
 
       screen.innerHTML = html;
       screen.scrollTop = screen.scrollHeight;
@@ -1963,16 +2032,21 @@
       const status = user.subscription_status || 'inactive';
       const badge = document.getElementById('billing-status-badge');
       const text = document.getElementById('billing-status-text');
+      const reactivateBtn = document.getElementById('billing-reactivate-btn');
 
       if (status === 'active') {
         badge.innerHTML = '<span class="badge badge--live badge--dot">Active</span>';
         text.textContent = 'Your subscription is active.';
+      } else if (status === 'trialing') {
+        badge.innerHTML = '<span class="badge badge--live badge--dot">Trial</span>';
+        text.textContent = 'You\'re on a free trial. Your card will be charged when it ends.';
       } else if (status === 'past_due') {
         badge.innerHTML = '<span class="badge badge--setup badge--dot">Payment failed</span>';
         text.textContent = 'Your last payment failed. Update your card to keep Cove running.';
       } else if (status === 'canceled') {
         badge.innerHTML = '<span class="badge badge--paused badge--dot">Cancelled</span>';
-        text.textContent = 'Your subscription has been cancelled.';
+        text.textContent = 'Your subscription has been cancelled. Reactivate to start capturing leads again.';
+        reactivateBtn.classList.remove('hidden');
       } else {
         badge.innerHTML = '<span class="badge badge--paused badge--dot">Inactive</span>';
         text.textContent = '';
@@ -1986,6 +2060,17 @@
       btn.disabled = false; btn.textContent = 'Manage billing →';
       if (data.ok && data.url) { location.href = data.url; }
       else { alert(data.error || 'Could not open billing portal.'); }
+    });
+
+    document.getElementById('billing-reactivate-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('billing-reactivate-btn');
+      btn.disabled = true; btn.textContent = 'Loading…';
+      try {
+        const data = await fetch('/api/billing/reactivate', { method: 'POST' }).then(r => r.json());
+        if (data.ok && data.url) { location.href = data.url; }
+        else { alert(data.error || 'Could not start checkout. Please try again.'); }
+      } catch { alert('Network error. Please try again.'); }
+      btn.disabled = false; btn.textContent = 'Reactivate subscription →';
     });
 
     // ─── Settings ───

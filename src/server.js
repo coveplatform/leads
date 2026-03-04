@@ -68,6 +68,7 @@ import {
   createBusiness,
   updateBusiness,
   getAllBusinesses,
+  getSignupFunnel,
   getAllLeadsWithBusiness,
   checkDemoRateLimit,
   recordDemoSend,
@@ -875,6 +876,33 @@ app.post("/api/billing/verify-session", requireAuth, async (req, res) => {
   }
 });
 
+app.post("/api/billing/reactivate", requireAuth, async (req, res) => {
+  try {
+    const user = await getUserById(req.userId);
+    if (!user) return res.status(404).json({ ok: false, error: "User not found" });
+
+    let customerId = user.stripe_customer_id;
+    if (!customerId) {
+      const customer = await createStripeCustomer({ email: user.email, name: user.name });
+      customerId = customer.id;
+      await updateUser(req.userId, { stripeCustomerId: customerId });
+    }
+
+    const priceId = config.stripe.priceId;
+    const session = await createCheckoutSession({
+      customerId,
+      priceId,
+      successUrl: `${config.baseUrl}/dashboard?reactivated=1`,
+      cancelUrl: `${config.baseUrl}/dashboard?billing=1`,
+    });
+
+    return res.json({ ok: true, url: session.url });
+  } catch (err) {
+    console.error("Reactivate error:", err);
+    return res.status(500).json({ ok: false, error: "Could not create checkout session" });
+  }
+});
+
 app.get("/api/billing/portal", requireAuth, async (req, res) => {
   try {
     if (!isStripeConfigured()) {
@@ -1287,6 +1315,14 @@ app.post("/api/voice/inbound", async (req, res) => {
       return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">Thanks for calling. This service is currently unavailable. Please try again later.</Say><Hangup/></Response>`);
     }
 
+    // ── Subscription gate — block lapsed accounts ──
+    const bizUser = await getUserById(business.user_id);
+    const subStatus = bizUser?.subscription_status;
+    if (subStatus && subStatus !== 'active' && subStatus !== 'trialing') {
+      console.log(`[voice/inbound] subscription lapsed (${subStatus}) for business ${business.id}, dropping call`);
+      return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">Thanks for calling. This service is currently unavailable. Please try again later.</Say><Hangup/></Response>`);
+    }
+
     console.log(`[voice/inbound] business=${business.name} id=${business.id}`);
 
     // ── Test call detection ──
@@ -1346,16 +1382,7 @@ app.post("/api/voice/inbound", async (req, res) => {
           console.log(`[voice/inbound] SMS sent to ${from}`);
         }
 
-        // Notify owner immediately so they know a call came in
-        if (business.owner_notify_phone) {
-          const ownerPhone = normalizePhone(business.owner_notify_phone, config.defaultCountryCode);
-          if (ownerPhone) {
-            const missedMsg = `📞 Missed call from ${from} — Cove is qualifying them now. You'll get a full summary once they reply.`;
-            sendSms({ from: business.twilio_from_number, to: ownerPhone, body: missedMsg }).catch(err =>
-              console.error("[voice/inbound] owner notify error:", err)
-            );
-          }
-        }
+        // Owner notified once at the end via the full lead summary.
       }
       } // end opted-out else
     } catch (err) {
@@ -1579,14 +1606,8 @@ app.post("/api/sms/inbound", async (req, res) => {
     const parsed = parseReply(step, replyText);
     const nextAnswers = { ...(lead.answers || {}), ...parsed };
 
-    if (isUrgentAnswer(step, replyText) && !nextAnswers.urgent_alert_sent && business.owner_notify_phone) {
-      const ownerPhone = normalizePhone(business.owner_notify_phone, config.defaultCountryCode);
-      const answerLabel = parsed[`${step.key}_label`] || bodyRaw;
-      await sendSms({
-        from: business.twilio_from_number,
-        to: ownerPhone,
-        body: buildUrgentAlert(lead, business, step.key, answerLabel),
-      });
+    // Track urgent answers — the completion summary flags them with "→ URGENT: Call this lead immediately."
+    if (isUrgentAnswer(step, replyText)) {
       nextAnswers.urgent_alert_sent = true;
     }
 
@@ -1798,6 +1819,16 @@ app.get("/api/admin/businesses", requireAdmin, async (req, res) => {
     const businesses = await getAllBusinesses();
     return res.json({ ok: true, businesses, count: businesses.length });
   } catch (error) {
+    return res.status(500).json({ ok: false, error: "Internal server error" });
+  }
+});
+
+app.get("/api/admin/funnel", requireAdmin, async (req, res) => {
+  try {
+    const rows = await getSignupFunnel();
+    return res.json({ ok: true, rows });
+  } catch (error) {
+    console.error("[admin/funnel] error:", error);
     return res.status(500).json({ ok: false, error: "Internal server error" });
   }
 });

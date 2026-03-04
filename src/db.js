@@ -215,6 +215,31 @@ export async function getAllBusinesses() {
   return rows;
 }
 
+export async function getSignupFunnel() {
+  const rows = await sql`
+    SELECT
+      u.id           AS user_id,
+      u.email,
+      u.name,
+      u.subscription_status,
+      u.onboarding_complete,
+      u.created_at   AS signed_up_at,
+      b.id           AS business_id,
+      b.name         AS business_name,
+      b.twilio_from_number,
+      b.is_active,
+      b.forwarding_verified,
+      COUNT(l.id)::int AS lead_count
+    FROM users u
+    LEFT JOIN businesses b ON b.user_id = u.id
+    LEFT JOIN leads l ON l.business_id = b.id
+    GROUP BY u.id, u.email, u.name, u.subscription_status, u.onboarding_complete, u.created_at,
+             b.id, b.name, b.twilio_from_number, b.is_active, b.forwarding_verified
+    ORDER BY u.created_at DESC
+  `;
+  return rows;
+}
+
 export async function getAllLeadsWithBusiness() {
   const rows = await sql`
     SELECT 
