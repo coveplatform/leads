@@ -874,6 +874,16 @@
       <div class="save-bar">
         <button class="btn btn--primary" id="settings-save">Save changes</button>
       </div>
+
+      <div class="card" style="margin-top:1.5rem;">
+        <div class="card__section" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:.9rem;font-weight:600;color:var(--text)">Sign out</div>
+            <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px">Sign out of your Cove account on this device.</div>
+          </div>
+          <button class="btn btn--secondary" id="settings-logout-btn">Sign out</button>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ HELP ═══ -->
@@ -2218,10 +2228,12 @@
     });
 
     // ─── Logout ───
-    document.getElementById('logout-btn').addEventListener('click', async () => {
+    async function doLogout() {
       await fetch('/api/auth/logout', { method: 'POST' });
       location.href = '/';
-    });
+    }
+    document.getElementById('logout-btn').addEventListener('click', doLogout);
+    document.getElementById('settings-logout-btn').addEventListener('click', doLogout);
 
     // ─── Helpers ───
     function esc(str) {
