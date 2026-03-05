@@ -1315,10 +1315,11 @@ app.post("/api/voice/inbound", async (req, res) => {
       return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">Thanks for calling. This service is currently unavailable. Please try again later.</Say><Hangup/></Response>`);
     }
 
-    // ── Subscription gate — block lapsed accounts ──
+    // ── Subscription gate — only block explicitly lapsed accounts ──
     const bizUser = await getUserById(business.user_id);
     const subStatus = bizUser?.subscription_status;
-    if (subStatus && subStatus !== 'active' && subStatus !== 'trialing') {
+    const BLOCKED_STATUSES = ['canceled', 'past_due', 'unpaid', 'paused'];
+    if (subStatus && BLOCKED_STATUSES.includes(subStatus)) {
       console.log(`[voice/inbound] subscription lapsed (${subStatus}) for business ${business.id}, dropping call`);
       return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">Thanks for calling. This service is currently unavailable. Please try again later.</Say><Hangup/></Response>`);
     }
