@@ -604,6 +604,19 @@
 
         </div>
 
+        <!-- Test the full SMS flow -->
+        <div class="int-section">
+          <div class="int-section__label">Test the full flow</div>
+          <p class="int-section__desc" style="margin-bottom:12px">Sends a real SMS to your notification number right now — simulates a missed call so you can reply and see the whole qualification flow end-to-end.</p>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button class="btn btn--secondary btn--sm" id="int-test-lead-btn" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:5px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Send test SMS
+            </button>
+            <span id="int-test-lead-status" style="font-size:12.5px;color:var(--text-muted)"></span>
+          </div>
+        </div>
+
         <!-- Test forwarding -->
         <div class="int-section">
           <div class="int-section__label">Test your forwarding</div>
@@ -1908,6 +1921,30 @@
         });
       }
     })();
+
+    // ─── Test lead (send real SMS to owner) ───
+    document.getElementById('int-test-lead-btn')?.addEventListener('click', async function() {
+      const btn = this;
+      const status = document.getElementById('int-test-lead-status');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      status.textContent = '';
+      try {
+        const r = await fetch('/api/me/send-test-lead', { method: 'POST' }).then(x => x.json());
+        if (r.ok) {
+          status.textContent = 'SMS sent — reply to it on your phone to test the flow.';
+          status.style.color = 'var(--green, #16a34a)';
+        } else {
+          status.textContent = r.error || 'Failed to send.';
+          status.style.color = 'var(--red, #dc2626)';
+        }
+      } catch {
+        status.textContent = 'Network error.';
+        status.style.color = 'var(--red, #dc2626)';
+      }
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:5px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Send test SMS';
+    });
 
     // ─── Missed calls: forwarding test ───
     (function() {
