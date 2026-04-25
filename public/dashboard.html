@@ -1278,11 +1278,11 @@
       const hasNotif = !!(business.owner_notify_phone || business.integrations?.notifications?.sms?.numbers?.length);
       if (hasNotif) { document.getElementById('gs-step-notif')?.classList.add('gs-step--done'); doneCount++; }
 
-      // Step: flow reviewed — tracked in localStorage
-      if (lsGet('gs_flow_done')) { document.getElementById('gs-step-flow')?.classList.add('gs-step--done'); doneCount++; }
+      // Step: flow reviewed — tracked by whether user has saved a flow config on the server
+      if (business.flow_config) { document.getElementById('gs-step-flow')?.classList.add('gs-step--done'); doneCount++; }
 
-      // Step: call forwarding — forwarding verified or at least one lead has come in
-      if (business.forwarding_verified || leadsData.length > 0) { document.getElementById('gs-step-forward')?.classList.add('gs-step--done'); doneCount++; }
+      // Step: call forwarding — only when forwarding is actually verified
+      if (business.forwarding_verified) { document.getElementById('gs-step-forward')?.classList.add('gs-step--done'); doneCount++; }
 
       const countEl = document.getElementById('gs-done-count');
       if (countEl) countEl.textContent = doneCount;
@@ -1299,7 +1299,6 @@
       panel.querySelectorAll('.gs-step__action[data-view]').forEach(btn => {
         btn.addEventListener('click', () => {
           showView(btn.dataset.view);
-          if (btn.dataset.view === 'flow') lsSet('gs_flow_done', '1');
           // If a specific tab is requested, activate it
           if (btn.dataset.itab) {
             const tabBtn = document.querySelector(`.int-tab[data-itab="${btn.dataset.itab}"]`);
@@ -1315,7 +1314,7 @@
         if (res.ok && res.number) {
           business.twilio_from_number = res.number;
           business.is_active = true;
-          document.getElementById('live-badge').innerHTML = '<span class="badge badge--live badge--dot">Live</span>';
+          document.getElementById('live-badge').innerHTML = '<span class="badge badge--setup badge--dot">Almost live</span>';
           document.getElementById('setup-alert').classList.add('hidden');
           document.getElementById('billing-number').textContent = res.number;
           const s2dot = document.querySelector('#sstep-2 .setup-step__dot');
@@ -1350,9 +1349,8 @@
       if (banner && business?.is_active && business?.twilio_from_number) {
         const alreadyVerified = business.forwarding_verified;
         const dismissed = lsGet('cf-dismissed');
-        if (alreadyVerified || total > 0 || dismissed) {
+        if (alreadyVerified || dismissed) {
           banner.classList.add('hidden');
-          if (total > 0) lsRemove('cf-dismissed');
         } else {
           banner.classList.remove('hidden');
         }
@@ -1641,12 +1639,15 @@
       const btn = document.getElementById('flow-save');
       btn.disabled = true; btn.textContent = 'Saving…';
 
-      if (flowEdited) {
+      const currentFlow = flowEdited || business.flow_config;
+      if (currentFlow) {
         await fetch('/api/me/flow', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ flowConfig: flowEdited }),
+          body: JSON.stringify({ flowConfig: currentFlow }),
         });
+        business.flow_config = currentFlow;
+        flowEdited = null;
       }
 
       await fetch('/api/me/business', {
@@ -1656,7 +1657,6 @@
       });
 
       business.name = bizName;
-      if (flowEdited) { business.flow_config = flowEdited; flowEdited = null; }
 
       document.getElementById('flow-saved').classList.add('visible');
       setTimeout(() => document.getElementById('flow-saved').classList.remove('visible'), 2000);
