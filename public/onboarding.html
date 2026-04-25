@@ -1168,6 +1168,17 @@
           </div>
         </div>
 
+        <!-- Test Cove number — shown after carrier is selected -->
+        <div class="cf-test-block" id="cf-test-wrap" style="display:none;margin-top:1rem">
+          <div class="cf-test-title">Test your Cove number <span style="font-weight:400;color:#A1A1AA">(optional)</span></div>
+          <div style="font-size:.78rem;color:#71717A;margin-bottom:.65rem;line-height:1.5">Send a quick SMS to confirm your number is working — handy to check before you go live.</div>
+          <div class="cf-test-row">
+            <input type="tel" class="cf-test-input" id="cf-test-phone" placeholder="Your mobile number" autocomplete="tel" />
+            <button class="btn btn--primary btn--sm" id="cf-test-btn" type="button">Send test</button>
+          </div>
+          <div class="cf-test-status" id="cf-test-status"></div>
+        </div>
+
         <div class="ob-actions ob-actions--right" style="margin-top:1.5rem">
           <button class="btn btn--primary btn--lg" id="go-dashboard" type="button">
             Go to my dashboard
@@ -1535,6 +1546,8 @@
 
         const section = document.getElementById('cf-carrier-section');
         if (section) section.style.display = 'block';
+        const testWrap = document.getElementById('cf-test-wrap');
+        if (testWrap) testWrap.style.display = 'block';
 
         // All carriers: show tap-to-activate
         document.getElementById('cf-activate-link').style.display = '';
@@ -2096,7 +2109,7 @@
       });
     });
 
-    // ─── Step 1 → 2 (directly — skip bridge) ───
+    // ─── Step 1 → 2a (bridge) ───
     document.getElementById('step1-next').addEventListener('click', async () => {
       const name = document.getElementById('biz-name').value.trim();
       const err = document.getElementById('step1-error');
@@ -2118,11 +2131,21 @@
       bizData = { ...bizData, businessName: name, description: desc };
       if (earlyPhone) bizData.notifyPhone = earlyPhone;
 
-      showStep(2);
+      // Update bridge screen with business name
+      const bridgeName = document.getElementById('bridge-biz-name');
+      if (bridgeName) bridgeName.textContent = name;
+
+      showStep('2a');
+    });
+
+    // ─── Step 2a handlers ───
+    document.getElementById('step2a-back').addEventListener('click', () => showStep(1));
+    document.getElementById('step2a-next').addEventListener('click', () => {
       flowConfig = makeFallbackFlow();
       renderFlow(flowConfig);
       document.getElementById('flow-loading').classList.add('hidden');
       document.getElementById('flow-content').classList.remove('hidden');
+      showStep(2);
     });
 
     // Starter flow — hardcoded placeholder questions, always used (no AI generation)
@@ -2143,11 +2166,8 @@
       };
     }
 
-    // step-2a is no longer navigated to — kept in DOM for safety but skipped in flow
-
-
     // ─── Step 2 → 3 ───
-    document.getElementById('step2-back').addEventListener('click', () => showStep(1));
+    document.getElementById('step2-back').addEventListener('click', () => showStep('2a'));
     document.getElementById('step2-next').addEventListener('click', () => {
       if (flowConfig) {
         bizData.flowConfig = flowConfig;

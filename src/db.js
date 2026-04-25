@@ -332,3 +332,132 @@ export async function updatePassword(userId, passwordHash) {
     WHERE id = ${userId}
   `;
 }
+
+// ─── Google OAuth ───
+
+export async function linkGoogleAccount(userId, googleId) {
+  await sql`
+    UPDATE users SET google_id = ${googleId}, updated_at = now()
+    WHERE id = ${userId}
+  `;
+}
+
+// ─── Stripe / Subscription ───
+
+export async function getUserByStripeCustomerId(stripeCustomerId) {
+  const rows = await sql`
+    SELECT * FROM users WHERE stripe_customer_id = ${stripeCustomerId} LIMIT 1
+  `;
+  return rows[0] || null;
+}
+
+export async function activateUserSubscription(userId, subscriptionId) {
+  await sql`
+    UPDATE users SET
+      stripe_subscription_id = ${subscriptionId},
+      subscription_status    = 'active',
+      onboarding_complete    = true,
+      trial_started_at       = COALESCE(trial_started_at, now()),
+      updated_at             = now()
+    WHERE id = ${userId}
+  `;
+}
+
+export async function syncUserSubscriptionStatus(stripeCustomerId, subscriptionId, status) {
+  await sql`
+    UPDATE users SET
+      stripe_subscription_id = ${subscriptionId},
+      subscription_status    = ${status},
+      updated_at             = now()
+    WHERE stripe_customer_id = ${stripeCustomerId}
+  `;
+}
+
+// ─── Trial Emails ───
+
+export async function getUserWithTrialInfo(userId) {
+  const rows = await sql`
+    SELECT id, email, name, trial_started_at, trial_emails_sent
+    FROM users WHERE id = ${userId} LIMIT 1
+  `;
+  return rows[0] || null;
+}
+
+export async function markTrialEmailSent(userId, bit) {
+  await sql`
+    UPDATE users
+    SET trial_emails_sent = COALESCE(trial_emails_sent, 0) | ${bit}
+    WHERE id = ${userId}
+  `;
+}
+
+// ─── Business Activation ───
+
+export async function setBusinessActive(businessId, isActive) {
+  await sql`
+    UPDATE businesses SET is_active = ${isActive}, updated_at = now()
+    WHERE id = ${businessId}
+  `;
+}
+
+export async function setBusinessActiveByUserId(userId, isActive) {
+  await sql`
+    UPDATE businesses SET is_active = ${isActive}, updated_at = now()
+    WHERE user_id = ${userId}
+  `;
+}
+
+// ─── Onboarding ───
+
+export async function resetOnboarding(userId) {
+  await sql`
+    UPDATE users SET onboarding_complete = false, updated_at = now()
+    WHERE id = ${userId}
+  `;
+  await sql`
+    UPDATE businesses SET twilio_from_number = null, is_active = false
+    WHERE user_id = ${userId}
+  `;
+}
+
+// ─── Twilio Provisioning ───
+
+export async function getBusinessNameById(businessId) {
+  const rows = await sql`
+    SELECT name FROM businesses WHERE id = ${businessId} LIMIT 1
+  `;
+  return rows[0]?.name || null;
+}
+
+export async function saveTwilioNumber(businessId, phoneNumber) {
+  await sql`
+    UPDATE businesses SET twilio_from_number = ${phoneNumber} WHERE id = ${businessId}
+  `;
+}
+
+// ─── Lead Actions ───
+
+export async function markLeadCalled(leadId, businessId) {
+  const rows = await sql`
+    SELECT id, answers FROM leads
+    WHERE id = ${leadId} AND business_id = ${businessId}
+    LIMIT 1
+  `;
+  if (!rows.length) return null;
+  const answers = {
+    ...(rows[0].answers || {}),
+    _called_back: true,
+    _called_back_at: new Date().toISOString(),
+  };
+  await sql`
+    UPDATE leads SET answers = ${JSON.stringify(answers)}::jsonb WHERE id = ${rows[0].id}
+  `;
+  return true;
+}
+
+export async function getLeadByIdAndBusiness(leadId, businessId) {
+  const rows = await sql`
+    SELECT id FROM leads WHERE id = ${leadId} AND business_id = ${businessId} LIMIT 1
+  `;
+  return rows[0] || null;
+}

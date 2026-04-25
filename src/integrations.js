@@ -66,69 +66,6 @@ export function buildAfterHoursMessage(business) {
   );
 }
 
-// ─── Outbound Completion Webhook (push to CRM/Zapier) ───
-
-export async function fireCompletionWebhook(business, lead, flowConfig) {
-  const integrations = business.integrations;
-  if (!integrations) return;
-
-  const webhookUrl = integrations.completion_webhook_url;
-  if (!webhookUrl) return;
-
-  const answers = lead.answers || {};
-  const payload = {
-    event: "lead.qualified",
-    timestamp: new Date().toISOString(),
-    business: {
-      id: business.id,
-      name: business.name,
-    },
-    lead: {
-      id: lead.id,
-      name: lead.name,
-      phone: lead.phone,
-      email: lead.email,
-      message: lead.message,
-      created_at: lead.created_at,
-      finished_at: lead.finished_at,
-    },
-    answers: {},
-    raw_answers: answers,
-    is_urgent: false,
-  };
-
-  for (const step of (flowConfig?.steps || [])) {
-    const code = answers[`${step.key}_code`];
-    const label = answers[`${step.key}_label`];
-    if (label) {
-      payload.answers[step.key] = { code, label };
-    }
-    if (step.urgent_values?.some((v) => v.toUpperCase() === String(code || "").toUpperCase())) {
-      payload.is_urgent = true;
-    }
-  }
-
-  try {
-    const headers = { "Content-Type": "application/json" };
-    if (integrations.webhook_secret) {
-      headers["X-Cove-Secret"] = integrations.webhook_secret;
-    }
-
-    const resp = await fetch(webhookUrl, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(10000),
-    });
-
-    if (!resp.ok) {
-      console.error(`Completion webhook failed ${resp.status} for business ${business.id}`);
-    }
-  } catch (err) {
-    console.error(`Completion webhook error for business ${business.id}:`, err.message);
-  }
-}
-
 // ─── Lead Nudge ───
 
 export function shouldNudge(lead, business) {

@@ -86,6 +86,19 @@ import {
   getUserByResetToken,
   clearPasswordResetToken,
   updatePassword,
+  linkGoogleAccount,
+  getUserByStripeCustomerId,
+  activateUserSubscription,
+  syncUserSubscriptionStatus,
+  getUserWithTrialInfo,
+  markTrialEmailSent,
+  setBusinessActive,
+  setBusinessActiveByUserId,
+  resetOnboarding,
+  getBusinessNameById,
+  saveTwilioNumber,
+  markLeadCalled,
+  getLeadByIdAndBusiness,
 } from "./db.js";
 import {
   isWithinOperatingHours,
@@ -100,6 +113,19 @@ import { normalizePhone } from "./phone.js";
 import { sendSms } from "./sms.js";
 import { day1Email, day4Email, day11Email } from "./trial-emails.js";
 import twilio from "twilio";
+
+// ─── Twilio signature validation middleware ───
+function validateTwilioSignature(req, res, next) {
+  if (!config.twilio.authToken) return next(); // skip in dev / when Twilio not configured
+  const signature = req.headers["x-twilio-signature"] || "";
+  const rawBase = (process.env.PRODUCTION_URL || config.baseUrl).trim();
+  const url = `${rawBase}${req.originalUrl}`;
+  if (!twilio.validateRequest(config.twilio.authToken, signature, url, req.body || {})) {
+    console.warn("[twilio] Rejected request with invalid signature from", req.ip);
+    return res.status(403).send("Forbidden");
+  }
+  next();
+}
 
 // ─── Cove self-qualification flow (used for contact form leads) ───
 const COVE_QUALIFICATION_FLOW = {
@@ -341,8 +367,7 @@ app.get("/api/auth/google/callback", async (req, res) => {
     if (!user) {
       user = await getUserByEmail(profile.email.toLowerCase());
       if (user) {
-        // Link Google to existing email account
-        await updateUser(user.id, {});
+        await linkGoogleAccount(user.id, profile.sub);
       } else {
         user = await createUser({
           email: profile.email.toLowerCase(),
@@ -452,9 +477,7 @@ app.post("/api/auth/provision-number", requireAuth, async (req, res) => {
     if (business.twilio_from_number) return res.json({ ok: true, number: business.twilio_from_number, already: true });
     const number = await provisionTwilioNumber(business.id);
     if (!number) return res.status(500).json({ ok: false, error: "Could not provision a number — Twilio may be unavailable or no AU numbers available. Contact support." });
-    const { neon } = await import("@neondatabase/serverless");
-    const sql = neon(config.databaseUrl);
-    await sql`UPDATE businesses SET is_active = true WHERE id = ${business.id}`;
+    await setBusinessActive(business.id, true);
     return res.json({ ok: true, number });
   } catch (err) {
     console.error("Provision number error:", err);
@@ -476,10 +499,8 @@ app.patch("/api/auth/update-profile", requireAuth, async (req, res) => {
         if (!valid) return res.status(400).json({ ok: false, error: "Current password is incorrect." });
       }
       if (newPassword.length < 8) return res.status(400).json({ ok: false, error: "Password must be at least 8 characters." });
-      const { neon } = await import("@neondatabase/serverless");
-      const sql = neon(config.databaseUrl);
       const hash = await hashPassword(newPassword);
-      await sql`UPDATE users SET password_hash = ${hash}, updated_at = now() WHERE id = ${req.userId}`;
+      await updatePassword(req.userId, hash);
     }
 
     const updated = await updateUser(req.userId, { name: name || user.name });
@@ -504,10 +525,7 @@ app.post("/api/onboarding/complete", requireAuth, async (req, res) => {
 // ─── Reset onboarding ───
 app.post("/api/auth/reset-onboarding", requireAuth, async (req, res) => {
   try {
-    const { neon } = await import("@neondatabase/serverless");
-    const sql = neon(config.databaseUrl);
-    await sql`UPDATE users SET onboarding_complete = false, updated_at = now() WHERE id = ${req.userId}`;
-    await sql`UPDATE businesses SET twilio_from_number = null, is_active = false WHERE user_id = ${req.userId}`;
+    await resetOnboarding(req.userId);
     return res.json({ ok: true });
   } catch (err) {
     console.error("Reset onboarding error:", err);
@@ -651,11 +669,7 @@ app.get("/api/me/leads", requireAuth, async (req, res) => {
 // ─── Trial email check (called from dashboard on load) ───
 app.post("/api/trial/check", requireAuth, async (req, res) => {
   try {
-    const { neon } = await import("@neondatabase/serverless");
-    const sql = neon(config.databaseUrl);
-
-    const users = await sql`SELECT * FROM users WHERE id = ${req.userId} LIMIT 1`;
-    const user = users[0];
+    const user = await getUserWithTrialInfo(req.userId);
     if (!user || !user.trial_started_at) return res.json({ ok: true, sent: [] });
 
     const daysSince = (Date.now() - new Date(user.trial_started_at).getTime()) / 86400000;
@@ -670,7 +684,7 @@ app.post("/api/trial/check", requireAuth, async (req, res) => {
     if (daysSince >= 3 && !(sent & 2) && leadCount === 0) {
       const { subject, html, text } = day4Email({ name: user.name, bizName: business?.name });
       await sendEmailViaResend({ to: user.email, subject, html, text });
-      await sql`UPDATE users SET trial_emails_sent = COALESCE(trial_emails_sent, 0) | 2 WHERE id = ${user.id}`;
+      await markTrialEmailSent(user.id, 2);
       dispatched.push("day4");
     }
 
@@ -678,7 +692,7 @@ app.post("/api/trial/check", requireAuth, async (req, res) => {
     if (daysSince >= 10 && !(sent & 4)) {
       const { subject, html, text } = day11Email({ name: user.name, bizName: business?.name, leadCount });
       await sendEmailViaResend({ to: user.email, subject, html, text });
-      await sql`UPDATE users SET trial_emails_sent = COALESCE(trial_emails_sent, 0) | 4 WHERE id = ${user.id}`;
+      await markTrialEmailSent(user.id, 4);
       dispatched.push("day11");
     }
 
@@ -693,6 +707,8 @@ app.get("/api/me/leads/:leadId/messages", requireAuth, async (req, res) => {
   try {
     const business = await getBusinessByUserId(req.userId);
     if (!business) return res.status(404).json({ ok: false, error: "No business" });
+    const owned = await getLeadByIdAndBusiness(req.params.leadId, business.id);
+    if (!owned) return res.status(404).json({ ok: false, error: "Lead not found" });
     const messages = await getMessagesByLeadId(req.params.leadId);
     return res.json({ ok: true, messages });
   } catch (err) {
@@ -705,18 +721,8 @@ app.post("/api/me/leads/:leadId/mark-called", requireAuth, async (req, res) => {
   try {
     const business = await getBusinessByUserId(req.userId);
     if (!business) return res.status(404).json({ ok: false, error: "No business" });
-    const { neon } = await import("@neondatabase/serverless");
-    const sql = neon(config.databaseUrl);
-    const rows = await sql`
-      SELECT id, answers FROM leads
-      WHERE id = ${req.params.leadId} AND business_id = ${business.id}
-      LIMIT 1
-    `;
-    if (!rows.length) return res.status(404).json({ ok: false, error: "Lead not found" });
-    const answers = rows[0].answers || {};
-    answers._called_back = true;
-    answers._called_back_at = new Date().toISOString();
-    await sql`UPDATE leads SET answers = ${JSON.stringify(answers)}::jsonb WHERE id = ${rows[0].id}`;
+    const result = await markLeadCalled(req.params.leadId, business.id);
+    if (!result) return res.status(404).json({ ok: false, error: "Lead not found" });
     return res.json({ ok: true });
   } catch (err) {
     console.error("Mark called error:", err);
@@ -971,78 +977,48 @@ async function handleStripeWebhook(req, res) {
 }
 
 async function activateSubscription(stripeCustomerId, subscriptionId) {
-  const { neon } = await import("@neondatabase/serverless");
-  const sql = neon(config.databaseUrl);
-
-  const users = await sql`
-    SELECT * FROM users WHERE stripe_customer_id = ${stripeCustomerId} LIMIT 1
-  `;
-  const user = users[0];
+  const user = await getUserByStripeCustomerId(stripeCustomerId);
   if (!user) return;
 
-  await sql`
-    UPDATE users SET
-      stripe_subscription_id = ${subscriptionId},
-      subscription_status = 'active',
-      onboarding_complete = true,
-      trial_started_at = COALESCE(trial_started_at, now()),
-      updated_at = now()
-    WHERE id = ${user.id}
-  `;
+  await activateUserSubscription(user.id, subscriptionId);
 
-  // Send day 1 activation email (call forwarding nudge)
   try {
-    const businesses = await sql`SELECT * FROM businesses WHERE user_id = ${user.id} LIMIT 1`;
-    const biz = businesses[0];
+    const business = await getBusinessByUserId(user.id);
     const { subject, html, text } = day1Email({
       name: user.name,
-      bizName: biz?.name,
-      coveNumber: biz?.twilio_from_number,
+      bizName: business?.name,
+      coveNumber: business?.twilio_from_number,
     });
     sendEmailViaResend({ to: user.email, subject, html, text }).catch(() => {});
-    await sql`UPDATE users SET trial_emails_sent = COALESCE(trial_emails_sent, 0) | 1 WHERE id = ${user.id}`;
+    await markTrialEmailSent(user.id, 1);
   } catch (e) {
     console.error("Day 1 trial email error:", e);
   }
 
-  // Provision Twilio number if not already done
-  const businesses = await sql`SELECT * FROM businesses WHERE user_id = ${user.id} LIMIT 1`;
-  const business = businesses[0];
+  const business = await getBusinessByUserId(user.id);
   if (business && !business.twilio_from_number) {
     await provisionTwilioNumber(business.id);
   }
   if (business && !business.is_active) {
-    await sql`UPDATE businesses SET is_active = true WHERE id = ${business.id}`;
+    await setBusinessActive(business.id, true);
   }
 }
 
 async function syncSubscriptionStatus(stripeCustomerId, subscriptionId, status) {
-  const { neon } = await import("@neondatabase/serverless");
-  const sql = neon(config.databaseUrl);
-  await sql`
-    UPDATE users SET
-      stripe_subscription_id = ${subscriptionId},
-      subscription_status = ${status},
-      updated_at = now()
-    WHERE stripe_customer_id = ${stripeCustomerId}
-  `;
+  await syncUserSubscriptionStatus(stripeCustomerId, subscriptionId, status);
 
-  // Deactivate business immediately when subscription is cancelled or payment fails
   const inactive = status === "canceled" || status === "past_due" || status === "unpaid";
   if (inactive) {
-    const users = await sql`SELECT id FROM users WHERE stripe_customer_id = ${stripeCustomerId} LIMIT 1`;
-    if (users[0]) {
-      await sql`UPDATE businesses SET is_active = false, updated_at = now() WHERE user_id = ${users[0].id}`;
-      console.log(`[syncSubscriptionStatus] Deactivated business for user ${users[0].id} (status: ${status})`);
+    const user = await getUserByStripeCustomerId(stripeCustomerId);
+    if (user) {
+      await setBusinessActiveByUserId(user.id, false);
+      console.log(`[syncSubscriptionStatus] Deactivated business for user ${user.id} (status: ${status})`);
     }
   }
 
-  // Reactivate if subscription comes back to active (e.g. payment recovered)
   if (status === "active") {
-    const users = await sql`SELECT id FROM users WHERE stripe_customer_id = ${stripeCustomerId} LIMIT 1`;
-    if (users[0]) {
-      await sql`UPDATE businesses SET is_active = true, updated_at = now() WHERE user_id = ${users[0].id}`;
-    }
+    const user = await getUserByStripeCustomerId(stripeCustomerId);
+    if (user) await setBusinessActiveByUserId(user.id, true);
   }
 }
 
@@ -1065,15 +1041,8 @@ async function provisionTwilioNumber(businessId) {
     const bundleSid          = process.env.TWILIO_BUNDLE_SID           || null;
     const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID || null;
 
-    // Fetch business name for the Twilio friendly name
-    const bizRows = await (async () => {
-      try {
-        const { neon } = await import("@neondatabase/serverless");
-        const s = neon(config.databaseUrl);
-        return await s`SELECT name FROM businesses WHERE id = ${businessId} LIMIT 1`;
-      } catch { return []; }
-    })();
-    const friendlyName = bizRows[0]?.name ? `Cove — ${bizRows[0].name}` : "Cove";
+    const bizName = await getBusinessNameById(businessId).catch(() => null);
+    const friendlyName = bizName ? `Cove — ${bizName}` : "Cove";
 
     // Try AU mobile first (needs regulatory bundle), then AU local
     let phoneNumber = null;
@@ -1124,10 +1093,7 @@ async function provisionTwilioNumber(businessId) {
       }
     }
 
-    // Save to DB
-    const { neon } = await import("@neondatabase/serverless");
-    const sql = neon(config.databaseUrl);
-    await sql`UPDATE businesses SET twilio_from_number = ${purchased.phoneNumber} WHERE id = ${businessId}`;
+    await saveTwilioNumber(businessId, purchased.phoneNumber);
 
     return purchased.phoneNumber;
   } catch (err) {
@@ -1170,12 +1136,15 @@ app.post("/api/lead", async (req, res) => {
     const flowConfig = getFlowConfig(business);
 
     if (!isWithinOperatingHours(business)) {
-      await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: buildAfterHoursMessage(business) });
+      const afterHoursBody = buildAfterHoursMessage(business);
+      await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: afterHoursBody });
+      await saveMessage({ leadId: lead.id, direction: "outbound", body: afterHoursBody });
       return res.json({ ok: true, leadId: lead.id, step: lead.current_step, after_hours: true });
     }
 
     const firstMessage = buildIntro(flowConfig, name, business.name);
     await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: firstMessage });
+    await saveMessage({ leadId: lead.id, direction: "outbound", body: firstMessage });
 
     return res.json({ ok: true, leadId: lead.id, step: lead.current_step, message: "Lead created and first SMS sent" });
   } catch (error) {
@@ -1284,7 +1253,7 @@ app.post("/api/website-inquiry", async (req, res) => {
 
 // ─── Inbound Voice (missed call → trigger SMS flow) ───
 
-app.post("/api/voice/inbound", async (req, res) => {
+app.post("/api/voice/inbound", validateTwilioSignature, async (req, res) => {
   try {
     const fromRaw         = String(req.body?.From          || "");
     const toRaw           = String(req.body?.To            || "");
@@ -1462,7 +1431,7 @@ app.get("/api/me/forwarding-status", requireAuth, async (req, res) => {
 
 // ─── Inbound SMS ───
 
-app.post("/api/sms/inbound", async (req, res) => {
+app.post("/api/sms/inbound", validateTwilioSignature, async (req, res) => {
   try {
     const fromRaw = String(req.body?.From || "");
     const toRaw = String(req.body?.To || "");
@@ -1484,8 +1453,34 @@ app.post("/api/sms/inbound", async (req, res) => {
     const business = await getBusinessByTwilioNumber(to);
     if (!business || !business.is_active) return res.status(200).send("OK");
 
-    const lead = await getLatestActiveLeadByBusinessAndPhone({ businessId: business.id, phone: from });
-    if (!lead) return res.status(200).send("OK");
+    let lead = await getLatestActiveLeadByBusinessAndPhone({ businessId: business.id, phone: from });
+
+    if (!lead) {
+      // Cold inbound SMS — someone texted directly with no active flow. Start one.
+      if (isStopKeyword(bodyRaw)) return res.status(200).send("OK");
+
+      const optedOut = await hasPhoneOptedOut(business.id, from);
+      if (optedOut) return res.status(200).send("OK");
+
+      const duplicate = await checkDuplicateLead(from, 30);
+      if (duplicate) return res.status(200).send("OK");
+
+      const newLead = await createLead({ businessId: business.id, name: null, phone: from, email: null, message: bodyRaw });
+      await saveMessage({ leadId: newLead.id, direction: "inbound", body: bodyRaw });
+
+      if (!isWithinOperatingHours(business)) {
+        const afterHoursBody = buildAfterHoursMessage(business);
+        await sendSms({ from: business.twilio_from_number, to: from, body: afterHoursBody });
+        await saveMessage({ leadId: newLead.id, direction: "outbound", body: afterHoursBody });
+        return res.status(200).send("OK");
+      }
+
+      const coldFlowConfig = getFlowConfig(business);
+      const firstMessage = buildIntro(coldFlowConfig, null, business.name);
+      await sendSms({ from: business.twilio_from_number, to: from, body: firstMessage });
+      await saveMessage({ leadId: newLead.id, direction: "outbound", body: firstMessage });
+      return res.status(200).send("OK");
+    }
 
     // Record inbound message
     await saveMessage({ leadId: lead.id, direction: "inbound", body: bodyRaw });
@@ -1745,6 +1740,12 @@ app.post("/api/webhook/podium/:businessId", async (req, res) => {
     const business = await getBusinessById(req.params.businessId);
     if (!business) return res.status(404).json({ ok: false, error: "Business not found" });
 
+    const webhookSecret = business.integrations?.webhook_secret;
+    if (webhookSecret) {
+      const provided = req.headers["x-cove-secret"] || "";
+      if (provided !== webhookSecret) return res.status(401).json({ ok: false, error: "Invalid webhook secret" });
+    }
+
     const { customerName, customer_name, name, customerPhone, customer_phone, phone, customerMessage, customer_message, message, customerEmail, customer_email, email } = req.body || {};
     const customerPhoneRaw = customerPhone || customer_phone || phone || null;
     if (!customerPhoneRaw) return res.status(400).json({ ok: false, error: "Phone number is required" });
@@ -1765,11 +1766,15 @@ app.post("/api/webhook/podium/:businessId", async (req, res) => {
 
     const flowConfig = getFlowConfig(business);
     if (!isWithinOperatingHours(business)) {
-      await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: buildAfterHoursMessage(business) });
+      const afterHoursBody = buildAfterHoursMessage(business);
+      await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: afterHoursBody });
+      await saveMessage({ leadId: lead.id, direction: "outbound", body: afterHoursBody });
       return res.json({ ok: true, leadId: lead.id });
     }
 
-    await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: buildIntro(flowConfig, lead.name, business.name) });
+    const introBody = buildIntro(flowConfig, lead.name, business.name);
+    await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: introBody });
+    await saveMessage({ leadId: lead.id, direction: "outbound", body: introBody });
     return res.json({ ok: true, leadId: lead.id });
   } catch (error) {
     console.error("Podium webhook error:", error);
@@ -1781,6 +1786,12 @@ app.post("/api/webhook/generic/:businessId", async (req, res) => {
   try {
     const business = await getBusinessById(req.params.businessId);
     if (!business) return res.status(404).json({ ok: false, error: "Business not found" });
+
+    const webhookSecret = business.integrations?.webhook_secret;
+    if (webhookSecret) {
+      const provided = req.headers["x-cove-secret"] || "";
+      if (provided !== webhookSecret) return res.status(401).json({ ok: false, error: "Invalid webhook secret" });
+    }
 
     const { name, phone, email, message, source } = req.body || {};
     if (!phone) return res.status(400).json({ ok: false, error: "phone is required" });
@@ -1801,11 +1812,15 @@ app.post("/api/webhook/generic/:businessId", async (req, res) => {
 
     const flowConfig = getFlowConfig(business);
     if (!isWithinOperatingHours(business)) {
-      await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: buildAfterHoursMessage(business) });
+      const afterHoursBody = buildAfterHoursMessage(business);
+      await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: afterHoursBody });
+      await saveMessage({ leadId: lead.id, direction: "outbound", body: afterHoursBody });
       return res.json({ ok: true, leadId: lead.id });
     }
 
-    await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: buildIntro(flowConfig, name, business.name) });
+    const introBody = buildIntro(flowConfig, name, business.name);
+    await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: introBody });
+    await saveMessage({ leadId: lead.id, direction: "outbound", body: introBody });
     return res.json({ ok: true, leadId: lead.id });
   } catch (error) {
     console.error("Generic webhook error:", error);

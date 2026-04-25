@@ -185,6 +185,17 @@
   });
 })();
 
+// ─── Sticky CTA — show only after hero button scrolls out of view ───
+(function () {
+  var stickyCta = document.querySelector(".sticky-cta");
+  var heroCta = document.querySelector(".hero__cta-main");
+  if (!stickyCta || !heroCta) return;
+  var io = new IntersectionObserver(function (entries) {
+    stickyCta.classList.toggle("show", !entries[0].isIntersecting);
+  });
+  io.observe(heroCta);
+})();
+
 // ─── Scroll Reveal ───
 (function () {
   var els = document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-scale");

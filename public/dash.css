@@ -1998,6 +1998,14 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .int-tab svg { width: 14px; height: 14px; flex-shrink: 0; }
 .int-tab:hover:not(.int-tab--active) { color: var(--text); }
 .int-tab--active { color: var(--accent); border-bottom-color: var(--accent); }
+.int-tab-badge {
+  font-size: .58rem; font-weight: 700; letter-spacing: .02em;
+  padding: 2px 6px; border-radius: 99px; margin-left: 2px;
+  vertical-align: middle; line-height: 1.4; white-space: nowrap;
+}
+.int-tab-badge--active { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.int-tab-badge--needs-setup { background: #fff3cd; color: #856404; border: 1px solid #fde68a; }
+.int-tab-badge--opt { background: #f4f4f5; color: #a1a1aa; border: 1px solid #e4e4e7; }
 .int-panel { display: none; flex-direction: column; gap: 12px; }
 .int-panel--active { display: flex; }
 
