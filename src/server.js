@@ -112,15 +112,20 @@ import {
 import { normalizePhone } from "./phone.js";
 import { sendSms } from "./sms.js";
 import { day1Email, day4Email, day11Email } from "./trial-emails.js";
-import twilio from "twilio";
+import twilio, { validateRequest as twilioValidateRequest } from "twilio";
 
 // ─── Twilio signature validation middleware ───
 function validateTwilioSignature(req, res, next) {
   if (!config.twilio.authToken) return next(); // skip in dev / when Twilio not configured
   const signature = req.headers["x-twilio-signature"] || "";
-  const rawBase = (process.env.PRODUCTION_URL || config.baseUrl).trim();
-  const url = `${rawBase}${req.originalUrl}`;
-  if (!twilio.validateRequest(config.twilio.authToken, signature, url, req.body || {})) {
+  // Mirror provisionTwilioNumber's URL logic so validation always matches the configured webhook URL.
+  // BASE_URL (config.baseUrl) is the canonical public domain — use it unless we're running locally.
+  const rawBase = (config.baseUrl || "").trim();
+  const base = (rawBase.startsWith("http://localhost") || rawBase.startsWith("http://127"))
+    ? (process.env.PRODUCTION_URL || "https://usecove.app").trim()
+    : rawBase;
+  const url = `${base}${req.originalUrl}`;
+  if (!twilioValidateRequest(config.twilio.authToken, signature, url, req.body || {})) {
     console.warn("[twilio] Rejected request with invalid signature from", req.ip);
     return res.status(403).send("Forbidden");
   }
@@ -1116,6 +1121,9 @@ app.post("/api/lead", async (req, res) => {
     if (!business) {
       return res.status(404).json({ ok: false, error: "Business not found or inactive" });
     }
+    if (!business.twilio_from_number) {
+      return res.status(503).json({ ok: false, error: "SMS number not yet provisioned for this business" });
+    }
 
     const normalizedPhone = normalizePhone(phone, config.defaultCountryCode);
     if (!normalizedPhone) {
@@ -1453,6 +1461,15 @@ app.post("/api/sms/inbound", validateTwilioSignature, async (req, res) => {
     const business = await getBusinessByTwilioNumber(to);
     if (!business || !business.is_active) return res.status(200).send("OK");
 
+    // Subscription gate — mirrors voice/inbound
+    if (business.user_id) {
+      const bizUser = await getUserById(business.user_id);
+      const BLOCKED = ["canceled", "past_due", "unpaid", "paused"];
+      if (bizUser?.subscription_status && BLOCKED.includes(bizUser.subscription_status)) {
+        return res.status(200).send("OK");
+      }
+    }
+
     let lead = await getLatestActiveLeadByBusinessAndPhone({ businessId: business.id, phone: from });
 
     if (!lead) {
@@ -1508,6 +1525,7 @@ app.post("/api/sms/inbound", validateTwilioSignature, async (req, res) => {
         const ownerPhone = normalizePhone(business.owner_notify_phone, config.defaultCountryCode);
         const alert = buildExitSummary(lead, business, bodyRaw, reason);
         await sendSms({ from: business.twilio_from_number, to: ownerPhone, body: alert });
+        await saveMessage({ leadId: lead.id, direction: "outbound", body: alert });
       }
 
       await updateLead(lead.id, {
@@ -1745,6 +1763,9 @@ app.post("/api/webhook/podium/:businessId", async (req, res) => {
       const provided = req.headers["x-cove-secret"] || "";
       if (provided !== webhookSecret) return res.status(401).json({ ok: false, error: "Invalid webhook secret" });
     }
+    if (!business.twilio_from_number) {
+      return res.status(503).json({ ok: false, error: "SMS number not yet provisioned for this business" });
+    }
 
     const { customerName, customer_name, name, customerPhone, customer_phone, phone, customerMessage, customer_message, message, customerEmail, customer_email, email } = req.body || {};
     const customerPhoneRaw = customerPhone || customer_phone || phone || null;
@@ -1791,6 +1812,9 @@ app.post("/api/webhook/generic/:businessId", async (req, res) => {
     if (webhookSecret) {
       const provided = req.headers["x-cove-secret"] || "";
       if (provided !== webhookSecret) return res.status(401).json({ ok: false, error: "Invalid webhook secret" });
+    }
+    if (!business.twilio_from_number) {
+      return res.status(503).json({ ok: false, error: "SMS number not yet provisioned for this business" });
     }
 
     const { name, phone, email, message, source } = req.body || {};

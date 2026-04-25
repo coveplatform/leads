@@ -1,16 +1,15 @@
 import twilio from "twilio";
 import { config } from "./config.js";
 
-const twilioClient = twilio(config.twilio.accountSid, config.twilio.authToken);
+let _client = null;
+function getClient() {
+  if (!_client) _client = twilio(config.twilio.accountSid, config.twilio.authToken);
+  return _client;
+}
 
 export async function sendSms({ from, to, body }) {
   if (!from || !to || !body) {
     throw new Error("sendSms requires from, to, and body");
   }
-
-  return twilioClient.messages.create({
-    from,
-    to,
-    body,
-  });
+  return getClient().messages.create({ from, to, body });
 }
