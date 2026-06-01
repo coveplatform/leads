@@ -330,15 +330,6 @@
       color: #e8540a; font-weight: 600; letter-spacing: .02em;
     }
 
-    .cf-test-block { border: 1.5px solid #E4E4E7; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; background: #fff; }
-    .cf-test-title { font-size: .82rem; font-weight: 700; color: #3F3F46; margin-bottom: .65rem; }
-    .cf-test-row { display: flex; gap: .6rem; margin-bottom: .5rem; }
-    .cf-test-input { flex: 1; padding: .6rem .85rem; font-size: .9rem; font-family: inherit; border: 1.5px solid #E4E4E7; border-radius: 8px; background: #fff; color: #18181B; outline: none; }
-    .cf-test-input:focus { border-color: #e8540a; }
-    .cf-test-status { font-size: .82rem; font-weight: 600; min-height: 1.2rem; margin-bottom: .2rem; }
-    .cf-test-status.success { color: #16A34A; }
-    .cf-test-status.error { color: #DC2626; }
-    .cf-test-note { font-size: .78rem; color: #A1A1AA; }
 
     /* ── Carrier tiles ── */
     .cf-carrier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; }
@@ -736,7 +727,6 @@
       .ob-complete-icon { width: 44px; height: 44px; }
       /* Step 2a info items — tighter gap on tiny screens */
       .ob-actions { margin-top: 1.25rem; }
-      .cf-test-row { flex-direction: column; }
     }
   </style>
 </head>
@@ -914,8 +904,8 @@
       <!-- Step 2: AI flow -->
       <div id="step-2" class="ob-form-inner hidden">
         <div class="ob-step-label">Step 2 of 4</div>
-        <h1 class="ob-heading">Your questions are ready.</h1>
-        <p class="ob-sub">Review and edit the questions Cove will text to every missed caller. You can update them anytime from your dashboard.</p>
+        <h1 class="ob-heading">Your auto-reply is ready.</h1>
+        <p class="ob-sub">This is what Cove texts every missed caller: a friendly text-back plus one quick question. Review it below — you can change it anytime from your dashboard.</p>
 
         <div id="flow-loading" class="hidden"></div>
 
@@ -933,7 +923,7 @@
                 <div class="cv-greeting-sub">Sent within 10 seconds of a missed call</div>
               </div>
             </div>
-            <textarea class="cv-greeting-textarea" id="cv-intro-text" rows="2" placeholder="Hi {firstName}, this is {businessName}. We missed your call — mind if we ask a couple of quick questions so we can help you faster?"></textarea>
+            <textarea class="cv-greeting-textarea" id="cv-intro-text" rows="2" placeholder="Hi {firstName}, sorry we missed your call — this is {businessName}. One quick question so we can call you back fast:"></textarea>
             <div class="cv-greeting-hint"><code>{firstName}</code> and <code>{businessName}</code> are filled in automatically</div>
           </div>
 
@@ -1166,17 +1156,6 @@
               <div style="font-size:12px;color:#166534;margin-top:2px">Missed calls will now be captured and qualified automatically.</div>
             </div>
           </div>
-        </div>
-
-        <!-- Test Cove number — shown after carrier is selected -->
-        <div class="cf-test-block" id="cf-test-wrap" style="display:none;margin-top:1rem">
-          <div class="cf-test-title">Test your Cove number <span style="font-weight:400;color:#A1A1AA">(optional)</span></div>
-          <div style="font-size:.78rem;color:#71717A;margin-bottom:.65rem;line-height:1.5">Send a quick SMS to confirm your number is working — handy to check before you go live.</div>
-          <div class="cf-test-row">
-            <input type="tel" class="cf-test-input" id="cf-test-phone" placeholder="Your mobile number" autocomplete="tel" />
-            <button class="btn btn--primary btn--sm" id="cf-test-btn" type="button">Send test</button>
-          </div>
-          <div class="cf-test-status" id="cf-test-status"></div>
         </div>
 
         <div class="ob-actions ob-actions--right" style="margin-top:1.5rem">
@@ -1423,12 +1402,9 @@
         const num = data.business?.twilio_from_number;
         if (num) { fillNumber(num); }
         else { loadNumber(); }
-        // Pre-fill test phone + send-to-phone with their saved notify number
+        // Remember their saved notify number for the "send setup to phone" action
         const notifyPhone = data.business?.owner_notify_phone;
         if (notifyPhone) {
-          const local = notifyPhone.startsWith('+61') ? '0' + notifyPhone.slice(3) : notifyPhone;
-          const testInput = document.getElementById('cf-test-phone');
-          if (testInput && !testInput.value) testInput.value = local;
           bizData.notifyPhone = notifyPhone;
         }
       }).catch(() => loadNumber());
@@ -1546,8 +1522,6 @@
 
         const section = document.getElementById('cf-carrier-section');
         if (section) section.style.display = 'block';
-        const testWrap = document.getElementById('cf-test-wrap');
-        if (testWrap) testWrap.style.display = 'block';
 
         // All carriers: show tap-to-activate
         document.getElementById('cf-activate-link').style.display = '';
@@ -1567,10 +1541,10 @@
     document.getElementById('cf-send-phone-btn')?.addEventListener('click', async function() {
       if (!_coveNumber || !_selectedCarrier) return;
       const code = getDialCode(_selectedCarrier, _coveNumber);
-      const phone = bizData.notifyPhone || document.getElementById('cf-test-phone')?.value.trim();
+      const phone = bizData.notifyPhone;
       const status = document.getElementById('cf-send-status');
       if (!phone) {
-        if (status) { status.textContent = 'Enter your number in the test box below first.'; status.style.color = '#DC2626'; }
+        if (status) { status.textContent = 'Add your mobile number in the notifications step first.'; status.style.color = '#DC2626'; }
         return;
       }
       this.disabled = true; this.textContent = 'Sending…';
@@ -1630,38 +1604,6 @@
           loadNumber();
         });
       }
-    }
-
-    // ─── Test SMS ───
-    const testBtn = document.getElementById('cf-test-btn');
-    if (testBtn) {
-      testBtn.addEventListener('click', async () => {
-        const phone = document.getElementById('cf-test-phone').value.trim();
-        const status = document.getElementById('cf-test-status');
-        if (!phone) { status.textContent = 'Enter your mobile number first.'; status.className = 'cf-test-status error'; return; }
-        testBtn.disabled = true; testBtn.textContent = 'Sending…';
-        status.textContent = ''; status.className = 'cf-test-status';
-        try {
-          const r = await fetch('/api/demo/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone, message: `Hi, this is a test from Cove. Your number is working.\n\nOnce you've set up call forwarding, missed calls to your business number will automatically trigger an SMS qualification flow.` })
-          });
-          let res;
-          try { res = await r.json(); } catch { res = { ok: false, error: 'Server error — try again.' }; }
-          if (res.ok) {
-            status.textContent = 'Test SMS sent — if it arrived, your Cove number is working. Now set up call forwarding above to go live.';
-            status.className = 'cf-test-status success';
-          } else {
-            status.textContent = res.error || 'Could not send — check your number and try again.';
-            status.className = 'cf-test-status error';
-          }
-        } catch(e) {
-          status.textContent = 'Could not send — check your connection and try again.';
-          status.className = 'cf-test-status error';
-        }
-        testBtn.disabled = false; testBtn.textContent = 'Send';
-      });
     }
 
     // ─── One-at-a-time Question Builder ───
@@ -2148,19 +2090,16 @@
       showStep(2);
     });
 
-    // Starter flow — hardcoded placeholder questions, always used (no AI generation)
+    // Starter flow — instant text-back + ONE question (no AI generation).
+    // One question keeps reply rates high; the urgency answer tells the owner
+    // whether to call back now.
     function makeFallbackFlow() {
       const biz = bizData.businessName || 'our team';
       return {
-        intro: `Hi! Thanks for calling ${biz} — we missed you. We'll ask you 3 quick questions so we can call you back faster.`,
+        intro: `Hi! Sorry we missed your call — this is ${biz}. One quick question so we can call you back fast:`,
         steps: [
-          { id: 'q1', key: 'name', question: "What's your name?", free_text: true,
-            options: [], invalid_text: null, urgent_values: [] },
-          { id: 'q2', key: 'service', question: 'What do you need help with?', free_text: false,
-            options: [{ value: 'A', label: 'General enquiry' }, { value: 'B', label: 'Urgent job' }, { value: 'C', label: 'Get a quote' }],
-            invalid_text: 'Please reply A, B or C.', urgent_values: ['B'] },
-          { id: 'q3', key: 'timing', question: 'How soon do you need us?', free_text: false,
-            options: [{ value: 'A', label: 'ASAP' }, { value: 'B', label: 'Today' }, { value: 'C', label: 'This week' }],
+          { id: 'q1', key: 'urgency', question: 'How urgent is it?', free_text: false,
+            options: [{ value: 'A', label: 'Urgent — need help today' }, { value: 'B', label: 'This week' }, { value: 'C', label: 'Just enquiring' }],
             invalid_text: 'Please reply A, B or C.', urgent_values: ['A'] },
         ],
       };

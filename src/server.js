@@ -99,6 +99,9 @@ import {
   saveTwilioNumber,
   markLeadCalled,
   getLeadByIdAndBusiness,
+  recordInboundCall,
+  setLeadOutcome,
+  getBusinessStats,
 } from "./db.js";
 import {
   isWithinOperatingHours,
@@ -112,7 +115,8 @@ import {
 import { normalizePhone } from "./phone.js";
 import { sendSms } from "./sms.js";
 import { day1Email, day4Email, day11Email } from "./trial-emails.js";
-import twilio, { validateRequest as twilioValidateRequest } from "twilio";
+import twilio from "twilio";
+const twilioValidateRequest = twilio.validateRequest;
 
 // ─── Twilio signature validation middleware ───
 function validateTwilioSignature(req, res, next) {
@@ -671,6 +675,48 @@ app.get("/api/me/leads", requireAuth, async (req, res) => {
   }
 });
 
+// ─── Dashboard scoreboard stats (recovered revenue) ───
+app.get("/api/me/stats", requireAuth, async (req, res) => {
+  try {
+    const business = await getBusinessByUserId(req.userId);
+    if (!business) return res.json({ ok: true, stats: null });
+
+    const daysParam = req.query.days;
+    const days = daysParam === "all" ? null : (Number(daysParam) || 30);
+    const raw = await getBusinessStats(business.id, days);
+
+    const captured = Number(raw.captured) || 0;
+    const qualified = Number(raw.qualified) || 0;
+    const won = Number(raw.won) || 0;
+    const lost = Number(raw.lost) || 0;
+    const wonValue = Number(raw.won_value) || 0;
+    const avgJobValue = Number(business.avg_job_value) || 0;
+
+    // Recovered revenue = actual booked value of won jobs. If the owner marked jobs
+    // won but didn't enter values, fall back to their average job value × won count.
+    const recovered = wonValue > 0
+      ? wonValue
+      : (avgJobValue > 0 ? won * avgJobValue : 0);
+
+    // Potential still in play = qualified leads not yet won/lost, valued at average.
+    const openQualified = Math.max(qualified - won - lost, 0);
+    const potential = avgJobValue > 0 ? openQualified * avgJobValue : 0;
+
+    return res.json({
+      ok: true,
+      stats: {
+        captured, qualified, won, lost,
+        recovered, potential,
+        avgJobValue,
+        hasOutcomes: won + lost > 0,
+      },
+    });
+  } catch (err) {
+    console.error("Get stats error:", err);
+    return res.status(500).json({ ok: false, error: "Could not fetch stats" });
+  }
+});
+
 // ─── Trial email check (called from dashboard on load) ───
 app.post("/api/trial/check", requireAuth, async (req, res) => {
   try {
@@ -735,15 +781,48 @@ app.post("/api/me/leads/:leadId/mark-called", requireAuth, async (req, res) => {
   }
 });
 
+// ─── Lead outcome (won / lost) — powers the recovered-revenue scoreboard ───
+app.post("/api/me/leads/:leadId/outcome", requireAuth, async (req, res) => {
+  try {
+    const business = await getBusinessByUserId(req.userId);
+    if (!business) return res.status(404).json({ ok: false, error: "No business" });
+
+    let { outcome, jobValue } = req.body || {};
+    if (outcome !== null && !["won", "lost"].includes(outcome)) {
+      return res.status(400).json({ ok: false, error: "outcome must be 'won', 'lost', or null" });
+    }
+    const value = jobValue === undefined || jobValue === null || jobValue === ""
+      ? null
+      : Number(jobValue);
+    if (value !== null && (!Number.isFinite(value) || value < 0)) {
+      return res.status(400).json({ ok: false, error: "Invalid job value" });
+    }
+
+    const updated = await setLeadOutcome(req.params.leadId, business.id, outcome, value);
+    if (!updated) return res.status(404).json({ ok: false, error: "Lead not found" });
+    return res.json({ ok: true, lead: updated });
+  } catch (err) {
+    console.error("Set outcome error:", err);
+    return res.status(500).json({ ok: false, error: "Could not update outcome" });
+  }
+});
+
 app.put("/api/me/business", requireAuth, async (req, res) => {
   try {
     const business = await getBusinessByUserId(req.userId);
     if (!business) return res.status(404).json({ ok: false, error: "No business found" });
 
-    const { name, bookingLink } = req.body || {};
+    const { name, bookingLink, avgJobValue } = req.body || {};
     const updates = {};
     if (name !== undefined) updates.name = name || business.name;
     if (bookingLink !== undefined) updates.bookingLink = bookingLink || null;
+    if (avgJobValue !== undefined) {
+      const v = avgJobValue === null || avgJobValue === "" ? null : Number(avgJobValue);
+      if (v !== null && (!Number.isFinite(v) || v < 0)) {
+        return res.status(400).json({ ok: false, error: "Invalid average job value" });
+      }
+      updates.avgJobValue = v;
+    }
 
     await updateBusiness(business.id, updates);
     return res.json({ ok: true });
@@ -1313,17 +1392,17 @@ app.post("/api/voice/inbound", validateTwilioSignature, async (req, res) => {
       return res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Hangup/></Response>`);
     }
 
-    // ── Forwarding detection ──
-    // Mark forwarding_verified on ANY real inbound call (not a test loopback).
-    // ForwardedFrom can be the business number OR the customer number depending on
-    // carrier; we don't need to match it — any real call proves forwarding works.
-    if (!business.forwarding_verified) {
-      console.log(`[voice/inbound] forwarding verified for business ${business.id}`);
-      updateBusiness(business.id, { forwardingVerified: true }).catch(err =>
-        console.error("[voice/inbound] forwarding verify update error:", err)
-      );
-      business.forwarding_verified = true;
-    }
+    // ── Forwarding heartbeat ──
+    // Every real inbound (forwarded) call stamps last_inbound_call_at and latches
+    // forwarding_verified. ForwardedFrom can be the business number OR the customer
+    // number depending on carrier; we don't need to match it — any real call proves
+    // forwarding works right now. The timestamp lets the dashboard show LIVE health,
+    // not just a one-time "it worked once".
+    console.log(`[voice/inbound] forwarding heartbeat for business ${business.id}`);
+    recordInboundCall(business.id).catch(err =>
+      console.error("[voice/inbound] heartbeat update error:", err)
+    );
+    business.forwarding_verified = true;
 
     // Do SMS work before responding — serverless kills background async after res.send()
     try {
@@ -1419,18 +1498,36 @@ app.post("/api/me/send-test-lead", requireAuth, async (req, res) => {
   }
 });
 
-// ─── Legacy: forwarding test call (kept for backwards compat, now a no-op redirect) ───
-app.post("/api/me/verify-forwarding/start", requireAuth, async (req, res) => {
-  return res.status(410).json({ ok: false, error: "This test method has been replaced. Use the test in Lead Sources instead." });
-});
-
-// ─── Forwarding verification: check status ───
+// ─── Forwarding heartbeat: live health + last-call timestamp ───
+// Powers both the onboarding verification poll and the dashboard health card /
+// "re-test now" flow. last_call_at lets the client confirm a NEW forwarded call
+// landed (timestamp moved forward) even on accounts that were verified long ago.
+const FORWARDING_STALE_DAYS = 30;
 
 app.get("/api/me/forwarding-status", requireAuth, async (req, res) => {
   try {
     const business = await getBusinessByUserId(req.userId);
     if (!business) return res.status(404).json({ ok: false, error: "No business found" });
-    return res.json({ ok: true, forwarding_verified: !!business.forwarding_verified });
+
+    const verified = !!business.forwarding_verified;
+    const lastCallAt = business.last_inbound_call_at || null;
+    const daysSince = lastCallAt
+      ? (Date.now() - new Date(lastCallAt).getTime()) / 86400000
+      : null;
+
+    let health = "not_set_up";
+    if (verified && daysSince != null && daysSince <= FORWARDING_STALE_DAYS) {
+      health = "live";          // a forwarded call landed recently — confirmed working
+    } else if (verified) {
+      health = "verified";      // worked before, but quiet — prompt a re-test
+    }
+
+    return res.json({
+      ok: true,
+      forwarding_verified: verified,
+      last_call_at: lastCallAt,
+      health,
+    });
   } catch (err) {
     console.error("[forwarding-status] error:", err);
     return res.status(500).json({ ok: false, error: "Could not check status" });

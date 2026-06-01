@@ -2,62 +2,43 @@
 // Replaces the hardcoded dental-only flow.js
 
 // ─── Industry Templates ───
+// One question per template. A missed caller wants a human to ring back, not a
+// form — so the SMS is an instant text-back plus a SINGLE high-signal question
+// that (a) tells the owner whether to call NOW and (b) keeps response rates high.
+// The intro is the greeting only; buildIntro appends steps[0].question.
 export const INDUSTRY_TEMPLATES = {
   dental: {
     name: "Dental Clinic",
-    intro: "Hi {firstName}, this is {businessName}. Thanks for contacting us — 3 quick Qs so our team can call you faster.",
-    completion: "Thanks, got it! {businessName} will contact you shortly.",
-    completion_with_booking: "Thanks, got it! {businessName} will contact you shortly. Book directly here: {bookingLink}",
+    intro: "Hi {firstName}, sorry we missed your call — this is {businessName}. One quick question so we can call you back fast:",
+    completion: "Thanks, got it! {businessName} will call you back shortly.",
+    completion_with_booking: "Thanks, got it! {businessName} will call you back shortly. Or book directly here: {bookingLink}",
     steps: [
-      {
-        id: "patient_type",
-        key: "patient_type",
-        question: "Are you a new or existing patient?\nA) New\nB) Existing",
-        invalid_text: "Please reply A for New or B for Existing.",
-        options: [
-          { value: "A", label: "New patient" },
-          { value: "B", label: "Existing patient" },
-        ],
-        urgent_values: [],
-      },
       {
         id: "intent",
         key: "intent",
-        question: "What can we help with today?\n1) Urgent pain\n2) Check-up/clean\n3) Broken tooth/filling\n4) Cosmetic consult\n5) Other",
+        question: "What do you need?\n1) Urgent pain\n2) Check-up/clean\n3) Broken tooth/filling\n4) Cosmetic\n5) Something else",
         invalid_text: "Please reply with a number from 1 to 5.",
         options: [
           { value: "1", label: "Urgent dental pain" },
           { value: "2", label: "Routine check-up and clean" },
           { value: "3", label: "Broken tooth / filling issue" },
           { value: "4", label: "Cosmetic consultation" },
-          { value: "5", label: "Other" },
+          { value: "5", label: "Something else" },
         ],
         urgent_values: ["1"],
-      },
-      {
-        id: "timing",
-        key: "timing",
-        question: "Preferred callback time?\nA) Morning\nB) Afternoon\nC) Next available",
-        invalid_text: "Please reply A for Morning, B for Afternoon, or C for Next available.",
-        options: [
-          { value: "A", label: "Morning" },
-          { value: "B", label: "Afternoon" },
-          { value: "C", label: "Next available" },
-        ],
-        urgent_values: [],
       },
     ],
   },
   plumbing: {
     name: "Plumbing",
-    intro: "Hi {firstName}, this is {businessName}. Quick questions so we can prioritise your job.",
-    completion: "Thanks {firstName}! {businessName} will be in touch shortly.",
-    completion_with_booking: "Thanks {firstName}! {businessName} will be in touch shortly. Or book online: {bookingLink}",
+    intro: "Hi {firstName}, sorry we missed your call — {businessName} here. One quick question so we can prioritise you:",
+    completion: "Thanks {firstName}! {businessName} will call you back shortly.",
+    completion_with_booking: "Thanks {firstName}! {businessName} will call you back shortly. Or book online: {bookingLink}",
     steps: [
       {
         id: "urgency",
         key: "urgency",
-        question: "How urgent is this?\nA) Emergency — water/gas leak now\nB) Urgent — need someone today\nC) Can wait a few days",
+        question: "How urgent is it?\nA) Emergency — water/gas leak now\nB) Need someone today\nC) Can wait a few days",
         invalid_text: "Please reply A, B or C.",
         options: [
           { value: "A", label: "Emergency — active leak" },
@@ -66,45 +47,18 @@ export const INDUSTRY_TEMPLATES = {
         ],
         urgent_values: ["A"],
       },
-      {
-        id: "job_type",
-        key: "job_type",
-        question: "What type of job?\n1) Blocked drain\n2) Leak / burst pipe\n3) Hot water system\n4) Toilet / tap repair\n5) Other",
-        invalid_text: "Please reply with a number from 1 to 5.",
-        options: [
-          { value: "1", label: "Blocked drain" },
-          { value: "2", label: "Leak / burst pipe" },
-          { value: "3", label: "Hot water system" },
-          { value: "4", label: "Toilet / tap repair" },
-          { value: "5", label: "Other" },
-        ],
-        urgent_values: ["2"],
-      },
-      {
-        id: "availability",
-        key: "availability",
-        question: "When are you available?\nA) Now — I'm home\nB) This morning\nC) This afternoon\nD) Tomorrow",
-        invalid_text: "Please reply A, B, C or D.",
-        options: [
-          { value: "A", label: "Now — home" },
-          { value: "B", label: "This morning" },
-          { value: "C", label: "This afternoon" },
-          { value: "D", label: "Tomorrow" },
-        ],
-        urgent_values: [],
-      },
     ],
   },
   electrical: {
     name: "Electrical",
-    intro: "Hi {firstName}, this is {businessName}. Quick Qs to get you sorted fast.",
-    completion: "Thanks! {businessName} will be in touch shortly.",
-    completion_with_booking: "Thanks! {businessName} will be in touch shortly. Or book online: {bookingLink}",
+    intro: "Hi {firstName}, sorry we missed your call — {businessName} here. One quick question to get you sorted fast:",
+    completion: "Thanks! {businessName} will call you back shortly.",
+    completion_with_booking: "Thanks! {businessName} will call you back shortly. Or book online: {bookingLink}",
     steps: [
       {
         id: "safety",
         key: "safety",
-        question: "Is this a safety issue?\nA) Yes — sparking, burning smell, no power\nB) No — general electrical work",
+        question: "Is this a safety issue (sparking, burning smell, no power)?\nA) Yes\nB) No — general electrical work",
         invalid_text: "Please reply A or B.",
         options: [
           { value: "A", label: "Safety issue" },
@@ -112,57 +66,18 @@ export const INDUSTRY_TEMPLATES = {
         ],
         urgent_values: ["A"],
       },
-      {
-        id: "job_type",
-        key: "job_type",
-        question: "What do you need?\n1) Power outage / fault\n2) New lights or power points\n3) Switchboard / safety switch\n4) Fan installation\n5) Other",
-        invalid_text: "Please reply with a number from 1 to 5.",
-        options: [
-          { value: "1", label: "Power outage / fault" },
-          { value: "2", label: "New lights or power points" },
-          { value: "3", label: "Switchboard / safety switch" },
-          { value: "4", label: "Fan installation" },
-          { value: "5", label: "Other" },
-        ],
-        urgent_values: ["1"],
-      },
-      {
-        id: "timing",
-        key: "timing",
-        question: "Preferred time for a callback?\nA) ASAP\nB) Morning\nC) Afternoon",
-        invalid_text: "Please reply A, B or C.",
-        options: [
-          { value: "A", label: "ASAP" },
-          { value: "B", label: "Morning" },
-          { value: "C", label: "Afternoon" },
-        ],
-        urgent_values: [],
-      },
     ],
   },
   hvac: {
     name: "HVAC / Air Conditioning",
-    intro: "Hi {firstName}, this is {businessName}. A few quick questions to get your comfort sorted.",
-    completion: "Thanks! {businessName} will follow up shortly.",
-    completion_with_booking: "Thanks! {businessName} will follow up shortly. Or book here: {bookingLink}",
+    intro: "Hi {firstName}, sorry we missed your call — {businessName} here. One quick question to get your comfort sorted:",
+    completion: "Thanks! {businessName} will call you back shortly.",
+    completion_with_booking: "Thanks! {businessName} will call you back shortly. Or book here: {bookingLink}",
     steps: [
-      {
-        id: "system_type",
-        key: "system_type",
-        question: "What system do you need help with?\nA) Air conditioning\nB) Heating\nC) Both / ducted\nD) Not sure",
-        invalid_text: "Please reply A, B, C or D.",
-        options: [
-          { value: "A", label: "Air conditioning" },
-          { value: "B", label: "Heating" },
-          { value: "C", label: "Both / ducted" },
-          { value: "D", label: "Not sure" },
-        ],
-        urgent_values: [],
-      },
       {
         id: "issue",
         key: "issue",
-        question: "What's the issue?\n1) Not working at all\n2) Not cooling/heating properly\n3) Strange noise or smell\n4) New installation\n5) Service / maintenance",
+        question: "What's happening?\n1) Not working at all\n2) Not heating/cooling properly\n3) Strange noise or smell\n4) New installation\n5) Service / maintenance",
         invalid_text: "Please reply with a number from 1 to 5.",
         options: [
           { value: "1", label: "Not working at all" },
@@ -173,73 +88,33 @@ export const INDUSTRY_TEMPLATES = {
         ],
         urgent_values: ["1", "3"],
       },
-      {
-        id: "timing",
-        key: "timing",
-        question: "When works best for a callback?\nA) ASAP\nB) Morning\nC) Afternoon\nD) This week sometime",
-        invalid_text: "Please reply A, B, C or D.",
-        options: [
-          { value: "A", label: "ASAP" },
-          { value: "B", label: "Morning" },
-          { value: "C", label: "Afternoon" },
-          { value: "D", label: "This week" },
-        ],
-        urgent_values: [],
-      },
     ],
   },
   legal: {
     name: "Legal Services",
-    intro: "Hi {firstName}, thanks for contacting {businessName}. A few quick questions so we can connect you with the right person.",
-    completion: "Thanks! Someone from {businessName} will be in touch shortly.",
-    completion_with_booking: "Thanks! Someone from {businessName} will be in touch shortly. Or book a consultation: {bookingLink}",
+    intro: "Hi {firstName}, sorry we missed your call — {businessName} here. One quick question so we can call you back:",
+    completion: "Thanks! Someone from {businessName} will call you back shortly.",
+    completion_with_booking: "Thanks! Someone from {businessName} will call you back shortly. Or book a consultation: {bookingLink}",
     steps: [
-      {
-        id: "matter_type",
-        key: "matter_type",
-        question: "What type of matter?\n1) Family / divorce\n2) Property / conveyancing\n3) Wills & estates\n4) Employment\n5) Business / commercial\n6) Other",
-        invalid_text: "Please reply with a number from 1 to 6.",
-        options: [
-          { value: "1", label: "Family / divorce" },
-          { value: "2", label: "Property / conveyancing" },
-          { value: "3", label: "Wills & estates" },
-          { value: "4", label: "Employment" },
-          { value: "5", label: "Business / commercial" },
-          { value: "6", label: "Other" },
-        ],
-        urgent_values: [],
-      },
       {
         id: "urgency",
         key: "urgency",
-        question: "How urgent is this?\nA) Very — court date or deadline soon\nB) Moderate — need advice this week\nC) Just exploring options",
+        question: "How urgent is your matter?\nA) Very — court date or deadline soon\nB) This week\nC) Just exploring options",
         invalid_text: "Please reply A, B or C.",
         options: [
           { value: "A", label: "Very urgent — deadline" },
-          { value: "B", label: "Moderate — this week" },
+          { value: "B", label: "This week" },
           { value: "C", label: "Exploring options" },
         ],
         urgent_values: ["A"],
-      },
-      {
-        id: "consult_pref",
-        key: "consult_pref",
-        question: "Preferred consultation type?\nA) Phone call\nB) In-person meeting\nC) Video call",
-        invalid_text: "Please reply A, B or C.",
-        options: [
-          { value: "A", label: "Phone call" },
-          { value: "B", label: "In-person" },
-          { value: "C", label: "Video call" },
-        ],
-        urgent_values: [],
       },
     ],
   },
   general: {
     name: "General Service Business",
-    intro: "Hi {firstName}, this is {businessName}. Quick questions so we can help you faster.",
-    completion: "Thanks! {businessName} will be in touch shortly.",
-    completion_with_booking: "Thanks! {businessName} will be in touch shortly. Or book online: {bookingLink}",
+    intro: "Hi {firstName}, sorry we missed your call — this is {businessName}. One quick question so we can help you faster:",
+    completion: "Thanks! {businessName} will call you back shortly.",
+    completion_with_booking: "Thanks! {businessName} will call you back shortly. Or book online: {bookingLink}",
     steps: [
       {
         id: "urgency",
@@ -252,28 +127,6 @@ export const INDUSTRY_TEMPLATES = {
           { value: "C", label: "Not urgent" },
         ],
         urgent_values: ["A"],
-      },
-      {
-        id: "service_type",
-        key: "service_type",
-        question: "What service do you need? (Reply with a short description)",
-        invalid_text: null,
-        options: [],
-        urgent_values: [],
-        free_text: true,
-      },
-      {
-        id: "timing",
-        key: "timing",
-        question: "Best time for a callback?\nA) ASAP\nB) Morning\nC) Afternoon\nD) Tomorrow",
-        invalid_text: "Please reply A, B, C or D.",
-        options: [
-          { value: "A", label: "ASAP" },
-          { value: "B", label: "Morning" },
-          { value: "C", label: "Afternoon" },
-          { value: "D", label: "Tomorrow" },
-        ],
-        urgent_values: [],
       },
     ],
   },

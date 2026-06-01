@@ -64,14 +64,14 @@ export async function getBusinessByUserId(userId) {
 export async function getRecentLeadsByBusinessId(businessId, days = 7) {
   const rows = days == null
     ? await sql`
-        SELECT id, name, phone, status, current_step, answers, created_at, finished_at
+        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value, created_at, finished_at
         FROM leads
         WHERE business_id = ${businessId}
         ORDER BY created_at DESC
         LIMIT 200
       `
     : await sql`
-        SELECT id, name, phone, status, current_step, answers, created_at, finished_at
+        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value, created_at, finished_at
         FROM leads
         WHERE business_id = ${businessId}
           AND created_at > NOW() - ${days + ' days'}::interval
@@ -79,6 +79,34 @@ export async function getRecentLeadsByBusinessId(businessId, days = 7) {
         LIMIT 200
       `;
   return rows;
+}
+
+// ─── Dashboard scoreboard stats ───
+// Aggregates lead outcomes for the "recovered revenue" overview. days=null = all-time.
+export async function getBusinessStats(businessId, days = 30) {
+  const rows = days == null
+    ? await sql`
+        SELECT
+          COUNT(*)::int                                              AS captured,
+          COUNT(*) FILTER (WHERE status = 'completed')::int          AS qualified,
+          COUNT(*) FILTER (WHERE outcome = 'won')::int               AS won,
+          COUNT(*) FILTER (WHERE outcome = 'lost')::int              AS lost,
+          COALESCE(SUM(job_value) FILTER (WHERE outcome = 'won'), 0) AS won_value
+        FROM leads
+        WHERE business_id = ${businessId}
+      `
+    : await sql`
+        SELECT
+          COUNT(*)::int                                              AS captured,
+          COUNT(*) FILTER (WHERE status = 'completed')::int          AS qualified,
+          COUNT(*) FILTER (WHERE outcome = 'won')::int               AS won,
+          COUNT(*) FILTER (WHERE outcome = 'lost')::int              AS lost,
+          COALESCE(SUM(job_value) FILTER (WHERE outcome = 'won'), 0) AS won_value
+        FROM leads
+        WHERE business_id = ${businessId}
+          AND created_at > NOW() - ${days + ' days'}::interval
+      `;
+  return rows[0];
 }
 
 export async function getBusinessById(id) {
@@ -199,11 +227,23 @@ export async function updateBusiness(businessId, fields) {
       integrations      = COALESCE(${fields.integrations ? JSON.stringify(fields.integrations) : null}::jsonb, integrations),
       user_id           = COALESCE(${fields.userId ?? null}, user_id),
       is_active         = COALESCE(${fields.isActive ?? null}, is_active),
+      avg_job_value     = COALESCE(${fields.avgJobValue ?? null}, avg_job_value),
       forwarding_verified = COALESCE(${fields.forwardingVerified ?? null}, forwarding_verified)
     WHERE id = ${businessId}
     RETURNING *
   `;
   return rows[0];
+}
+
+// ─── Forwarding heartbeat ───
+// Called on every real inbound (forwarded) call. Stamps the time and latches
+// forwarding_verified — together these let the dashboard show live health.
+export async function recordInboundCall(businessId) {
+  await sql`
+    UPDATE businesses
+    SET last_inbound_call_at = now(), forwarding_verified = true
+    WHERE id = ${businessId}
+  `;
 }
 
 export async function getAllBusinesses() {
@@ -453,6 +493,19 @@ export async function markLeadCalled(leadId, businessId) {
     UPDATE leads SET answers = ${JSON.stringify(answers)}::jsonb WHERE id = ${rows[0].id}
   `;
   return true;
+}
+
+// outcome: 'won' | 'lost' | null (clears). jobValue: numeric or null (leaves unchanged).
+export async function setLeadOutcome(leadId, businessId, outcome, jobValue) {
+  const rows = await sql`
+    UPDATE leads SET
+      outcome   = ${outcome},
+      job_value = COALESCE(${jobValue ?? null}, job_value),
+      updated_at = now()
+    WHERE id = ${leadId} AND business_id = ${businessId}
+    RETURNING id, outcome, job_value
+  `;
+  return rows[0] || null;
 }
 
 export async function getLeadByIdAndBusiness(leadId, businessId) {

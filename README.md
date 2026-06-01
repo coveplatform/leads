@@ -39,13 +39,12 @@ npm run dev             # http://localhost:3000
 
 ## Features
 
-### Custom Flow Builder (`/flow-builder.html`)
-- Visual drag-drop node editor for SMS qualification flows
+### SMS Qualification Flow
+- Instant text-back + one high-signal question per missed call
 - 6 industry templates (dental, plumbing, electrical, HVAC, legal, general)
-- AI-powered flow generation — describe a business and get custom questions
-- Per-step urgent value triggers (e.g. "Emergency" sends instant alert to owner)
-- Live SMS preview as you build
-- Free-text step support for open-ended questions
+- AI-powered flow generation — describe a business and get a custom question
+- Urgent value triggers (e.g. "Emergency" sends an instant alert to the owner)
+- Edited in onboarding and the dashboard flow view
 
 ### AI Smart Replies
 - When `OPENAI_API_KEY` is set, leads can reply in natural language
@@ -131,4 +130,4 @@ window.PodiumEventsCallback = function(event, properties) {
 - Use E.164 phone format (`+614...`) for reliable matching.
 - Twilio enforces SMS compliance; STOP/UNSUBSCRIBE handling is built in.
 - Flow config is stored as JSONB on the businesses table — no separate flows table needed.
-- The old hardcoded dental flow in `src/flow.js` is preserved but no longer used by the server.
+- Flows are an instant text-back + one qualifying question (see `src/flow-engine.js` templates).

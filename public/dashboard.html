@@ -110,6 +110,11 @@
           <h1 class="page-header__title" id="biz-name-header">Your business</h1>
           <span id="live-badge"></span>
         </div>
+        <div class="fwd-health" id="fwd-health" style="display:none">
+          <span class="fwd-health__dot"></span>
+          <span id="fwd-health-text">Checking forwarding…</span>
+          <button class="fwd-health__retest" id="fwd-health-retest" type="button" style="display:none">Re-test now</button>
+        </div>
       </div>
 
       <!-- Getting started panel (hidden once dismissed or all done) -->
@@ -240,23 +245,24 @@
         </div>
       </div>
 
-      <!-- Stats -->
+      <!-- Scoreboard — recovered revenue leads -->
       <div class="stats-strip" id="stats-strip">
-        <div class="stat-item">
-          <div class="stat-item__val" id="stat-week">0</div>
-          <div class="stat-item__key">Leads this week</div>
+        <div class="stat-item stat-item--hero">
+          <div class="stat-item__val stat-item__val--orange" id="stat-recovered">—</div>
+          <div class="stat-item__key">Recovered revenue · last 30 days</div>
+          <div class="stat-item__note" id="stat-recovered-note">Mark leads won to track the money Cove brings in.</div>
         </div>
         <div class="stat-item">
-          <div class="stat-item__val stat-item__val--green" id="stat-done">0</div>
+          <div class="stat-item__val" id="stat-captured">0</div>
+          <div class="stat-item__key">Calls caught</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__val stat-item__val--green" id="stat-qualified">0</div>
           <div class="stat-item__key">Qualified leads</div>
         </div>
         <div class="stat-item">
-          <div class="stat-item__val stat-item__val--muted" id="stat-abandoned">0</div>
-          <div class="stat-item__key">No reply</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-item__val stat-item__val--orange" id="stat-rate">—</div>
-          <div class="stat-item__key">Response rate</div>
+          <div class="stat-item__val" id="stat-won">0</div>
+          <div class="stat-item__key">Jobs won</div>
         </div>
       </div>
 
@@ -807,6 +813,11 @@
               <input type="url" id="settings-booking" placeholder="https://yoursite.com/book" />
               <span class="hint">Sent to leads when they complete the qualification flow.</span>
             </div>
+            <div class="form-group">
+              <label for="settings-avg-value">Average job value <span class="label-optional">(optional)</span></label>
+              <input type="number" id="settings-avg-value" inputmode="numeric" min="0" step="50" placeholder="350" />
+              <span class="hint">Used to estimate recovered revenue on your dashboard. We use the actual value when you mark a lead won.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1077,13 +1088,13 @@
             { id: 'fake-4', name: 'Marcus Webb', phone: '+61444444444', status: 'active', created_at: new Date(_now - 9000000).toISOString(), answers: { job_type_label: 'Leaking tap', location_label: 'Coogee' } },
             { id: 'fake-5', name: 'Anna Rossi', phone: '+61455555555', status: 'stopped', created_at: new Date(_now - 86400000).toISOString(), answers: {} },
           ];
-          const _total = leadsData.length;
           const _done = leadsData.filter(l => l.status === 'completed').length;
-          const _abandoned = leadsData.filter(l => l.status === 'active' && ((_now - new Date(l.created_at).getTime()) / 60000) > 60).length;
-          document.getElementById('stat-week').textContent = _total > 0 ? _total : '—';
-          document.getElementById('stat-done').textContent = _total > 0 ? _done : '—';
-          document.getElementById('stat-abandoned').textContent = _total > 0 ? _abandoned : '—';
-          document.getElementById('stat-rate').textContent = _total > 0 ? Math.round(_done / _total * 100) + '%' : '—';
+          // Dev preview scoreboard
+          document.getElementById('stat-recovered').textContent = '$2,400';
+          document.getElementById('stat-recovered-note').textContent = '2 jobs won · $3,200 still in play';
+          document.getElementById('stat-captured').textContent = leadsData.length;
+          document.getElementById('stat-qualified').textContent = _done;
+          document.getElementById('stat-won').textContent = '2';
 
           fillOverview();
           updateGetStartedPanel();
@@ -1121,7 +1132,11 @@
         // Overview
         fillOverview();
         await loadLeads();
-        setInterval(async () => { try { await loadLeads(); } catch {} }, 30000);
+        loadStats();
+        updateForwardingHealth();
+        setInterval(async () => {
+          try { await loadLeads(); loadStats(); updateForwardingHealth(); } catch {}
+        }, 30000);
         updateGetStartedPanel();
 
         // Handle return from Stripe
@@ -1197,18 +1212,23 @@
 
         let pollInterval = null;
         let pollTimeout = null;
-        function startPolling() {
+        // Baseline timestamp captured when a test starts. Confirmation requires a
+        // NEW forwarded call (timestamp advances past the baseline) — so re-testing
+        // an already-verified account still proves forwarding works right now.
+        function startPolling(baselineCallAt) {
           if (pollInterval) return;
           pollInterval = setInterval(async () => {
             try {
               const r = await fetch('/api/me/forwarding-status').then(x => x.json());
-              if (r.forwarding_verified) {
+              const gotNewCall = r.last_call_at && r.last_call_at !== baselineCallAt;
+              if (gotNewCall) {
                 clearInterval(pollInterval); clearTimeout(pollTimeout);
                 pollInterval = pollTimeout = null;
                 business.forwarding_verified = true;
                 showState('verified');
                 const callsBadge = document.getElementById('itab-calls-badge');
                 if (callsBadge) { callsBadge.textContent = 'Active'; callsBadge.className = 'int-tab-badge int-tab-badge--active'; }
+                updateForwardingHealth();
               }
             } catch { /* silent */ }
           }, 3000);
@@ -1224,10 +1244,22 @@
           }, 120000);
         }
 
-        // "Test forwarding" button — listen for a real forwarded call
-        document.getElementById('fwd-test-btn')?.addEventListener('click', () => {
+        // "Test forwarding" button — capture baseline, then listen for a NEW forwarded call
+        async function beginTest() {
           showState('calling');
-          startPolling();
+          let baseline = null;
+          try {
+            const r = await fetch('/api/me/forwarding-status').then(x => x.json());
+            baseline = r.last_call_at || null;
+          } catch { /* treat as no baseline */ }
+          startPolling(baseline);
+        }
+        document.getElementById('fwd-test-btn')?.addEventListener('click', beginTest);
+        // Re-test link in the heartbeat health line reuses the same flow.
+        document.getElementById('fwd-health-retest')?.addEventListener('click', () => {
+          banner.classList.remove('hidden');
+          beginTest();
+          banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
 
         // Cancel listening
@@ -1332,17 +1364,6 @@
       leadsData = data.leads || [];
 
       const total = leadsData.length;
-      const done = leadsData.filter(l => l.status === 'completed').length;
-      const abandoned = leadsData.filter(l => {
-        if (l.status !== 'active') return false;
-        const age = (Date.now() - new Date(l.created_at).getTime()) / 60000;
-        return age > 60;
-      }).length;
-
-      document.getElementById('stat-week').textContent = total > 0 ? total : '—';
-      document.getElementById('stat-done').textContent = total > 0 ? done : '—';
-      document.getElementById('stat-abandoned').textContent = total > 0 ? abandoned : '—';
-      document.getElementById('stat-rate').textContent = total > 0 ? Math.round(done / total * 100) + '%' : '—';
 
       // Show/hide forwarding banner
       const banner = document.getElementById('forwarding-banner');
@@ -1369,6 +1390,67 @@
       }
 
       renderLeads(leadsData);
+    }
+
+    function fmtMoney(n) {
+      const v = Number(n) || 0;
+      return '$' + Math.round(v).toLocaleString('en-AU');
+    }
+
+    // ─── Scoreboard (recovered revenue) ───
+    async function loadStats() {
+      try {
+        const data = await fetch('/api/me/stats?days=30').then(r => r.json());
+        if (!data.ok || !data.stats) return;
+        const s = data.stats;
+        document.getElementById('stat-captured').textContent = s.captured;
+        document.getElementById('stat-qualified').textContent = s.qualified;
+        document.getElementById('stat-won').textContent = s.won;
+        document.getElementById('stat-recovered').textContent = s.recovered > 0 ? fmtMoney(s.recovered) : '—';
+
+        const note = document.getElementById('stat-recovered-note');
+        if (s.recovered > 0) {
+          note.textContent = s.potential > 0
+            ? `${s.won} job${s.won === 1 ? '' : 's'} won · ${fmtMoney(s.potential)} still in play`
+            : `${s.won} job${s.won === 1 ? '' : 's'} won`;
+        } else if (!s.avgJobValue) {
+          note.textContent = 'Set your average job value in Settings to see recovered revenue.';
+        } else if (s.qualified > 0) {
+          note.textContent = `${fmtMoney(s.potential)} in qualified leads — mark them won as they convert.`;
+        } else {
+          note.textContent = 'Mark leads won to track the money Cove brings in.';
+        }
+      } catch { /* silent — never block dashboard */ }
+    }
+
+    // ─── Forwarding heartbeat health line ───
+    async function updateForwardingHealth() {
+      const wrap = document.getElementById('fwd-health');
+      if (!wrap || !business?.twilio_from_number) return;
+      try {
+        const r = await fetch('/api/me/forwarding-status').then(x => x.json());
+        if (!r.ok) return;
+        wrap.style.display = 'inline-flex';
+        const textEl = document.getElementById('fwd-health-text');
+        const retest = document.getElementById('fwd-health-retest');
+        wrap.classList.remove('fwd-health--live', 'fwd-health--warn');
+
+        if (r.health === 'live') {
+          wrap.classList.add('fwd-health--live');
+          textEl.textContent = `Call forwarding live · last forwarded call ${timeAgo(r.last_call_at)}`;
+          retest.style.display = 'none';
+        } else if (r.health === 'verified') {
+          wrap.classList.add('fwd-health--live');
+          textEl.textContent = r.last_call_at
+            ? `Forwarding confirmed · no calls in a while`
+            : 'Forwarding confirmed · waiting for your first missed call';
+          retest.style.display = 'inline';
+        } else {
+          wrap.classList.add('fwd-health--warn');
+          textEl.textContent = 'Call forwarding not confirmed yet';
+          retest.style.display = 'inline';
+        }
+      } catch { /* silent */ }
     }
 
     function getLeadStatus(lead) {
@@ -2146,6 +2228,8 @@
       document.getElementById('settings-email').value = user.email || '';
       document.getElementById('settings-biz-name').value = business?.name || '';
       document.getElementById('settings-booking').value = business?.booking_link || '';
+      document.getElementById('settings-avg-value').value =
+        (business?.avg_job_value !== null && business?.avg_job_value !== undefined) ? business.avg_job_value : '';
       document.getElementById('settings-pw-current').value = '';
       document.getElementById('settings-pw-new').value = '';
       document.getElementById('settings-pw-confirm').value = '';
@@ -2181,6 +2265,8 @@
       try {
         const bizName = document.getElementById('settings-biz-name').value.trim();
         const bookingLink = document.getElementById('settings-booking').value.trim();
+        const avgRaw = document.getElementById('settings-avg-value').value.trim();
+        const avgJobValue = avgRaw === '' ? null : Number(avgRaw);
 
         const payload = { name };
         if (pwNew) { payload.currentPassword = pwCurrent; payload.newPassword = pwNew; }
@@ -2192,7 +2278,7 @@
           }).then(r => r.json()),
           fetch('/api/me/business', {
             method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: bizName, bookingLink: bookingLink || null }),
+            body: JSON.stringify({ name: bizName, bookingLink: bookingLink || null, avgJobValue }),
           }),
         ]);
 
@@ -2200,6 +2286,7 @@
           user.name = name;
           business.name = bizName;
           business.booking_link = bookingLink || null;
+          business.avg_job_value = avgJobValue;
           document.getElementById('sidebar-name').textContent = name || user.email;
           document.getElementById('biz-name-header').textContent = bizName;
           const bizEl = document.getElementById('sidebar-biz-name');
@@ -2295,6 +2382,9 @@
       } else {
         lbl.textContent = 'Mark as called back';
       }
+
+      // Outcome (won/lost) state
+      setOutcomeUI(lead.outcome || null, lead.job_value);
 
       // Show panel
       panel.classList.add('open');
@@ -2408,6 +2498,12 @@
         const isNew = ageMs < 5 * 60 * 1000;
         const isUrgent = lead.status === 'active' && ageMs < 30 * 60 * 1000;
         const calledBack = lead.answers?._called_back;
+        const wonValue = lead.outcome === 'won' && lead.job_value ? ` ${fmtMoney(lead.job_value)}` : '';
+        const outcomePill = lead.outcome === 'won'
+          ? `<span class="lead-badge lead-badge--done">Won${wonValue}</span>`
+          : lead.outcome === 'lost'
+          ? `<span class="lead-badge lead-badge--stopped">Lost</span>`
+          : '';
         return `<tr class="lead-row${isUrgent ? ' lead-row--urgent' : ''}" data-index="${i}">
           <td class="name-cell">
             <div class="lead-name">${esc(displayName || '—')}</div>
@@ -2418,6 +2514,7 @@
             ${isNew ? '<span class="lead-badge lead-badge--new">New</span>' : ''}
             <span class="lead-badge ${cls}">${label}</span>
             ${calledBack ? '<span class="lead-badge lead-badge--called">Called back</span>' : ''}
+            ${outcomePill}
           </td>
           <td class="time-cell">${timeAgo(lead.created_at)}</td>
           <td class="view-cell"><span class="thread-open-btn">View</span></td>
@@ -2482,6 +2579,18 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.73 12 19.79 19.79 0 0 1 1.66 3.38 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 13 13.91l.27-.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 20 16z"/></svg>
         <span id="mark-called-label">Mark as called back</span>
       </button>
+      <div class="thread-outcome">
+        <div class="thread-outcome__label">Did this lead turn into a job?</div>
+        <div class="thread-outcome__row">
+          <button class="outcome-btn outcome-btn--won" id="outcome-won-btn" type="button">Won</button>
+          <button class="outcome-btn outcome-btn--lost" id="outcome-lost-btn" type="button">Lost</button>
+        </div>
+        <div class="thread-outcome__row outcome-value" id="outcome-value-row" style="display:none">
+          <span class="outcome-value__prefix">Job value $</span>
+          <input type="number" inputmode="numeric" min="0" step="50" id="outcome-value-input" placeholder="0" />
+          <button class="btn btn--secondary btn--sm" id="outcome-value-save" type="button">Save</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2498,6 +2607,59 @@
         currentLeadsDays = days;
         loadAllLeads(days);
       });
+    });
+
+    // ─── Lead outcome (won / lost) ───
+    function setOutcomeUI(outcome, jobValue) {
+      const wonBtn = document.getElementById('outcome-won-btn');
+      const lostBtn = document.getElementById('outcome-lost-btn');
+      const valueRow = document.getElementById('outcome-value-row');
+      const valueInput = document.getElementById('outcome-value-input');
+      wonBtn.classList.toggle('is-active', outcome === 'won');
+      lostBtn.classList.toggle('is-active', outcome === 'lost');
+      // Value only relevant for won jobs
+      valueRow.style.display = outcome === 'won' ? 'flex' : 'none';
+      valueInput.value = (jobValue !== null && jobValue !== undefined) ? jobValue : '';
+    }
+
+    async function saveOutcome(outcome, jobValue) {
+      if (!currentThreadLeadId) return;
+      try {
+        const body = { outcome };
+        if (jobValue !== undefined) body.jobValue = jobValue;
+        const r = await fetch(`/api/me/leads/${currentThreadLeadId}/outcome`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }).then(x => x.json());
+        if (!r.ok) return false;
+        // Keep local cache in sync so re-opening reflects the change
+        const cached = leadsData.find(l => l.id === currentThreadLeadId);
+        if (cached) { cached.outcome = r.lead.outcome; cached.job_value = r.lead.job_value; }
+        loadStats();
+        return true;
+      } catch { return false; }
+    }
+
+    document.getElementById('outcome-won-btn').addEventListener('click', async () => {
+      const isActive = document.getElementById('outcome-won-btn').classList.contains('is-active');
+      const next = isActive ? null : 'won';   // tap again to clear
+      setOutcomeUI(next, document.getElementById('outcome-value-input').value || null);
+      await saveOutcome(next);
+    });
+    document.getElementById('outcome-lost-btn').addEventListener('click', async () => {
+      const isActive = document.getElementById('outcome-lost-btn').classList.contains('is-active');
+      const next = isActive ? null : 'lost';
+      setOutcomeUI(next, null);
+      await saveOutcome(next);
+    });
+    document.getElementById('outcome-value-save').addEventListener('click', async () => {
+      const btn = document.getElementById('outcome-value-save');
+      const val = document.getElementById('outcome-value-input').value;
+      btn.disabled = true; btn.textContent = 'Saving…';
+      const ok = await saveOutcome('won', val === '' ? null : Number(val));
+      btn.textContent = ok ? 'Saved ✓' : 'Try again';
+      setTimeout(() => { btn.disabled = false; btn.textContent = 'Save'; }, 1200);
     });
 
     // Mark as called back

@@ -37,20 +37,17 @@ async function callOpenAI(messages, options = {}) {
 // ─── Generate Flow for Industry ───
 
 export async function generateFlowForIndustry(industry, businessName, extraContext) {
-  const prompt = `You are a lead qualification expert. Generate an SMS qualification flow for a ${industry} business${businessName ? ` called "${businessName}"` : ""}.
+  const prompt = `You are a lead qualification expert. Generate a SHORT SMS auto-reply for a ${industry} business${businessName ? ` called "${businessName}"` : ""}. This is sent automatically when the business MISSES a phone call.
 
 ${extraContext ? `Additional context: ${extraContext}` : ""}
 
-The flow must have exactly 3 questions. Each question should help the business owner:
-1. Understand urgency (should I call back NOW or later?)
-2. Understand what the customer needs (type of job/service)
-3. Know when to contact them (timing preference)
+The reply is an instant text-back plus exactly ONE question. The single question must tell the owner whether to call back NOW or later (urgency / type of need) while being effortless to answer in one tap. Do not ask for timing, contact details, or anything else — keep it to one question so people actually reply.
 
 Return ONLY valid JSON in this exact format (no markdown, no explanation):
 {
-  "intro": "Hi {firstName}, this is {businessName}. [short intro message]",
-  "completion": "Thanks! {businessName} will [action] shortly.",
-  "completion_with_booking": "Thanks! {businessName} will [action] shortly. Or book here: {bookingLink}",
+  "intro": "Hi {firstName}, sorry we missed your call — this is {businessName}. One quick question:",
+  "completion": "Thanks! {businessName} will call you back shortly.",
+  "completion_with_booking": "Thanks! {businessName} will call you back shortly. Or book here: {bookingLink}",
   "steps": [
     {
       "id": "step_key",
@@ -69,14 +66,15 @@ Return ONLY valid JSON in this exact format (no markdown, no explanation):
 }
 
 Rules:
+- steps MUST contain exactly ONE question
 - Use A/B/C letters OR 1/2/3/4/5 numbers for options (not both in same question)
-- Keep questions SHORT — these are SMS messages
+- Keep the question SHORT — it's an SMS
 - urgent_values array: which option values indicate urgency (triggers instant owner alert)
-- The intro MUST contain {firstName} and {businessName} placeholders
+- The intro MUST contain {firstName} and {businessName} placeholders and acknowledge the missed call
 - The completion MUST contain {businessName} placeholder
 - completion_with_booking MUST contain {businessName} and {bookingLink}
-- Make questions industry-specific and natural
-- free_text should be false for all structured questions`;
+- Make the question industry-specific and natural
+- free_text should be false`;
 
   const raw = await callOpenAI([{ role: "user", content: prompt }], {
     temperature: 0.6,
@@ -89,6 +87,9 @@ Rules:
     if (!flow.steps || !Array.isArray(flow.steps) || flow.steps.length === 0) {
       throw new Error("Invalid flow: no steps");
     }
+
+    // Enforce the one-question rule even if the model returns extras.
+    flow.steps = flow.steps.slice(0, 1);
 
     for (const step of flow.steps) {
       if (!step.id) step.id = step.key;
