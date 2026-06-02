@@ -158,6 +158,18 @@ export async function sendLeadNotifications({ business, lead, flowConfig, summar
       answers: {},
       raw_answers: answers,
       is_urgent: false,
+      // Booking (migration 009) — null when the lead didn't book in-conversation.
+      booking: lead.appointment_at
+        ? {
+            appointment_at: lead.appointment_at,
+            status: lead.booking_status || "proposed",
+            label: answers._appointment_label || null,
+          }
+        : null,
+      // Instant-quote range — null unless the quote toggle produced one.
+      quote: (lead.quote_low != null && lead.quote_high != null)
+        ? { low: Number(lead.quote_low), high: Number(lead.quote_high), unit: "job" }
+        : null,
     };
 
     for (const step of (flowConfig?.steps || [])) {

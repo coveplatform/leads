@@ -1,0 +1,52 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { buildSummary, buildBookedAlert, getStepType, INDUSTRY_TEMPLATES } from "../src/flow-engine.js";
+
+const dental = INDUSTRY_TEMPLATES.dental;
+const business = { name: "Smile Dental", operating_hours: { timezone: "Australia/Sydney" } };
+const bookedLead = {
+  name: "Sarah Jones",
+  phone: "+61400000000",
+  answers: { intent_code: "1", intent_label: "Urgent dental pain", _appointment_label: "Tomorrow 8–10am" },
+  appointment_at: "2026-06-04T22:00:00Z",
+  booking_status: "proposed",
+  quote_low: 16000,
+  quote_high: 22000,
+};
+
+test("getStepType defaults to question, reads booking/quote", () => {
+  assert.equal(getStepType({}), "question");
+  assert.equal(getStepType({ type: "booking" }), "booking");
+});
+
+test("buildSummary surfaces the quote range and booked appointment", () => {
+  const s = buildSummary(bookedLead, business, dental);
+  assert.ok(s.includes("Urgent dental pain"));
+  assert.ok(s.includes("$16k–$22k"));
+  assert.ok(s.includes("Tomorrow 8–10am"));
+  assert.ok(s.includes("proposed"));
+  assert.ok(s.includes("Appointment booked"));
+});
+
+test("buildSummary is unchanged for a plain lead (no booking/quote)", () => {
+  const plain = { name: "Bob", phone: "+61400000001", answers: { intent_label: "Routine check-up and clean" } };
+  const s = buildSummary(plain, business, dental);
+  assert.ok(s.includes("Routine check-up and clean"));
+  assert.ok(!s.includes("Booked"));
+  assert.ok(!s.includes("Est. quote"));
+});
+
+test("buildBookedAlert is a punchy owner SMS", () => {
+  const alert = buildBookedAlert(bookedLead, business, {
+    appointmentLabel: "Tomorrow 8–10am",
+    quote: { low: 16000, high: 22000 },
+    flowConfig: dental,
+  });
+  assert.ok(alert.includes("🔥 Booked lead"));
+  assert.ok(alert.includes("Smile Dental"));
+  assert.ok(alert.includes("Sarah Jones"));
+  assert.ok(alert.includes("Urgent dental pain"));
+  assert.ok(alert.includes("Tomorrow 8–10am"));
+  assert.ok(alert.includes("$16k–$22k"));
+  assert.ok(alert.includes("Confirm the time"));
+});

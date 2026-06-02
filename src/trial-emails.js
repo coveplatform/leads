@@ -141,3 +141,50 @@ export function day11Email({ name, bizName, leadCount }) {
 
   return { subject, html, text };
 }
+
+// ─── Monthly "what Cove made you" email (ROI / retention) ───
+export function monthlyRoiEmail({ name, bizName, roi }) {
+  const firstName = name?.split(" ")[0] || "there";
+  const money = (n) => "$" + Math.round(Number(n) || 0).toLocaleString("en-US");
+  const period = roi?.label || "Last month";
+
+  const subject = roi?.estimatedValue > 0
+    ? `${period}: Cove put ~${money(roi.estimatedValue)} of work in front of you`
+    : `${period} with Cove`;
+
+  const stat = (val, lbl, color) => `
+    <td style="padding:6px 8px;text-align:center">
+      <div style="font-size:1.6rem;font-weight:900;letter-spacing:-.04em;color:${color}">${val}</div>
+      <div style="font-size:.72rem;color:#71717a;font-weight:600">${lbl}</div>
+    </td>`;
+
+  const roiNote = roi?.cost && roi.estimatedValue > 0
+    ? `<p style="color:#15803d;font-weight:700;font-size:.95rem;margin:0 0 18px">
+         That's about ${money(roi.estimatedValue)} of work for the ${money(roi.cost)} you paid${roi.roiMultiple ? ` — roughly ${roi.roiMultiple}× back` : ""}.
+       </p>`
+    : "";
+
+  const html = wrap(`
+    <h2 style="font-size:1.35rem;font-weight:800;letter-spacing:-.04em;color:#0e0c0a;margin:0 0 6px">
+      Here's what Cove did for ${bizName || "you"} — ${period}.
+    </h2>
+    <p style="color:#52525b;font-size:.92rem;line-height:1.6;margin:0 0 20px">${roi?.summary || ""}</p>
+
+    <div style="background:#f8f8fa;border:1px solid #e4e4e7;border-radius:12px;padding:18px 12px;margin-bottom:18px">
+      <table style="width:100%;border-collapse:collapse"><tr>
+        ${stat(roi?.recoveredCalls ?? 0, "calls recovered", "#0e0c0a")}
+        ${stat(roi?.booked ?? 0, "booked", "#e8540a")}
+        ${stat(money(roi?.estimatedValue ?? 0), "in jobs", "#16a34a")}
+      </tr></table>
+    </div>
+    ${roiNote}
+
+    <a href="https://usecove.app/dashboard" style="display:inline-block;background:#e8540a;color:#fff;font-size:.9rem;font-weight:700;padding:12px 24px;border-radius:8px;text-decoration:none">
+      See the full breakdown →
+    </a>
+  `);
+
+  const text = `Hi ${firstName},\n\nHere's what Cove did for ${bizName || "you"} — ${period}:\n\n${roi?.summary || ""}\n\n- ${roi?.recoveredCalls ?? 0} calls recovered\n- ${roi?.booked ?? 0} booked\n- ~${money(roi?.estimatedValue ?? 0)} in jobs${roi?.cost ? `\n- you paid ${money(roi.cost)}` : ""}\n\nSee the full breakdown: https://usecove.app/dashboard\n\n— The Cove team`;
+
+  return { subject, html, text };
+}

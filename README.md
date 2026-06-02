@@ -28,6 +28,9 @@ npm run dev             # http://localhost:3000
 | `DEMO_TWILIO_NUMBER` | No | Twilio number for live demo on homepage |
 | `ADMIN_PASSWORD` | No | Password for admin dashboard + flow builder |
 | `OPENAI_API_KEY` | No | Enables AI flow generation + smart reply parsing |
+| `COVE_MONTHLY_PRICE` | No | Subscription price used to frame ROI (default `89`) |
+| `CRON_SECRET` | No | Bearer token guarding the monthly ROI email cron |
+| `SMS_DRY_RUN` | No | `1` makes `sendSms` log instead of calling Twilio (tests only) |
 | `DEBUG` | No | Set `true` for verbose logging |
 
 ## Database setup
@@ -36,6 +39,8 @@ npm run dev             # http://localhost:3000
 2. Copy the connection string into `DATABASE_URL`
 3. Run `sql/schema.sql` in the Neon SQL Editor
 4. Run `migrations/002_flow_engine.sql` to add flow engine columns
+5. Run remaining migrations in order. Latest: `migrations/009_booking_roi.sql`
+   (booking + quote columns) — or `node scripts/run-migration-009.mjs`
 
 ## Features
 
@@ -45,6 +50,24 @@ npm run dev             # http://localhost:3000
 - AI-powered flow generation — describe a business and get a custom question
 - Urgent value triggers (e.g. "Emergency" sends an instant alert to the owner)
 - Edited in onboarding and the dashboard flow view
+
+### In-conversation Booking
+- After triage, Cove offers real appointment windows over SMS and soft-books the pick
+- Slots are generated from the business's `operating_hours` (skips closed days / past times) — no external calendar needed for the MVP (`booking_status = 'proposed'`, owner confirms)
+- Owner gets a punchy "🔥 Booked lead" alert; the booked time + range flow through to webhooks/CRM
+- Toggled per business in the dashboard flow editor (stored in `flow_config.booking`)
+
+### Recovered-revenue / ROI engine
+- `GET /api/me/roi?period=month|last_month|all` aggregates calls recovered, conversations, booked, est. value, won jobs vs. subscription cost
+- Surfaced as the **Overview hero** ("This month: 23 calls recovered · 9 booked · ~$61,000 in jobs · you paid $89")
+- Monthly "what Cove made you" email via Resend, driven by a Vercel cron (`/api/cron/monthly-roi`)
+
+### Instant quote (toggle / upsell)
+- Drops a ballpark **range** before booking, always with an "estimate only" disclaimer
+- Two modes: `matrix` (option → band, e.g. HVAC) and `formula` (numeric inputs → band, e.g. roofing)
+- Owner/AI-authored formulas run through a whitelist guard (`src/quote-formula.js`) — no `eval`/injection
+- Per-business rates, anchored to `avg_job_value`. Stored in `flow_config.quote_spec`
+- **Magic demo** at `/demo` (backed by `POST /api/quote/simulate`) renders capture → quote → book with no Twilio
 
 ### AI Smart Replies
 - When `OPENAI_API_KEY` is set, leads can reply in natural language
@@ -82,9 +105,21 @@ Set Twilio inbound SMS webhook to: `https://your-app.vercel.app/api/sms/inbound`
 ### Core
 - `GET /health`
 - `POST /api/lead` — Create lead + start SMS flow
-- `POST /api/sms/inbound` — Twilio webhook (receives replies)
+- `POST /api/sms/inbound` — Twilio webhook (receives replies; triage → quote → booking)
 - `POST /api/website-inquiry` — Marketing site contact form
 - `POST /api/demo` — Send demo SMS flow to a phone number
+
+### Booking · ROI · Quote
+- `GET /api/me/roi?period=month|last_month|all` — recovered-revenue aggregate (dashboard hero)
+- `POST /api/quote/simulate` — render a capture → quote → book transcript, no Twilio (powers `/demo`)
+- `GET /api/cron/monthly-roi` — monthly "what Cove made you" email (Vercel cron; guarded by `CRON_SECRET`)
+
+## Testing
+
+```bash
+npm test                              # unit + HTTP integration (no DB needed)
+SMS_DRY_RUN=1 node scripts/test-inbound-e2e.mjs   # full inbound E2E (needs a real DATABASE_URL)
+```
 
 ### Admin
 - `POST /api/admin/auth` — Authenticate with admin password

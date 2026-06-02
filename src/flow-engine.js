@@ -1,6 +1,16 @@
 // Dynamic flow engine — interprets JSON flow configs per business
 // Replaces the hardcoded dental-only flow.js
 
+import { formatAppointment } from "./booking.js";
+import { fmtRange } from "./quote.js";
+
+// Step kinds. Existing flows have no `type` and default to 'question', so they
+// are unchanged. 'booking' and 'quote' steps are injected after triage.
+export const STEP_TYPES = { QUESTION: "question", BOOKING: "booking", QUOTE: "quote" };
+export function getStepType(step) {
+  return step?.type || STEP_TYPES.QUESTION;
+}
+
 // ─── Industry Templates ───
 // One question per template. A missed caller wants a human to ring back, not a
 // form — so the SMS is an instant text-back plus a SINGLE high-signal question
@@ -267,6 +277,16 @@ export function buildSummary(lead, business, flowConfig) {
     }
   }
 
+  // Quote range (instant-quote toggle) and booked appointment, when present.
+  if (lead.quote_low != null && lead.quote_high != null) {
+    lines.push(`Est. quote: ${fmtRange({ low: lead.quote_low, high: lead.quote_high })} (estimate only)`);
+  }
+  const apptLabel = formatAppointment(lead, business.operating_hours?.timezone);
+  if (apptLabel) {
+    const statusNote = lead.booking_status === "confirmed" ? "confirmed" : "proposed — confirm with caller";
+    lines.push(`📅 Booked: ${apptLabel} (${statusNote})`);
+  }
+
   const hasUrgent = flowConfig.steps.some((step) => {
     const code = answers[`${step.key}_code`];
     return step.urgent_values?.some(
@@ -275,7 +295,9 @@ export function buildSummary(lead, business, flowConfig) {
   });
 
   lines.push("---");
-  if (hasUrgent) {
+  if (apptLabel) {
+    lines.push("→ Appointment booked. Confirm the time with the lead.");
+  } else if (hasUrgent) {
     lines.push("→ URGENT: Call this lead immediately.");
   } else {
     lines.push("→ Call back in preferred time window.");
@@ -285,6 +307,27 @@ export function buildSummary(lead, business, flowConfig) {
     lines.push(`Booking: ${business.booking_link}`);
   }
 
+  return lines.join("\n");
+}
+
+// Punchy owner SMS for a fresh booking:
+//   "🔥 Booked lead — Sarah, roof replacement, Tomorrow 8–10am, est. ~$16k–$22k"
+export function buildBookedAlert(lead, business, { appointmentLabel, quote, flowConfig } = {}) {
+  const answers = lead.answers || {};
+  // Job descriptor = the first answered triage label.
+  let descriptor = "";
+  for (const step of (flowConfig?.steps || [])) {
+    const label = answers[`${step.key}_label`];
+    if (label) { descriptor = String(label); break; }
+  }
+  const lines = [
+    `🔥 Booked lead — ${business.name || "your business"}`,
+    `${lead.name || "Unknown"} · ${lead.phone}`,
+  ];
+  if (descriptor) lines.push(descriptor);
+  if (appointmentLabel) lines.push(`📅 ${appointmentLabel}`);
+  if (quote) lines.push(`Est. ${fmtRange(quote)} (estimate only)`);
+  lines.push("→ Confirm the time with them.");
   return lines.join("\n");
 }
 
