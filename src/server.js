@@ -37,11 +37,25 @@ import {
   buildSummary,
   buildUrgentAlert,
   buildExitSummary,
+  buildBookedAlert,
   isStopKeyword,
   buildStoppedMessage,
   getIndustryList,
   INDUSTRY_TEMPLATES,
 } from "./flow-engine.js";
+import {
+  buildBookingStep,
+  parseBookingReply,
+  formatAppointment,
+} from "./booking.js";
+import {
+  computeQuoteFromAnswers,
+  buildQuoteSentence,
+  getQuoteSpecForTrade,
+  validateQuoteSpec,
+  fmtRange,
+} from "./quote.js";
+import { computeRoi } from "./roi.js";
 import {
   generateFlowForIndustry,
   parseNaturalLanguageReply,
@@ -102,6 +116,7 @@ import {
   recordInboundCall,
   setLeadOutcome,
   getBusinessStats,
+  setLeadBooking,
 } from "./db.js";
 import {
   isWithinOperatingHours,
@@ -114,7 +129,7 @@ import {
 } from "./integrations.js";
 import { normalizePhone } from "./phone.js";
 import { sendSms } from "./sms.js";
-import { day1Email, day4Email, day11Email } from "./trial-emails.js";
+import { day1Email, day4Email, day11Email, monthlyRoiEmail } from "./trial-emails.js";
 import twilio from "twilio";
 const twilioValidateRequest = twilio.validateRequest;
 
@@ -184,6 +199,87 @@ function resolveFlowConfig(lead, business) {
   const stored = lead?.answers?._flow_config;
   if (stored && Array.isArray(stored.steps) && stored.steps.length > 0) return stored;
   return getFlowConfig(business);
+}
+
+// ─── Booking + completion helpers (migration 009) ───
+
+// Notify owner/CRM once the conversation finishes. For a fresh booking the owner
+// SMS is the punchy buildBookedAlert; otherwise the full lead summary. The
+// webhook payload always carries structured booking/quote (see integrations.js).
+async function finalizeAndNotify({ business, lead, flowConfig, booked }) {
+  let summary;
+  if (booked) {
+    const appointmentLabel = lead.answers?._appointment_label
+      || formatAppointment(lead, business.operating_hours?.timezone);
+    const quote = (lead.quote_low != null && lead.quote_high != null)
+      ? { low: lead.quote_low, high: lead.quote_high } : null;
+    summary = buildBookedAlert(lead, business, { appointmentLabel, quote, flowConfig });
+  } else {
+    summary = buildSummary(lead, business, flowConfig);
+  }
+  await sendLeadNotifications({
+    business, lead, flowConfig, summary,
+    sendSmsFn: sendSms, normalizePhoneFn: normalizePhone, defaultCountryCode: config.defaultCountryCode,
+  });
+}
+
+// Handle the caller's reply to the in-conversation booking offer.
+async function handleBookingReply({ res, business, lead, flowConfig, bodyRaw }) {
+  const slots = lead.answers?._offered_slots || [];
+  const escapeValue = lead.answers?._booking_escape || String(slots.length + 1);
+  const parsed = parseBookingReply({ slots, escapeValue }, bodyRaw);
+
+  const clearAwaiting = (extra = {}) => ({ ...(lead.answers || {}), _awaiting: null, ...extra });
+  const finishExit = async (msg) => {
+    const completedLead = await setLeadBooking(lead.id, {
+      bookingStatus: "none",
+      status: "completed",
+      finishedAt: new Date().toISOString(),
+      lastInboundText: bodyRaw,
+      answers: clearAwaiting(),
+    });
+    await sendSms({ from: business.twilio_from_number, to: lead.phone, body: msg });
+    await saveMessage({ leadId: lead.id, direction: "outbound", body: msg });
+    await finalizeAndNotify({ business, lead: completedLead, flowConfig, booked: false });
+    return res.status(200).send("OK");
+  };
+
+  // Declined / "call me" → graceful exit, owner still notified.
+  if (parsed?.escape || detectSpecialIntent(bodyRaw) === "call_me") {
+    return finishExit(`No worries — ${business.name || "we"}'ll call to sort a time that suits.`);
+  }
+
+  // Picked a slot → soft-book (owner confirms).
+  if (parsed?.slot) {
+    const slot = parsed.slot;
+    const completedLead = await setLeadBooking(lead.id, {
+      appointmentAt: slot.iso,
+      bookingStatus: "proposed",
+      status: "completed",
+      finishedAt: new Date().toISOString(),
+      lastInboundText: bodyRaw,
+      answers: clearAwaiting({ _appointment_label: slot.label }),
+    });
+    const confirm = `Booked ✅ ${slot.label}. ${business.name || "We"}'ll confirm shortly — reply here if you need to change it.`;
+    await sendSms({ from: business.twilio_from_number, to: lead.phone, body: confirm });
+    await saveMessage({ leadId: lead.id, direction: "outbound", body: confirm });
+    await finalizeAndNotify({ business, lead: completedLead, flowConfig, booked: true });
+    return res.status(200).send("OK");
+  }
+
+  // Unparseable → re-offer the same slots, then give up gracefully.
+  const retryCount = getRetryCount(lead.answers, lead.current_step);
+  if (retryCount >= MAX_RETRIES_MULTIPLE_CHOICE) {
+    return finishExit(`No worries — ${business.name || "we"}'ll call you to book a time.`);
+  }
+  await setLeadBooking(lead.id, {
+    answers: incrementRetryAnswers(lead.answers, lead.current_step),
+    lastInboundText: bodyRaw,
+  });
+  const reprompt = `Sorry, didn't catch that.\n\n${lead.answers?._booking_question || "Reply with the number of a slot, or say 'another time'."}`;
+  await sendSms({ from: business.twilio_from_number, to: lead.phone, body: reprompt });
+  await saveMessage({ leadId: lead.id, direction: "outbound", body: reprompt });
+  return res.status(200).send("OK");
 }
 
 const app = express();
@@ -272,6 +368,10 @@ app.get("/onboarding", requireAuthRedirect, (_req, res) => {
 
 app.get("/dashboard", (_req, res) => {
   res.sendFile(path.join(publicDir, "dashboard.html"));
+});
+
+app.get("/demo", (_req, res) => {
+  res.sendFile(path.join(publicDir, "demo.html"));
 });
 
 app.get("/privacy", (_req, res) => {
@@ -840,11 +940,39 @@ app.put("/api/me/flow", requireAuth, async (req, res) => {
     const { flowConfig } = req.body || {};
     if (!flowConfig) return res.status(400).json({ ok: false, error: "flowConfig is required" });
 
+    // Booking + quote_spec live inside the flow_config JSONB. Sanitize the new
+    // sections before persisting (the formula guard is the key safety net).
+    if (flowConfig.booking && typeof flowConfig.booking === "object") {
+      flowConfig.booking = {
+        enabled: !!flowConfig.booking.enabled,
+        slots: Math.min(3, Math.max(1, Number(flowConfig.booking.slots) || 2)),
+        prompt: String(flowConfig.booking.prompt || "").slice(0, 200) || undefined,
+      };
+    }
+    if (flowConfig.quote_spec && typeof flowConfig.quote_spec === "object") {
+      const check = validateQuoteSpec(flowConfig.quote_spec);
+      if (!check.ok) return res.status(400).json({ ok: false, error: `Invalid quote setup: ${check.reason}` });
+    }
+
     await updateBusiness(business.id, { flowConfig });
     return res.json({ ok: true });
   } catch (err) {
     console.error("Update flow error:", err);
     return res.status(500).json({ ok: false, error: "Could not update flow" });
+  }
+});
+
+// ─── ROI / recovered-revenue (dashboard hero) ───
+app.get("/api/me/roi", requireAuth, async (req, res) => {
+  try {
+    const business = await getBusinessByUserId(req.userId);
+    if (!business) return res.json({ ok: true, roi: null });
+    const period = String(req.query.period || "month");
+    const roi = await computeRoi(business, period);
+    return res.json({ ok: true, roi });
+  } catch (err) {
+    console.error("Get ROI error:", err);
+    return res.status(500).json({ ok: false, error: "Could not compute ROI" });
   }
 });
 
@@ -1609,6 +1737,15 @@ app.post("/api/sms/inbound", validateTwilioSignature, async (req, res) => {
     }
 
     const flowConfig = resolveFlowConfig(lead, business);
+
+    // ─── Booking step reply (injected after triage; migration 009) ───
+    // When the lead is mid-booking, current_step points past the real steps, so
+    // route here before getFlowStep (which would return null).
+    if (lead.answers?._awaiting === "booking") {
+      await handleBookingReply({ res, business, lead, flowConfig, bodyRaw });
+      return;
+    }
+
     const step = getFlowStep(flowConfig, lead.current_step);
     if (!step) return res.status(200).send("OK");
 
@@ -1731,24 +1868,83 @@ app.post("/api/sms/inbound", validateTwilioSignature, async (req, res) => {
         try { finalAnswers = await condenseFreeTextAnswers(flowConfig, nextAnswers); } catch { /* keep originals */ }
       }
 
-      const completedLead = await updateLead(lead.id, {
-        answers: finalAnswers,
-        last_inbound_text: bodyRaw,
-        current_step: lead.current_step + 1,
-        status: "completed",
-        finished_at: new Date().toISOString(),
-      });
+      const quoteEnabled = !!flowConfig.quote_spec?.enabled;
+      const bookingEnabled = !!flowConfig.booking?.enabled;
 
-      const completionBody = buildCompletion(flowConfig, business);
+      // ── Default path (no quote / no booking): unchanged, no 009 dependency ──
+      if (!quoteEnabled && !bookingEnabled) {
+        const completedLead = await updateLead(lead.id, {
+          answers: finalAnswers,
+          last_inbound_text: bodyRaw,
+          current_step: lead.current_step + 1,
+          status: "completed",
+          finished_at: new Date().toISOString(),
+        });
+
+        const completionBody = buildCompletion(flowConfig, business);
+        await sendSms({ from: business.twilio_from_number, to: lead.phone, body: completionBody });
+        await saveMessage({ leadId: lead.id, direction: "outbound", body: completionBody });
+
+        const summary = buildSummary(completedLead, business, flowConfig);
+        await sendLeadNotifications({
+          business, lead: completedLead, flowConfig, summary,
+          sendSmsFn: sendSms, normalizePhoneFn: normalizePhone, defaultCountryCode: config.defaultCountryCode,
+        });
+
+        return res.status(200).send("OK");
+      }
+
+      // ── Quote / booking path (migration 009) ──
+      let quote = null;
+      if (quoteEnabled) {
+        try {
+          quote = computeQuoteFromAnswers(flowConfig.quote_spec, finalAnswers, { avgJobValue: business.avg_job_value });
+        } catch { quote = null; }
+      }
+      const quoteSentence = quote ? buildQuoteSentence(quote) : "";
+
+      // Offer slots in-conversation when booking is on and we're open.
+      if (bookingEnabled && isWithinOperatingHours(business)) {
+        const bookingStep = buildBookingStep(business, {
+          count: flowConfig.booking.slots,
+          prompt: flowConfig.booking.prompt,
+        });
+        if (bookingStep.slots.length > 0) {
+          const awaitingAnswers = {
+            ...finalAnswers,
+            _awaiting: "booking",
+            _offered_slots: bookingStep.slots,
+            _booking_escape: bookingStep.escapeValue,
+            _booking_question: bookingStep.question,
+          };
+          await setLeadBooking(lead.id, {
+            answers: awaitingAnswers,
+            currentStep: lead.current_step + 1,
+            lastInboundText: bodyRaw,
+            quoteLow: quote ? quote.low : null,
+            quoteHigh: quote ? quote.high : null,
+          });
+          const msg = [quoteSentence, bookingStep.question].filter(Boolean).join("\n\n");
+          await sendSms({ from: business.twilio_from_number, to: lead.phone, body: msg });
+          await saveMessage({ leadId: lead.id, direction: "outbound", body: msg });
+          return res.status(200).send("OK");
+        }
+      }
+
+      // Booking off / unavailable → finalize now, leading with the quote.
+      const completedLead = await setLeadBooking(lead.id, {
+        answers: finalAnswers,
+        lastInboundText: bodyRaw,
+        currentStep: lead.current_step + 1,
+        status: "completed",
+        finishedAt: new Date().toISOString(),
+        quoteLow: quote ? quote.low : null,
+        quoteHigh: quote ? quote.high : null,
+      });
+      const completionBody = [quoteSentence, buildCompletion(flowConfig, business)].filter(Boolean).join("\n\n");
       await sendSms({ from: business.twilio_from_number, to: lead.phone, body: completionBody });
       await saveMessage({ leadId: lead.id, direction: "outbound", body: completionBody });
-
-      const summary = buildSummary(completedLead, business, flowConfig);
-      await sendLeadNotifications({
-        business, lead: completedLead, flowConfig, summary,
-        sendSmsFn: sendSms, normalizePhoneFn: normalizePhone, defaultCountryCode: config.defaultCountryCode,
-      });
-
+      await finalizeAndNotify({ business, lead: completedLead, flowConfig, booked: false });
       return res.status(200).send("OK");
     }
 
@@ -1845,6 +2041,126 @@ app.post("/api/demo/send", requireAuth, async (req, res) => {
   } catch (err) {
     console.error("Test SMS error:", err);
     return res.status(500).json({ ok: false, error: "Could not send SMS — " + (err.message || "unknown error") });
+  }
+});
+
+// ─── Magic demo: capture → quote → book, rendered with NO Twilio ───
+// Backs /public/demo.html. Runs the real flow-engine + quote + slot generation
+// and returns the SMS transcript so a sales call can screen-share the wow.
+
+const DEMO_SCRIPTS = {
+  roofing: (d) => ({
+    label: "Roof replacement",
+    need: `Need a full roof replacement — the house is about ${Number(d.squares) || 20} squares${d.steep === "steep" ? ", it's two-storey" : ""}.`,
+    answers: { squares: Number(d.squares) || 20, steep: d.steep === "steep" ? "steep" : "standard" },
+  }),
+  hvac: (d) => ({
+    label: "Air conditioning",
+    need: "My air con has stopped working completely — not cooling at all.",
+    answers: { issue_code: "1" },
+  }),
+  default: (d) => ({
+    label: "Job",
+    need: "Hoping to get a ballpark for some work and book someone in.",
+    answers: {},
+  }),
+};
+
+app.post("/api/quote/simulate", async (req, res) => {
+  try {
+    const body = req.body || {};
+    const businessName = String(body.businessName || "Your Business").slice(0, 60);
+    const trade = String(body.trade || "default").toLowerCase();
+    const avgJobValue = Number(body.avgJobValue) || 0;
+    const details = body.details && typeof body.details === "object" ? body.details : {};
+
+    // Light IP rate-limit (no SMS cost, but guard the endpoint). Never throws.
+    const ipKey = `sim:${req.ip || "anon"}`;
+    try {
+      if ((await checkDemoRateLimit(ipKey)) >= 30) {
+        return res.status(429).json({ ok: false, error: "Too many demo runs. Try again shortly." });
+      }
+      await recordDemoSend(ipKey);
+    } catch { /* table may not exist */ }
+
+    const script = (DEMO_SCRIPTS[trade] || DEMO_SCRIPTS.default)(details);
+
+    // Quote from the same engine the live flow uses.
+    const quote = computeQuoteFromAnswers(
+      { enabled: true, trade: getQuoteSpecForTrade(trade) ? trade : undefined },
+      script.answers,
+      { avgJobValue },
+    );
+    const quoteSentence = quote ? buildQuoteSentence(quote) : "";
+
+    // Real slot generation from operating hours (default hours if none supplied).
+    const demoBusiness = { operating_hours: body.operatingHours || null };
+    const bookingStep = buildBookingStep(demoBusiness, { count: 2, prompt: "Want to grab the first slot?" });
+    const firstSlot = bookingStep.slots[0];
+
+    const messages = [];
+    messages.push({ from: "cove", text: `Hi! Sorry we missed your call — this is ${businessName}. What can we help with?` });
+    messages.push({ from: "caller", text: script.need });
+    messages.push({ from: "cove", text: [quoteSentence, bookingStep.question].filter(Boolean).join("\n\n") });
+    if (firstSlot) {
+      messages.push({ from: "caller", text: "1" });
+      messages.push({ from: "cove", text: `Booked ✅ ${firstSlot.label}. ${businessName} will confirm shortly.` });
+    }
+
+    const ownerAlert = [
+      `🔥 Booked lead — ${businessName}`,
+      `${script.label}${firstSlot ? ` · ${firstSlot.label}` : ""}`,
+      quote ? `Est. ${fmtRange(quote)} (estimate only)` : null,
+      "→ Confirm the time with them.",
+    ].filter(Boolean).join("\n");
+
+    return res.json({
+      ok: true,
+      messages,
+      quote: quote ? { low: quote.low, high: quote.high, range: fmtRange(quote), disclaimer: quote.disclaimer } : null,
+      slots: bookingStep.slots,
+      ownerAlert,
+    });
+  } catch (err) {
+    console.error("/api/quote/simulate error", err);
+    return res.status(500).json({ ok: false, error: "Could not run the demo." });
+  }
+});
+
+// ─── Cron: monthly "what Cove made you" ROI email ───
+// Triggered by the Vercel cron in vercel.json. Protected by CRON_SECRET when set
+// (Vercel sends it as `Authorization: Bearer <CRON_SECRET>`).
+app.get("/api/cron/monthly-roi", async (req, res) => {
+  const secret = process.env.CRON_SECRET;
+  if (secret) {
+    const auth = req.headers.authorization || "";
+    const provided = auth.startsWith("Bearer ") ? auth.slice(7) : String(req.query.secret || "");
+    if (provided !== secret) return res.status(401).json({ ok: false, error: "Unauthorized" });
+  }
+  try {
+    const businesses = await getAllBusinesses();
+    let sent = 0, skipped = 0;
+    for (const business of businesses) {
+      try {
+        const user = business.user_id ? await getUserById(business.user_id) : null;
+        const to = business.owner_notify_email || user?.email;
+        if (!to) { skipped++; continue; }
+
+        const roi = await computeRoi(business, "last_month");
+        // Don't email a brand-new account with nothing to show.
+        if (roi.recoveredCalls === 0) { skipped++; continue; }
+
+        const { subject, html, text } = monthlyRoiEmail({ name: user?.name, bizName: business.name, roi });
+        await sendEmailViaResend({ to, subject, html, text });
+        sent++;
+      } catch (e) {
+        console.error("[cron/monthly-roi] business", business.id, e.message);
+      }
+    }
+    return res.json({ ok: true, sent, skipped });
+  } catch (err) {
+    console.error("/api/cron/monthly-roi error", err);
+    return res.status(500).json({ ok: false, error: "Cron failed" });
   }
 });
 

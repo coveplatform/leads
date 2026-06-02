@@ -245,6 +245,18 @@
         </div>
       </div>
 
+      <!-- ROI hero — what Cove made you (last 30 days) -->
+      <div class="card" id="roi-hero" style="margin-bottom:1rem;background:linear-gradient(135deg,#0e0c0a,#241910);color:#fff;border:none;padding:22px 24px;border-radius:16px">
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fb923c;margin-bottom:8px">What Cove made you</div>
+        <div id="roi-summary" style="font-size:1.15rem;font-weight:800;letter-spacing:-.02em;line-height:1.35">Crunching your numbers…</div>
+        <div style="display:flex;gap:28px;flex-wrap:wrap;margin-top:16px">
+          <div><div id="roi-recovered" style="font-size:1.55rem;font-weight:900;letter-spacing:-.03em">—</div><div style="font-size:.72rem;color:#a1a1aa;font-weight:600">calls recovered</div></div>
+          <div><div id="roi-booked" style="font-size:1.55rem;font-weight:900;letter-spacing:-.03em;color:#fb923c">—</div><div style="font-size:.72rem;color:#a1a1aa;font-weight:600">booked</div></div>
+          <div><div id="roi-value" style="font-size:1.55rem;font-weight:900;letter-spacing:-.03em;color:#4ade80">—</div><div style="font-size:.72rem;color:#a1a1aa;font-weight:600">in jobs (est.)</div></div>
+          <div><div id="roi-cost" style="font-size:1.55rem;font-weight:900;letter-spacing:-.03em">—</div><div style="font-size:.72rem;color:#a1a1aa;font-weight:600">you paid</div></div>
+        </div>
+      </div>
+
       <!-- Scoreboard — recovered revenue leads -->
       <div class="stats-strip" id="stats-strip">
         <div class="stat-item stat-item--hero">
@@ -259,6 +271,10 @@
         <div class="stat-item">
           <div class="stat-item__val stat-item__val--green" id="stat-qualified">0</div>
           <div class="stat-item__key">Qualified leads</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__val" id="stat-booked">0</div>
+          <div class="stat-item__key">Booked</div>
         </div>
         <div class="stat-item">
           <div class="stat-item__val" id="stat-won">0</div>
@@ -354,6 +370,44 @@
             </div>
             <textarea id="flow-completion-booking" class="flow-intro-ta textarea--noresize" placeholder="Thanks! {businessName} will be in touch shortly. Book directly: {bookingLink}"></textarea>
             <p class="flow-setup__hint">Use <code class="inline-code">{businessName}</code> and <code class="inline-code">{bookingLink}</code> as placeholders.</p>
+          </div>
+
+          <!-- Booking — book the next appointment inside the conversation -->
+          <div class="section" style="margin-top:1.25rem;">
+            <div class="section__title-row">
+              <span class="section__title section__title--flush">Booking</span>
+            </div>
+            <p class="section__sub">Offer appointment times right inside the text conversation. Slots come from your operating hours (set them under <strong>Alerts &amp; Hours</strong>).</p>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600">
+              <input type="checkbox" id="flow-booking-enabled" />
+              <span>Let leads book a time over SMS</span>
+            </label>
+            <div id="flow-booking-fields" style="margin-top:12px;display:none">
+              <div class="flow-q-label">Booking prompt</div>
+              <textarea id="flow-booking-prompt" class="flow-intro-ta textarea--noresize" placeholder="Want to grab the first available slot?"></textarea>
+              <div class="flow-q-label" style="margin-top:10px">Time slots to offer</div>
+              <input type="number" id="flow-booking-slots" min="1" max="3" value="2" style="width:80px" />
+            </div>
+          </div>
+
+          <!-- Instant quote — the wow / upsell toggle -->
+          <div class="section" style="margin-top:1.25rem;">
+            <div class="section__title-row">
+              <span class="section__title section__title--flush">Instant quote <span style="font-size:.68rem;font-weight:700;color:#e8540a;border:1px solid #fbcaaa;background:#fff2ea;padding:2px 7px;border-radius:999px;vertical-align:middle">Add-on</span></span>
+            </div>
+            <p class="section__sub">Drop a ballpark range before booking. Always shown as a range with an “estimate only” note, anchored to your average job value.</p>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600">
+              <input type="checkbox" id="flow-quote-enabled" />
+              <span>Show an instant ballpark quote</span>
+            </label>
+            <div id="flow-quote-fields" style="margin-top:12px;display:none">
+              <div class="flow-q-label">Trade pricing model</div>
+              <select id="flow-quote-trade" style="width:100%;max-width:340px;padding:9px 11px;border:1px solid var(--border,#e4e4e7);border-radius:8px;font-size:14px">
+                <option value="roofing">Roofing — per-square formula</option>
+                <option value="hvac">HVAC / Air conditioning — per job type</option>
+              </select>
+              <p class="flow-setup__hint">Quotes always show as a range with a disclaimer. Set your average job value under <strong>Settings</strong> so estimates reflect your pricing.</p>
+            </div>
           </div>
         </div><!-- /flow-layout__editor -->
 
@@ -1397,8 +1451,25 @@
       return '$' + Math.round(v).toLocaleString('en-AU');
     }
 
+    // ─── ROI hero (what Cove made you) ───
+    async function loadRoi() {
+      try {
+        const data = await fetch('/api/me/roi?period=month').then(r => r.json());
+        if (!data.ok || !data.roi) return;
+        const r = data.roi;
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        set('roi-summary', r.summary || '');
+        set('roi-recovered', r.recoveredCalls);
+        set('roi-booked', r.booked);
+        set('roi-value', r.estimatedValue > 0 ? fmtMoney(r.estimatedValue) : '$0');
+        set('roi-cost', r.cost != null ? fmtMoney(r.cost) : '—');
+        set('stat-booked', r.booked);
+      } catch { /* silent — never block dashboard */ }
+    }
+
     // ─── Scoreboard (recovered revenue) ───
     async function loadStats() {
+      loadRoi(); // refresh the ROI hero alongside the scoreboard
       try {
         const data = await fetch('/api/me/stats?days=30').then(r => r.json());
         if (!data.ok || !data.stats) return;
@@ -1512,6 +1583,22 @@
       if (compEl) flow.completion = compEl.value.trim();
       const compBookEl = document.getElementById('flow-completion-booking');
       if (compBookEl) flow.completion_with_booking = compBookEl.value.trim();
+      // Booking + instant-quote toggles (stored in the flow_config JSONB)
+      const bkEl = document.getElementById('flow-booking-enabled');
+      if (bkEl) {
+        flow.booking = {
+          enabled: bkEl.checked,
+          slots: Math.min(3, Math.max(1, Number(document.getElementById('flow-booking-slots')?.value) || 2)),
+          prompt: (document.getElementById('flow-booking-prompt')?.value || '').trim() || undefined,
+        };
+      }
+      const qzEl = document.getElementById('flow-quote-enabled');
+      if (qzEl) {
+        flow.quote_spec = {
+          enabled: qzEl.checked,
+          trade: document.getElementById('flow-quote-trade')?.value || 'roofing',
+        };
+      }
       flowEdited = JSON.parse(JSON.stringify(flow));
     }
 
@@ -1544,6 +1631,29 @@
         compBookEl.value = flow.completion_with_booking || '';
         requestAnimationFrame(() => { compBookEl.style.height = 'auto'; compBookEl.style.height = compBookEl.scrollHeight + 'px'; });
         compBookEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; }, { once: false });
+      }
+      // Booking + instant-quote toggles
+      const bkEl = document.getElementById('flow-booking-enabled');
+      if (bkEl) {
+        const b = flow.booking || {};
+        bkEl.checked = !!b.enabled;
+        const fields = document.getElementById('flow-booking-fields');
+        const slotsEl = document.getElementById('flow-booking-slots');
+        const promptEl = document.getElementById('flow-booking-prompt');
+        if (slotsEl) slotsEl.value = b.slots || 2;
+        if (promptEl) promptEl.value = b.prompt || '';
+        if (fields) fields.style.display = b.enabled ? '' : 'none';
+        bkEl.onchange = () => { if (fields) fields.style.display = bkEl.checked ? '' : 'none'; };
+      }
+      const qzEl = document.getElementById('flow-quote-enabled');
+      if (qzEl) {
+        const q = flow.quote_spec || {};
+        qzEl.checked = !!q.enabled;
+        const qfields = document.getElementById('flow-quote-fields');
+        const tradeEl = document.getElementById('flow-quote-trade');
+        if (tradeEl) tradeEl.value = q.trade || 'roofing';
+        if (qfields) qfields.style.display = q.enabled ? '' : 'none';
+        qzEl.onchange = () => { if (qfields) qfields.style.display = qzEl.checked ? '' : 'none'; };
       }
       document.getElementById('flow-biz-name').addEventListener('input', updateFlowPreview, { once: true });
 

@@ -193,6 +193,70 @@ export async function updateLead(leadId, fields) {
   return rows[0];
 }
 
+// ─── Booking / quote writes (migration 009) ───
+// One write path for the booking step: stamp the proposed slot, the quote range,
+// and (when finalising) the completed status. Every field is COALESCE-guarded so
+// callers set only what they need. Lives apart from updateLead so the generic
+// lead update path stays independent of the 009 columns.
+export async function setLeadBooking(leadId, {
+  appointmentAt = null,
+  bookingStatus = null,
+  quoteLow = null,
+  quoteHigh = null,
+  answers = null,
+  status = null,
+  currentStep = null,
+  lastInboundText = null,
+  finishedAt = null,
+} = {}) {
+  const answersJson = answers ? JSON.stringify(answers) : undefined;
+  const rows = await sql`
+    UPDATE leads SET
+      appointment_at    = COALESCE(${appointmentAt}::timestamptz, appointment_at),
+      booking_status    = COALESCE(${bookingStatus}, booking_status),
+      quote_low         = COALESCE(${quoteLow}, quote_low),
+      quote_high        = COALESCE(${quoteHigh}, quote_high),
+      answers           = COALESCE(${answersJson}::jsonb, answers),
+      status            = COALESCE(${status}, status),
+      current_step      = COALESCE(${currentStep ?? null}, current_step),
+      last_inbound_text = COALESCE(${lastInboundText}, last_inbound_text),
+      finished_at       = COALESCE(${finishedAt}::timestamptz, finished_at),
+      updated_at        = now()
+    WHERE id = ${leadId}
+    RETURNING *
+  `;
+  return rows[0];
+}
+
+// ─── ROI aggregate (recovered revenue) ───
+// avgJobValue anchors estimated value where actual / quote figures are absent.
+//   captured        = calls/enquiries recovered (every lead)
+//   qualified       = conversations completed
+//   booked          = leads with a proposed/confirmed appointment
+//   won_value       = actual booked $ of won jobs (job_value, else avg)
+//   booked_pipeline = booked-but-not-yet-won jobs, at quote-mid (else avg)
+export async function getRoiAggregate(businessId, since, until, avgJobValue = 0) {
+  const avg = Number(avgJobValue) || 0;
+  const rows = await sql`
+    SELECT
+      COUNT(*)::int                                              AS captured,
+      COUNT(*) FILTER (WHERE status = 'completed')::int          AS qualified,
+      COUNT(*) FILTER (WHERE appointment_at IS NOT NULL)::int    AS booked,
+      COUNT(*) FILTER (WHERE outcome = 'won')::int               AS won,
+      COUNT(*) FILTER (WHERE outcome = 'lost')::int              AS lost,
+      COALESCE(SUM(COALESCE(job_value, ${avg}::numeric))
+               FILTER (WHERE outcome = 'won'), 0)                AS won_value,
+      COALESCE(SUM(COALESCE((quote_low + quote_high) / 2.0, ${avg}::numeric))
+               FILTER (WHERE appointment_at IS NOT NULL
+                         AND (outcome IS NULL OR outcome NOT IN ('won', 'lost'))), 0) AS booked_pipeline
+    FROM leads
+    WHERE business_id = ${businessId}
+      AND created_at >= ${since}::timestamptz
+      AND created_at <  ${until}::timestamptz
+  `;
+  return rows[0];
+}
+
 export async function createBusiness({
   name,
   twilioFromNumber,
