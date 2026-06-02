@@ -62,23 +62,37 @@ export async function getBusinessByUserId(userId) {
 }
 
 export async function getRecentLeadsByBusinessId(businessId, days = 7) {
-  const rows = days == null
-    ? await sql`
-        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value, created_at, finished_at
-        FROM leads
-        WHERE business_id = ${businessId}
-        ORDER BY created_at DESC
-        LIMIT 200
-      `
-    : await sql`
-        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value, created_at, finished_at
-        FROM leads
-        WHERE business_id = ${businessId}
+  // Prefer the booking/quote columns (migration 009); fall back to the legacy
+  // shape if they don't exist yet, so the dashboard never breaks pre-migration.
+  const extended = () => days == null
+    ? sql`
+        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value,
+               appointment_at, booking_status, quote_low, quote_high, created_at, finished_at
+        FROM leads WHERE business_id = ${businessId}
+        ORDER BY created_at DESC LIMIT 200`
+    : sql`
+        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value,
+               appointment_at, booking_status, quote_low, quote_high, created_at, finished_at
+        FROM leads WHERE business_id = ${businessId}
           AND created_at > NOW() - ${days + ' days'}::interval
-        ORDER BY created_at DESC
-        LIMIT 200
-      `;
-  return rows;
+        ORDER BY created_at DESC LIMIT 200`;
+  const legacy = () => days == null
+    ? sql`
+        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value, created_at, finished_at
+        FROM leads WHERE business_id = ${businessId}
+        ORDER BY created_at DESC LIMIT 200`
+    : sql`
+        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value, created_at, finished_at
+        FROM leads WHERE business_id = ${businessId}
+          AND created_at > NOW() - ${days + ' days'}::interval
+        ORDER BY created_at DESC LIMIT 200`;
+  try {
+    return await extended();
+  } catch (err) {
+    const undefinedColumn = err?.code === "42703" || /column .* does not exist/i.test(err?.message || "");
+    if (undefinedColumn) return await legacy();
+    throw err;
+  }
 }
 
 // ─── Dashboard scoreboard stats ───

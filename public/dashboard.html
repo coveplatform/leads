@@ -406,7 +406,21 @@
                 <option value="roofing">Roofing — per-square formula</option>
                 <option value="hvac">HVAC / Air conditioning — per job type</option>
               </select>
-              <p class="flow-setup__hint">Quotes always show as a range with a disclaimer. Set your average job value under <strong>Settings</strong> so estimates reflect your pricing.</p>
+
+              <div id="flow-quote-rates-roofing" style="margin-top:14px">
+                <div class="flow-q-label">Your roofing rates</div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+                  <div><div style="font-size:12px;color:var(--text-faint,#71717a);margin-bottom:4px">$ / square (low)</div><input type="number" id="flow-rate-sqlow" min="0" style="width:120px" placeholder="350" /></div>
+                  <div><div style="font-size:12px;color:var(--text-faint,#71717a);margin-bottom:4px">$ / square (high)</div><input type="number" id="flow-rate-sqhigh" min="0" style="width:120px" placeholder="520" /></div>
+                  <div><div style="font-size:12px;color:var(--text-faint,#71717a);margin-bottom:4px">Call-out fee</div><input type="number" id="flow-rate-callout" min="0" style="width:120px" placeholder="250" /></div>
+                </div>
+                <p class="flow-setup__hint">1 square ≈ 100 sq ft. Two-storey / steep jobs are auto-bumped ~30%. Leave blank to use sensible defaults.</p>
+              </div>
+              <div id="flow-quote-rates-hvac" style="margin-top:14px;display:none">
+                <p class="flow-setup__hint">HVAC uses standard service / repair / install bands, anchored to your average job value (set under <strong>Settings</strong>). No rates to enter.</p>
+              </div>
+
+              <p class="flow-setup__hint">Quotes always show as a range with an “estimate only” disclaimer.</p>
             </div>
           </div>
         </div><!-- /flow-layout__editor -->
@@ -1594,10 +1608,19 @@
       }
       const qzEl = document.getElementById('flow-quote-enabled');
       if (qzEl) {
-        flow.quote_spec = {
-          enabled: qzEl.checked,
-          trade: document.getElementById('flow-quote-trade')?.value || 'roofing',
-        };
+        const trade = document.getElementById('flow-quote-trade')?.value || 'roofing';
+        const spec = { enabled: qzEl.checked, trade };
+        if (trade === 'roofing') {
+          const rates = {};
+          const lo = Number(document.getElementById('flow-rate-sqlow')?.value);
+          const hi = Number(document.getElementById('flow-rate-sqhigh')?.value);
+          const co = Number(document.getElementById('flow-rate-callout')?.value);
+          if (Number.isFinite(lo) && lo > 0) rates.per_square_low = lo;
+          if (Number.isFinite(hi) && hi > 0) rates.per_square_high = hi;
+          if (Number.isFinite(co) && co >= 0) rates.callout = co;
+          if (Object.keys(rates).length) spec.rates = rates;
+        }
+        flow.quote_spec = spec;
       }
       flowEdited = JSON.parse(JSON.stringify(flow));
     }
@@ -1652,8 +1675,24 @@
         const qfields = document.getElementById('flow-quote-fields');
         const tradeEl = document.getElementById('flow-quote-trade');
         if (tradeEl) tradeEl.value = q.trade || 'roofing';
+        const rr = q.rates || {};
+        const sqlow = document.getElementById('flow-rate-sqlow');
+        const sqhigh = document.getElementById('flow-rate-sqhigh');
+        const callout = document.getElementById('flow-rate-callout');
+        if (sqlow) sqlow.value = rr.per_square_low ?? '';
+        if (sqhigh) sqhigh.value = rr.per_square_high ?? '';
+        if (callout) callout.value = rr.callout ?? '';
+        const toggleRates = () => {
+          const t = tradeEl ? tradeEl.value : 'roofing';
+          const roof = document.getElementById('flow-quote-rates-roofing');
+          const hvac = document.getElementById('flow-quote-rates-hvac');
+          if (roof) roof.style.display = t === 'roofing' ? '' : 'none';
+          if (hvac) hvac.style.display = t === 'hvac' ? '' : 'none';
+        };
         if (qfields) qfields.style.display = q.enabled ? '' : 'none';
+        toggleRates();
         qzEl.onchange = () => { if (qfields) qfields.style.display = qzEl.checked ? '' : 'none'; };
+        if (tradeEl) tradeEl.onchange = toggleRates;
       }
       document.getElementById('flow-biz-name').addEventListener('input', updateFlowPreview, { once: true });
 
@@ -2614,6 +2653,13 @@
           : lead.outcome === 'lost'
           ? `<span class="lead-badge lead-badge--stopped">Lost</span>`
           : '';
+        const kfmt = (n) => { const v = Number(n) || 0; return v >= 1000 ? '$' + Math.round(v / 1000) + 'k' : '$' + Math.round(v); };
+        const bookedPill = lead.appointment_at
+          ? `<span class="lead-badge lead-badge--new" title="${esc(lead.answers?._appointment_label || 'Appointment booked')}">📅 Booked</span>`
+          : '';
+        const quotePill = (lead.quote_low != null && lead.quote_high != null)
+          ? `<span class="lead-badge" title="Instant quote (estimate)">${kfmt(lead.quote_low)}–${kfmt(lead.quote_high)}</span>`
+          : '';
         return `<tr class="lead-row${isUrgent ? ' lead-row--urgent' : ''}" data-index="${i}">
           <td class="name-cell">
             <div class="lead-name">${esc(displayName || '—')}</div>
@@ -2624,6 +2670,7 @@
             ${isNew ? '<span class="lead-badge lead-badge--new">New</span>' : ''}
             <span class="lead-badge ${cls}">${label}</span>
             ${calledBack ? '<span class="lead-badge lead-badge--called">Called back</span>' : ''}
+            ${bookedPill}${quotePill}
             ${outcomePill}
           </td>
           <td class="time-cell">${timeAgo(lead.created_at)}</td>
