@@ -100,6 +100,28 @@ export const INDUSTRY_TEMPLATES = {
       },
     ],
   },
+  roofing: {
+    name: "Roofing",
+    intro: "Hi {firstName}, sorry we missed your call — {businessName} here. One quick question so we can help fast:",
+    completion: "Thanks {firstName}! {businessName} will call you back shortly.",
+    completion_with_booking: "Thanks {firstName}! {businessName} will call you back shortly. Or book online: {bookingLink}",
+    steps: [
+      {
+        id: "job_type",
+        key: "job_type",
+        question: "What do you need?\n1) Roof replacement\n2) Repair / leak\n3) New roof (new build)\n4) Inspection / quote\n5) Something else",
+        invalid_text: "Please reply with a number from 1 to 5.",
+        options: [
+          { value: "1", label: "Roof replacement" },
+          { value: "2", label: "Repair / leak" },
+          { value: "3", label: "New roof" },
+          { value: "4", label: "Inspection / quote" },
+          { value: "5", label: "Something else" },
+        ],
+        urgent_values: ["2"],
+      },
+    ],
+  },
   legal: {
     name: "Legal Services",
     intro: "Hi {firstName}, sorry we missed your call — {businessName} here. One quick question so we can call you back:",

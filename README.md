@@ -46,7 +46,7 @@ npm run dev             # http://localhost:3000
 
 ### SMS Qualification Flow
 - Instant text-back + one high-signal question per missed call
-- 6 industry templates (dental, plumbing, electrical, HVAC, legal, general)
+- 7 industry templates (dental, plumbing, electrical, HVAC, roofing, legal, general)
 - AI-powered flow generation — describe a business and get a custom question
 - Urgent value triggers (e.g. "Emergency" sends an instant alert to the owner)
 - Edited in onboarding and the dashboard flow view

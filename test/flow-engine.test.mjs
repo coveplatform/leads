@@ -19,6 +19,12 @@ test("getStepType defaults to question, reads booking/quote", () => {
   assert.equal(getStepType({ type: "booking" }), "booking");
 });
 
+test("roofing is a first-class industry template", () => {
+  assert.ok(INDUSTRY_TEMPLATES.roofing, "roofing template should exist");
+  assert.equal(INDUSTRY_TEMPLATES.roofing.steps.length, 1);
+  assert.equal(INDUSTRY_TEMPLATES.roofing.steps[0].key, "job_type");
+});
+
 test("buildSummary surfaces the quote range and booked appointment", () => {
   const s = buildSummary(bookedLead, business, dental);
   assert.ok(s.includes("Urgent dental pain"));
