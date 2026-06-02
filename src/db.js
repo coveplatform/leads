@@ -64,16 +64,14 @@ export async function getBusinessByUserId(userId) {
 export async function getRecentLeadsByBusinessId(businessId, days = 7) {
   const rows = days == null
     ? await sql`
-        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value,
-               appointment_at, booking_status, quote_low, quote_high, created_at, finished_at
+        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value, created_at, finished_at
         FROM leads
         WHERE business_id = ${businessId}
         ORDER BY created_at DESC
         LIMIT 200
       `
     : await sql`
-        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value,
-               appointment_at, booking_status, quote_low, quote_high, created_at, finished_at
+        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value, created_at, finished_at
         FROM leads
         WHERE business_id = ${businessId}
           AND created_at > NOW() - ${days + ' days'}::interval
