@@ -86,6 +86,9 @@ import {
   getAllLeadsWithBusiness,
   checkDemoRateLimit,
   recordDemoSend,
+  claimMessageSid,
+  releaseMessageSid,
+  rateLimitExceeded,
   checkDuplicateLead,
   saveMessage,
   getMessagesByLeadId,
@@ -120,7 +123,6 @@ import {
 } from "./db.js";
 import {
   isWithinOperatingHours,
-  buildAfterHoursMessage,
   sendLeadNotifications,
   shouldNudge,
   buildNudgeMessage,
@@ -132,6 +134,26 @@ import { sendSms } from "./sms.js";
 import { day1Email, day4Email, day11Email, monthlyRoiEmail } from "./trial-emails.js";
 import twilio from "twilio";
 const twilioValidateRequest = twilio.validateRequest;
+
+// Client IP for rate limiting. Behind Vercel/proxies the real IP is the first
+// entry in x-forwarded-for; fall back to the socket address locally.
+function clientIp(req) {
+  const xff = req.headers["x-forwarded-for"];
+  if (xff) return String(xff).split(",")[0].trim();
+  return req.ip || req.socket?.remoteAddress || "unknown";
+}
+
+// Per-IP rate-limit guard for an endpoint. Returns true (and sends a 429) when
+// the caller is over the limit; the route should bail. Fails open on DB error.
+async function rateLimited(req, res, bucket, windowSeconds, max) {
+  try {
+    if (await rateLimitExceeded(bucket, clientIp(req), windowSeconds, max)) {
+      res.status(429).json({ ok: false, error: "Too many attempts. Please wait a few minutes and try again." });
+      return true;
+    }
+  } catch { /* rate-limit table unavailable — don't block the user */ }
+  return false;
+}
 
 // ─── Twilio signature validation middleware ───
 function validateTwilioSignature(req, res, next) {
@@ -396,6 +418,7 @@ app.get("/health", (_req, res) => {
 
 app.post("/api/auth/signup", async (req, res) => {
   try {
+    if (await rateLimited(req, res, "signup", 3600, 5)) return; // 5/hour per IP
     const { name, email, password } = req.body || {};
     if (!name || !email || !password) {
       return res.status(400).json({ ok: false, error: "Name, email and password are required" });
@@ -428,6 +451,7 @@ app.post("/api/auth/signup", async (req, res) => {
 
 app.post("/api/auth/login", async (req, res) => {
   try {
+    if (await rateLimited(req, res, "login", 900, 10)) return; // 10 / 15 min per IP
     const { email, password } = req.body || {};
     if (!email || !password) {
       return res.status(400).json({ ok: false, error: "Email and password are required" });
@@ -507,6 +531,7 @@ app.post("/api/auth/logout", (req, res) => {
 
 app.post("/api/auth/forgot-password", async (req, res) => {
   try {
+    if (await rateLimited(req, res, "forgot", 3600, 5)) return; // 5/hour per IP
     const { email } = req.body || {};
     if (!email) return res.status(400).json({ ok: false, error: "Email is required" });
 
@@ -708,13 +733,20 @@ app.post("/api/onboarding/save", requireAuth, async (req, res) => {
       bookingLink,
     } = req.body || {};
 
-    if (!businessName || !notifyPhone) {
-      return res.status(400).json({ ok: false, error: "Business name and notification phone are required" });
+    if (!businessName) {
+      return res.status(400).json({ ok: false, error: "Business name is required" });
+    }
+    if (!notifyPhone && !notifyEmail) {
+      return res.status(400).json({ ok: false, error: "Add a notification phone or email so leads can reach you" });
     }
 
-    const normalizedPhone = normalizePhone(notifyPhone, config.defaultCountryCode);
-    if (!normalizedPhone) {
-      return res.status(400).json({ ok: false, error: "Invalid phone number" });
+    // Phone is optional (email-only is allowed), but if given it must be valid.
+    let normalizedPhone = null;
+    if (notifyPhone) {
+      normalizedPhone = normalizePhone(notifyPhone, config.defaultCountryCode);
+      if (!normalizedPhone) {
+        return res.status(400).json({ ok: false, error: "Invalid phone number" });
+      }
     }
 
     let business = await getBusinessByUserId(req.userId);
@@ -1350,13 +1382,8 @@ app.post("/api/lead", async (req, res) => {
     const lead = await createLead({ businessId, name, phone: normalizedPhone, email, message });
     const flowConfig = getFlowConfig(business);
 
-    if (!isWithinOperatingHours(business)) {
-      const afterHoursBody = buildAfterHoursMessage(business);
-      await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: afterHoursBody });
-      await saveMessage({ leadId: lead.id, direction: "outbound", body: afterHoursBody });
-      return res.json({ ok: true, leadId: lead.id, step: lead.current_step, after_hours: true });
-    }
-
+    // Always qualify — even after hours. The caller still gets texted back and
+    // triaged; the completion line tells them the callback comes in the morning.
     const firstMessage = buildIntro(flowConfig, name, business.name);
     await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: firstMessage });
     await saveMessage({ leadId: lead.id, direction: "outbound", body: firstMessage });
@@ -1554,18 +1581,14 @@ app.post("/api/voice/inbound", validateTwilioSignature, async (req, res) => {
 
         const flowConfig = getFlowConfig(business);
 
-        if (!isWithinOperatingHours(business)) {
-          console.log(`[voice/inbound] outside operating hours, sending after-hours SMS to ${from}`);
-          const body = buildAfterHoursMessage(business);
-          await sendSms({ from: business.twilio_from_number, to: from, body });
-          await saveMessage({ leadId: lead.id, direction: "outbound", body });
-        } else {
-          const firstMessage = buildIntro(flowConfig, null, business.name);
-          console.log(`[voice/inbound] sending first SMS to ${from}`);
-          await sendSms({ from: business.twilio_from_number, to: from, body: firstMessage });
-          await saveMessage({ leadId: lead.id, direction: "outbound", body: firstMessage });
-          console.log(`[voice/inbound] SMS sent to ${from}`);
-        }
+        // Always qualify — even after hours. The caller is texted back and
+        // triaged the same way; the completion line (built at the end of the
+        // flow) sets the morning-callback expectation when we're closed.
+        const firstMessage = buildIntro(flowConfig, null, business.name);
+        console.log(`[voice/inbound] sending first SMS to ${from}`);
+        await sendSms({ from: business.twilio_from_number, to: from, body: firstMessage });
+        await saveMessage({ leadId: lead.id, direction: "outbound", body: firstMessage });
+        console.log(`[voice/inbound] SMS sent to ${from}`);
 
         // Owner notified once at the end via the full lead summary.
       }
@@ -1665,6 +1688,8 @@ app.get("/api/me/forwarding-status", requireAuth, async (req, res) => {
 // ─── Inbound SMS ───
 
 app.post("/api/sms/inbound", validateTwilioSignature, async (req, res) => {
+  // Tracked outside the try so the error handler can release it on failure.
+  let claimedSid = null;
   try {
     const fromRaw = String(req.body?.From || "");
     const toRaw = String(req.body?.To || "");
@@ -1682,6 +1707,17 @@ app.post("/api/sms/inbound", validateTwilioSignature, async (req, res) => {
     const to = normalizePhone(toRaw, config.defaultCountryCode);
 
     if (!from || !to) return res.status(400).send("Invalid Twilio payload");
+
+    // ── Idempotency ── Twilio delivers at-least-once and retries on slow/failed
+    // responses. Claim the MessageSid up front so a duplicate/retry is ignored
+    // instead of advancing the flow twice. Released in catch so genuine errors
+    // can still be retried. Fails open if the dedup store is unavailable.
+    const messageSid = req.body?.MessageSid || req.body?.SmsMessageSid || null;
+    try {
+      const fresh = await claimMessageSid(messageSid);
+      if (!fresh) return res.status(200).send("OK"); // duplicate — already handled
+      claimedSid = messageSid;
+    } catch { /* dedup unavailable — process normally */ }
 
     const business = await getBusinessByTwilioNumber(to);
     if (!business || !business.is_active) return res.status(200).send("OK");
@@ -1710,13 +1746,8 @@ app.post("/api/sms/inbound", validateTwilioSignature, async (req, res) => {
       const newLead = await createLead({ businessId: business.id, name: null, phone: from, email: null, message: bodyRaw });
       await saveMessage({ leadId: newLead.id, direction: "inbound", body: bodyRaw });
 
-      if (!isWithinOperatingHours(business)) {
-        const afterHoursBody = buildAfterHoursMessage(business);
-        await sendSms({ from: business.twilio_from_number, to: from, body: afterHoursBody });
-        await saveMessage({ leadId: newLead.id, direction: "outbound", body: afterHoursBody });
-        return res.status(200).send("OK");
-      }
-
+      // Always qualify — even after hours (see voice/inbound). The completion
+      // line sets the morning-callback expectation when we're closed.
       const coldFlowConfig = getFlowConfig(business);
       const firstMessage = buildIntro(coldFlowConfig, null, business.name);
       await sendSms({ from: business.twilio_from_number, to: from, body: firstMessage });
@@ -1881,7 +1912,7 @@ app.post("/api/sms/inbound", validateTwilioSignature, async (req, res) => {
           finished_at: new Date().toISOString(),
         });
 
-        const completionBody = buildCompletion(flowConfig, business);
+        const completionBody = buildCompletion(flowConfig, business, { afterHours: !isWithinOperatingHours(business) });
         await sendSms({ from: business.twilio_from_number, to: lead.phone, body: completionBody });
         await saveMessage({ leadId: lead.id, direction: "outbound", body: completionBody });
 
@@ -1941,7 +1972,7 @@ app.post("/api/sms/inbound", validateTwilioSignature, async (req, res) => {
         quoteLow: quote ? quote.low : null,
         quoteHigh: quote ? quote.high : null,
       });
-      const completionBody = [quoteSentence, buildCompletion(flowConfig, business)].filter(Boolean).join("\n\n");
+      const completionBody = [quoteSentence, buildCompletion(flowConfig, business, { afterHours: !isWithinOperatingHours(business) })].filter(Boolean).join("\n\n");
       await sendSms({ from: business.twilio_from_number, to: lead.phone, body: completionBody });
       await saveMessage({ leadId: lead.id, direction: "outbound", body: completionBody });
       await finalizeAndNotify({ business, lead: completedLead, flowConfig, booked: false });
@@ -1958,6 +1989,9 @@ app.post("/api/sms/inbound", validateTwilioSignature, async (req, res) => {
     return res.status(200).send("OK");
   } catch (error) {
     console.error("/api/sms/inbound error", error);
+    // Release the claim so this message isn't permanently marked handled after a
+    // mid-processing failure.
+    if (claimedSid) { try { await releaseMessageSid(claimedSid); } catch { /* ignore */ } }
     return res.status(200).send("OK");
   }
 });
@@ -2198,13 +2232,9 @@ app.post("/api/webhook/podium/:businessId", async (req, res) => {
       message: `[Podium] ${customerMessage || customer_message || message || ""}`.trim(),
     });
 
+    // Always qualify — even after hours; the completion line sets the
+    // morning-callback expectation when we're closed.
     const flowConfig = getFlowConfig(business);
-    if (!isWithinOperatingHours(business)) {
-      const afterHoursBody = buildAfterHoursMessage(business);
-      await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: afterHoursBody });
-      await saveMessage({ leadId: lead.id, direction: "outbound", body: afterHoursBody });
-      return res.json({ ok: true, leadId: lead.id });
-    }
 
     const introBody = buildIntro(flowConfig, lead.name, business.name);
     await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: introBody });
@@ -2247,13 +2277,9 @@ app.post("/api/webhook/generic/:businessId", async (req, res) => {
       message: source ? `[${source}] ${message || ""}` : message || null,
     });
 
+    // Always qualify — even after hours; the completion line sets the
+    // morning-callback expectation when we're closed.
     const flowConfig = getFlowConfig(business);
-    if (!isWithinOperatingHours(business)) {
-      const afterHoursBody = buildAfterHoursMessage(business);
-      await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: afterHoursBody });
-      await saveMessage({ leadId: lead.id, direction: "outbound", body: afterHoursBody });
-      return res.json({ ok: true, leadId: lead.id });
-    }
 
     const introBody = buildIntro(flowConfig, name, business.name);
     await sendSms({ from: business.twilio_from_number, to: normalizedPhone, body: introBody });

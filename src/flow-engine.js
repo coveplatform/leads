@@ -269,15 +269,24 @@ export function buildIntro(flowConfig, name, businessName) {
   return `${intro}\n\n${flowConfig.steps[0].question}`;
 }
 
-export function buildCompletion(flowConfig, business) {
+export function buildCompletion(flowConfig, business, { afterHours = false } = {}) {
+  let message;
   if (business.booking_link && flowConfig.completion_with_booking) {
-    return flowConfig.completion_with_booking
+    message = flowConfig.completion_with_booking
       .replace(/{businessName}/g, business.name || "our team")
       .replace(/{bookingLink}/g, business.booking_link);
+  } else {
+    const template =
+      flowConfig.completion || "Thanks! {businessName} will contact you shortly.";
+    message = template.replace(/{businessName}/g, business.name || "our team");
   }
-  const template =
-    flowConfig.completion || "Thanks! {businessName} will contact you shortly.";
-  return template.replace(/{businessName}/g, business.name || "our team");
+  // After hours nobody's calling back tonight — set the honest expectation.
+  // Every built-in template phrases the callback as "shortly"; swap it for a
+  // morning callback so we don't imply an immediate response while closed.
+  if (afterHours) {
+    message = message.replace(/\bshortly\b/gi, "first thing in the morning");
+  }
+  return message;
 }
 
 export function buildSummary(lead, business, flowConfig) {

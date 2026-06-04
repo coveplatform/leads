@@ -383,6 +383,40 @@ export async function recordDemoSend(phone) {
   await sql`INSERT INTO demo_rate_limits (phone) VALUES (${phone})`;
 }
 
+// ─── Inbound SMS idempotency ───
+// Claims a Twilio MessageSid. Returns true if it's NEW (safe to process), false
+// if already seen (a duplicate/retry that should be ignored). Missing sid → true.
+export async function claimMessageSid(sid) {
+  if (!sid) return true;
+  const rows = await sql`
+    INSERT INTO processed_messages (message_sid) VALUES (${sid})
+    ON CONFLICT (message_sid) DO NOTHING
+    RETURNING message_sid
+  `;
+  return rows.length > 0;
+}
+
+// Releases a claimed sid so a Twilio retry can reprocess it (used when handling
+// failed after the claim).
+export async function releaseMessageSid(sid) {
+  if (!sid) return;
+  await sql`DELETE FROM processed_messages WHERE message_sid = ${sid}`;
+}
+
+// ─── Generic rate limiting ───
+// Records a hit for (bucket, key) and returns true if the key was ALREADY at or
+// over `max` within the last `windowSeconds`.
+export async function rateLimitExceeded(bucket, key, windowSeconds, max) {
+  const rows = await sql`
+    SELECT COUNT(*)::int AS cnt FROM rate_limits
+    WHERE bucket = ${bucket} AND key = ${key}
+      AND created_at > NOW() - make_interval(secs => ${windowSeconds})
+  `;
+  const count = Number(rows[0]?.cnt || 0);
+  await sql`INSERT INTO rate_limits (bucket, key) VALUES (${bucket}, ${key})`;
+  return count >= max;
+}
+
 export async function checkDuplicateLead(phone, minutesWindow) {
   const rows = await sql`
     SELECT id FROM leads

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildSummary, buildBookedAlert, getStepType, INDUSTRY_TEMPLATES } from "../src/flow-engine.js";
+import { buildSummary, buildBookedAlert, buildCompletion, getStepType, INDUSTRY_TEMPLATES } from "../src/flow-engine.js";
 
 const dental = INDUSTRY_TEMPLATES.dental;
 const business = { name: "Smile Dental", operating_hours: { timezone: "Australia/Sydney" } };
@@ -40,6 +40,18 @@ test("buildSummary is unchanged for a plain lead (no booking/quote)", () => {
   assert.ok(s.includes("Routine check-up and clean"));
   assert.ok(!s.includes("Booked"));
   assert.ok(!s.includes("Est. quote"));
+});
+
+test("buildCompletion promises a prompt callback during hours", () => {
+  const msg = buildCompletion(dental, business);
+  assert.ok(msg.includes("shortly"));
+  assert.ok(!msg.includes("first thing in the morning"));
+});
+
+test("buildCompletion sets a morning-callback expectation after hours", () => {
+  const msg = buildCompletion(dental, business, { afterHours: true });
+  assert.ok(msg.includes("first thing in the morning"));
+  assert.ok(!msg.includes("shortly"));
 });
 
 test("buildBookedAlert is a punchy owner SMS", () => {

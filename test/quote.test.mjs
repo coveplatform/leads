@@ -10,9 +10,9 @@ import {
 
 test("roofing (formula mode) computes a tidy range", () => {
   const q = computeQuoteFromAnswers({ enabled: true, trade: "roofing" }, { squares: 20, steep: "standard" }, {});
-  // 20*350+250=7250 -> 7000 ; 20*520+250=10650 -> 11000
-  assert.equal(q.low, 7000);
-  assert.equal(q.high, 11000);
+  // 20*900+250=18250 -> 18000 ; 20*1200+250=24250 -> 25000
+  assert.equal(q.low, 18000);
+  assert.equal(q.high, 25000);
   assert.equal(q.unit, "job");
   assert.ok(q.disclaimer.includes("estimate only"));
   assert.ok(q.low < q.high);

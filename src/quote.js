@@ -88,7 +88,9 @@ export const QUOTE_SPECS = {
         ],
       },
     ],
-    rates: { per_square_low: 350, per_square_high: 520, steep_mult: 1.3, callout: 250 },
+    // AU full-roof-replacement rates (~$100–130/m²). An 18-square standard roof
+    // lands at ~$16k–$22k, matching the figure quoted on the landing page.
+    rates: { per_square_low: 900, per_square_high: 1200, steep_mult: 1.3, callout: 250 },
     // Variables exposed to the formulas (all numeric, all whitelisted).
     vars: (answers, rates) => ({
       squares: num(answers.squares ?? answers.squares_code, 20),
