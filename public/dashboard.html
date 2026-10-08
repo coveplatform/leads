@@ -74,10 +74,6 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         Lead sources
       </button>
-      <button class="sidebar__item" data-view="billing">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Billing
-      </button>
       <button class="sidebar__item" data-view="settings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Settings
@@ -172,7 +168,6 @@
             <p class="alert-card__sub">This usually takes 1–2 minutes. Refresh the page to check. If it's been more than 5 minutes, something may have gone wrong — contact us and we'll sort it.</p>
             <div class="alert-card__actions">
               <button class="btn btn--secondary btn--sm" onclick="location.reload()">↻ Refresh</button>
-              <button class="btn btn--ghost btn--sm" id="reset-setup-btn">Start setup again</button>
               <a href="mailto:hello@usecove.app?subject=Number+not+provisioned" class="btn btn--ghost btn--sm">Contact support</a>
             </div>
           </div>
@@ -245,28 +240,11 @@
         </div>
       </div>
 
-      <!-- ROI hero — what Cove made you (last 30 days) -->
-      <div class="card" id="roi-hero" style="margin-bottom:1rem;background:linear-gradient(135deg,#0e0c0a,#241910);color:#fff;border:none;padding:22px 24px;border-radius:16px">
-        <div style="font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fb923c;margin-bottom:8px">What Cove made you</div>
-        <div id="roi-summary" style="font-size:1.15rem;font-weight:800;letter-spacing:-.02em;line-height:1.35">Crunching your numbers…</div>
-        <div style="display:flex;gap:28px;flex-wrap:wrap;margin-top:16px">
-          <div><div id="roi-recovered" style="font-size:1.55rem;font-weight:900;letter-spacing:-.03em">—</div><div style="font-size:.72rem;color:#a1a1aa;font-weight:600">calls recovered</div></div>
-          <div><div id="roi-booked" style="font-size:1.55rem;font-weight:900;letter-spacing:-.03em;color:#fb923c">—</div><div style="font-size:.72rem;color:#a1a1aa;font-weight:600">booked</div></div>
-          <div><div id="roi-value" style="font-size:1.55rem;font-weight:900;letter-spacing:-.03em;color:#4ade80">—</div><div style="font-size:.72rem;color:#a1a1aa;font-weight:600">in jobs (est.)</div></div>
-          <div><div id="roi-cost" style="font-size:1.55rem;font-weight:900;letter-spacing:-.03em">—</div><div style="font-size:.72rem;color:#a1a1aa;font-weight:600">you paid</div></div>
-        </div>
-      </div>
-
-      <!-- Scoreboard — recovered revenue leads -->
+      <!-- Scoreboard — last 30 days -->
       <div class="stats-strip" id="stats-strip">
-        <div class="stat-item stat-item--hero">
-          <div class="stat-item__val stat-item__val--orange" id="stat-recovered">—</div>
-          <div class="stat-item__key">Recovered revenue · last 30 days</div>
-          <div class="stat-item__note" id="stat-recovered-note">Mark leads won to track the money Cove brings in.</div>
-        </div>
         <div class="stat-item">
           <div class="stat-item__val" id="stat-captured">0</div>
-          <div class="stat-item__key">Calls caught</div>
+          <div class="stat-item__key">Calls caught · 30 days</div>
         </div>
         <div class="stat-item">
           <div class="stat-item__val stat-item__val--green" id="stat-qualified">0</div>
@@ -390,39 +368,6 @@
             </div>
           </div>
 
-          <!-- Instant quote — the wow / upsell toggle -->
-          <div class="section" style="margin-top:1.25rem;">
-            <div class="section__title-row">
-              <span class="section__title section__title--flush">Instant quote <span style="font-size:.68rem;font-weight:700;color:#e8540a;border:1px solid #fbcaaa;background:#fff2ea;padding:2px 7px;border-radius:999px;vertical-align:middle">Add-on</span></span>
-            </div>
-            <p class="section__sub">Drop a ballpark range before booking. Always shown as a range with an “estimate only” note, anchored to your average job value.</p>
-            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600">
-              <input type="checkbox" id="flow-quote-enabled" />
-              <span>Show an instant ballpark quote</span>
-            </label>
-            <div id="flow-quote-fields" style="margin-top:12px;display:none">
-              <div class="flow-q-label">Trade pricing model</div>
-              <select id="flow-quote-trade" style="width:100%;max-width:340px;padding:9px 11px;border:1px solid var(--border,#e4e4e7);border-radius:8px;font-size:14px">
-                <option value="roofing">Roofing — per-square formula</option>
-                <option value="hvac">HVAC / Air conditioning — per job type</option>
-              </select>
-
-              <div id="flow-quote-rates-roofing" style="margin-top:14px">
-                <div class="flow-q-label">Your roofing rates</div>
-                <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
-                  <div><div style="font-size:12px;color:var(--text-faint,#71717a);margin-bottom:4px">$ / square (low)</div><input type="number" id="flow-rate-sqlow" min="0" style="width:120px" placeholder="350" /></div>
-                  <div><div style="font-size:12px;color:var(--text-faint,#71717a);margin-bottom:4px">$ / square (high)</div><input type="number" id="flow-rate-sqhigh" min="0" style="width:120px" placeholder="520" /></div>
-                  <div><div style="font-size:12px;color:var(--text-faint,#71717a);margin-bottom:4px">Call-out fee</div><input type="number" id="flow-rate-callout" min="0" style="width:120px" placeholder="250" /></div>
-                </div>
-                <p class="flow-setup__hint">1 square ≈ 100 sq ft. Two-storey / steep jobs are auto-bumped ~30%. Leave blank to use sensible defaults.</p>
-              </div>
-              <div id="flow-quote-rates-hvac" style="margin-top:14px;display:none">
-                <p class="flow-setup__hint">HVAC uses standard service / repair / install bands, anchored to your average job value (set under <strong>Settings</strong>). No rates to enter.</p>
-              </div>
-
-              <p class="flow-setup__hint">Quotes always show as a range with an “estimate only” disclaimer.</p>
-            </div>
-          </div>
         </div><!-- /flow-layout__editor -->
 
         <!-- Right: live preview -->
@@ -588,11 +533,6 @@
           Missed calls
           <span id="itab-calls-badge" class="int-tab-badge"></span>
         </button>
-        <button class="int-tab" data-itab="form">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-          Website form
-          <span class="int-tab-badge int-tab-badge--opt">Optional</span>
-        </button>
         <button class="int-tab" data-itab="crm">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           CRM
@@ -668,15 +608,6 @@
               <a id="dash-activate-link" href="#" class="cf-activate-btn">Tap to activate — opens your dialler</a>
               <p style="font-size:12px;color:var(--text-muted);margin:4px 0 0;text-align:center">Just tap <strong>Call</strong> — takes 5 seconds</p>
             </div>
-            <!-- Desktop: send code to phone -->
-            <div id="dash-desktop-section" class="cf-desktop-send">
-              <p class="cf-desktop-send__label">On a desktop? Send this code to your phone:</p>
-              <div class="cf-desktop-send__row">
-                <input type="tel" id="dash-send-phone" placeholder="+61 400 000 000" style="flex:1;min-width:0" />
-                <button class="btn btn--primary btn--sm" id="dash-send-btn" type="button">Send</button>
-              </div>
-              <p class="cf-send-status" id="dash-send-status"></p>
-            </div>
           </div>
 
         </div>
@@ -746,43 +677,6 @@
 
       </div>
 
-      <!-- Panel: Website form -->
-      <div class="int-panel" id="int-panel-form">
-        <div class="int-section">
-          <div class="int-section__label">What happens</div>
-          <div class="int-how-list">
-            <div class="int-how-item">
-              <span class="int-how-num">1</span>
-              <div><strong>A visitor fills in your contact form</strong><p>On your website — could be at 2am, on a Sunday, whenever</p></div>
-            </div>
-            <div class="int-how-item">
-              <span class="int-how-num">2</span>
-              <div><strong>Cove picks up their phone number from the form</strong><p>One line of code on your site connects the form to Cove</p></div>
-            </div>
-            <div class="int-how-item int-how-item--hl">
-              <span class="int-how-num int-how-num--hl">3</span>
-              <div><strong>Cove texts them straight away</strong><p>They get your qualification questions immediately. You wake up to a qualified lead.</p></div>
-            </div>
-          </div>
-          <p class="int-section__desc">Works with Wix, Squarespace, Webflow, WordPress, or any custom HTML form.</p>
-        </div>
-        <div class="int-section">
-          <div class="int-section__label">Step 1 — Add this script to your website's &lt;head&gt;</div>
-          <div class="snippet-wrap">
-            <pre id="embed-snippet" class="snippet">Loading…</pre>
-            <button onclick="copySnippet()" class="snippet-copy" id="copy-snippet-btn">Copy</button>
-          </div>
-        </div>
-        <div class="int-section">
-          <div class="int-section__label">Step 2 — Call this when your form is submitted</div>
-          <div class="snippet-wrap">
-            <pre class="snippet" id="embed-example">Loading…</pre>
-            <button onclick="copyExample()" class="snippet-copy" id="copy-example-btn">Copy</button>
-          </div>
-          <p class="int-section__desc">Only the customer's phone number is required. Everything else is optional.</p>
-        </div>
-      </div>
-
       <!-- Panel: CRM -->
       <div class="int-panel" id="int-panel-crm">
         <div class="int-section">
@@ -790,7 +684,7 @@
           <div class="int-how-list">
             <div class="int-how-item">
               <span class="int-how-num">1</span>
-              <div><strong>Cove qualifies a lead</strong><p>Via a missed call or your website contact form</p></div>
+              <div><strong>Cove qualifies a lead</strong><p>From a missed call</p></div>
             </div>
             <div class="int-how-item int-how-item--hl">
               <span class="int-how-num int-how-num--hl">2</span>
@@ -805,57 +699,6 @@
             <p class="int-dfy-card__desc">Tell us what CRM you use, we connect it to Cove. Usually takes us about 30 minutes and it just works from then on.</p>
             <a href="mailto:hello@usecove.app?subject=CRM%20setup%20for%20Cove" class="btn btn--primary btn--sm">Email us to get started →</a>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ BILLING ═══ -->
-    <div id="view-billing" class="hidden">
-      <div class="page-header">
-        <h1 class="page-header__title">Billing</h1>
-        <p class="page-header__sub">Manage your subscription and payment details.</p>
-      </div>
-      <div id="billing-reactivated-banner" class="hidden" style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:10px;padding:.85rem 1.1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:.75rem;font-size:.875rem;color:#15803d;font-weight:500;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Subscription reactivated — welcome back! Cove is live again.
-      </div>
-
-      <div class="card">
-        <div class="card__section">
-          <div class="section__title">Current plan</div>
-          <div class="plan-display">
-            <div class="plan-display__name">Cove Standard</div>
-            <div class="plan-display__price"><strong>$89</strong>/month · Cancel anytime</div>
-            <div class="plan-display__status">
-              <span id="billing-status-badge"></span>
-              <span id="billing-status-text" class="plan-display__status-text"></span>
-            </div>
-          </div>
-          <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
-            <button class="btn btn--secondary" id="billing-portal-btn">
-              Manage billing
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </button>
-            <button class="btn btn--primary hidden" id="billing-reactivate-btn">
-              Reactivate subscription →
-            </button>
-          </div>
-        </div>
-
-        <div class="card__divider"></div>
-
-      </div>
-
-      <div class="card card--faint">
-        <div class="card__section">
-          <div class="guarantee-header">
-            <div class="guarantee-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <div class="guarantee-title">7-day money-back guarantee</div>
-          </div>
-          <p class="section__sub">If Cove doesn't pay for itself within 7 days of activation, contact us and we'll give you a full refund — no questions asked.</p>
-          <a href="mailto:hello@usecove.app" class="text-link">hello@usecove.app</a>
         </div>
       </div>
     </div>
@@ -890,20 +733,6 @@
         </div>
       </div>
 
-      <!-- Preview flow -->
-      <div class="card card--mb">
-        <div class="card__section">
-          <div class="section__title">Preview your flow</div>
-          <p class="section__hint" style="margin-bottom:14px">Send yourself the exact SMS sequence your leads receive.</p>
-          <div class="form-group" style="margin-bottom:0">
-            <div style="display:flex;gap:8px;align-items:flex-start">
-              <input type="tel" id="settings-preview-phone" placeholder="+61 400 000 000" style="flex:1" />
-              <button class="btn btn--secondary" id="settings-preview-btn" type="button" style="flex-shrink:0">Send preview</button>
-            </div>
-            <p class="hint" id="settings-preview-status" style="margin-top:6px;min-height:16px"></p>
-          </div>
-        </div>
-      </div>
 
       <!-- Profile -->
       <div class="card card--mb">
@@ -1030,14 +859,6 @@
           </div>
         </details>
 
-        <details class="faq-item">
-          <summary class="faq-item__q">How do I pause or cancel?</summary>
-          <div class="faq-item__a">
-            <p>Go to <strong>Billing</strong> in the sidebar. You can pause your account or cancel your subscription at any time — no lock-in, no cancellation fee.</p>
-            <p>If you cancel, your number stays active until the end of your billing period.</p>
-          </div>
-        </details>
-
         <details class="faq-item faq-item--last">
           <summary class="faq-item__q">My Cove number isn't texting people — what do I do?</summary>
           <div class="faq-item__a">
@@ -1083,7 +904,7 @@
     function lsRemove(k) { localStorage.removeItem(lsKey(k)); }
 
     // ─── Navigation ───
-    const views = ['overview', 'leads', 'flow', 'notifications', 'integrations', 'billing', 'settings', 'help'];
+    const views = ['overview', 'leads', 'flow', 'notifications', 'integrations', 'settings', 'help'];
 
     function showView(name) {
       views.forEach(v => {
@@ -1098,7 +919,6 @@
       if (name === 'flow' && business) renderFlowEditor();
       if (name === 'notifications' && business) fillNotificationForm();
       if (name === 'integrations' && business) fillIntegrations();
-      if (name === 'billing') fillBilling();
       if (name === 'settings' && user) fillSettings();
       closeMobileMenu();
     }
@@ -1158,8 +978,6 @@
           ];
           const _done = leadsData.filter(l => l.status === 'completed').length;
           // Dev preview scoreboard
-          document.getElementById('stat-recovered').textContent = '$2,400';
-          document.getElementById('stat-recovered-note').textContent = '2 jobs won · $3,200 still in play';
           document.getElementById('stat-captured').textContent = leadsData.length;
           document.getElementById('stat-qualified').textContent = _done;
           document.getElementById('stat-won').textContent = '2';
@@ -1176,17 +994,10 @@
         user = meData.user;
         business = meData.business;
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const reactivated = urlParams.has('reactivated');
-
-        if (!reactivated && (!user.onboarding_complete || !business?.is_active)) {
-          location.href = '/onboarding';
+        // Accounts are set up by Kris; a login without a business can't do anything here.
+        if (!business) {
+          document.body.innerHTML = '<div style="font-family:sans-serif;max-width:420px;margin:15vh auto;padding:0 16px;text-align:center;color:#3f3f46"><h1 style="font-size:1.2rem">Your Cove account isn\'t set up yet</h1><p>Kris will finish setting it up and let you know. Questions? <a href="mailto:hello@usecove.app">hello@usecove.app</a></p></div>';
           return;
-        }
-
-        // Clean up query params from URL without reloading
-        if (urlParams.has('reactivated') || urlParams.has('billing')) {
-          history.replaceState(null, '', '/dashboard');
         }
 
         // Sidebar
@@ -1207,20 +1018,6 @@
         }, 30000);
         updateGetStartedPanel();
 
-        // Handle return from Stripe
-        if (reactivated) {
-          showView('billing');
-          document.querySelectorAll('.sidebar__item').forEach(el => el.classList.remove('active'));
-          document.querySelector('.sidebar__item[data-view="billing"]')?.classList.add('active');
-          document.getElementById('billing-reactivated-banner')?.classList.remove('hidden');
-        } else if (urlParams.has('billing')) {
-          showView('billing');
-          document.querySelectorAll('.sidebar__item').forEach(el => el.classList.remove('active'));
-          document.querySelector('.sidebar__item[data-view="billing"]')?.classList.add('active');
-        }
-
-        // Fire trial email check in background — never blocks UI
-        fetch('/api/trial/check', { method: 'POST' }).catch(() => {});
       } catch (e) {
         console.error(e);
         location.href = '/login';
@@ -1258,10 +1055,6 @@
         }
       }
 
-      // Auto-attempt provisioning if number missing
-      if (!business.twilio_from_number) {
-        tryProvision();
-      }
 
 
       // ── Forwarding banner: verify test flow ──
@@ -1344,27 +1137,6 @@
         });
       })();
 
-      // Reset setup handler
-      const resetBtn = document.getElementById('reset-setup-btn');
-      if (resetBtn) {
-        resetBtn.addEventListener('click', async () => {
-          if (!confirm('This will reset your onboarding so you can start again. Your account and payment will be kept. Continue?')) return;
-          resetBtn.disabled = true; resetBtn.textContent = 'Resetting…';
-          await fetch('/api/auth/reset-onboarding', { method: 'POST' });
-          location.href = '/onboarding';
-        });
-      }
-
-      // Refresh button — re-attempt provision
-      const refreshBtn = document.querySelector('#setup-alert .btn--secondary');
-      if (refreshBtn) {
-        refreshBtn.addEventListener('click', async (e) => {
-          e.preventDefault();
-          refreshBtn.disabled = true; refreshBtn.textContent = 'Checking…';
-          await tryProvision();
-          refreshBtn.disabled = false; refreshBtn.textContent = '↻ Refresh';
-        });
-      }
     }
 
     function updateGetStartedPanel() {
@@ -1408,24 +1180,6 @@
       });
     }
 
-    async function tryProvision() {
-      try {
-        const res = await fetch('/api/auth/provision-number', { method: 'POST' }).then(r => r.json());
-        if (res.ok && res.number) {
-          business.twilio_from_number = res.number;
-          business.is_active = true;
-          document.getElementById('live-badge').innerHTML = '<span class="badge badge--setup badge--dot">Almost live</span>';
-          document.getElementById('setup-alert').classList.add('hidden');
-          document.getElementById('billing-number').textContent = res.number;
-          const s2dot = document.querySelector('#sstep-2 .setup-step__dot');
-          if (s2dot) { s2dot.classList.remove('setup-step__dot--spin'); s2dot.classList.add('setup-step__dot--done'); }
-          const s3dot = document.querySelector('#sstep-3 .setup-step__dot');
-          if (s3dot) s3dot.classList.add('setup-step__dot--spin');
-          setTimeout(() => location.href = '/onboarding?step=complete', 800);
-        }
-      } catch (e) { /* silent */ }
-    }
-
     async function loadLeads() {
       const data = await fetch('/api/me/leads').then(r => r.json());
       if (!data.ok) return;
@@ -1465,46 +1219,17 @@
       return '$' + Math.round(v).toLocaleString('en-AU');
     }
 
-    // ─── ROI hero (what Cove made you) ───
-    async function loadRoi() {
-      try {
-        const data = await fetch('/api/me/roi?period=month').then(r => r.json());
-        if (!data.ok || !data.roi) return;
-        const r = data.roi;
-        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-        set('roi-summary', r.summary || '');
-        set('roi-recovered', r.recoveredCalls);
-        set('roi-booked', r.booked);
-        set('roi-value', r.estimatedValue > 0 ? fmtMoney(r.estimatedValue) : '$0');
-        set('roi-cost', r.cost != null ? fmtMoney(r.cost) : '—');
-        set('stat-booked', r.booked);
-      } catch { /* silent — never block dashboard */ }
-    }
-
-    // ─── Scoreboard (recovered revenue) ───
+    // ─── Scoreboard — counts from the last 30 days of leads ───
     async function loadStats() {
-      loadRoi(); // refresh the ROI hero alongside the scoreboard
       try {
-        const data = await fetch('/api/me/stats?days=30').then(r => r.json());
-        if (!data.ok || !data.stats) return;
-        const s = data.stats;
-        document.getElementById('stat-captured').textContent = s.captured;
-        document.getElementById('stat-qualified').textContent = s.qualified;
-        document.getElementById('stat-won').textContent = s.won;
-        document.getElementById('stat-recovered').textContent = s.recovered > 0 ? fmtMoney(s.recovered) : '—';
-
-        const note = document.getElementById('stat-recovered-note');
-        if (s.recovered > 0) {
-          note.textContent = s.potential > 0
-            ? `${s.won} job${s.won === 1 ? '' : 's'} won · ${fmtMoney(s.potential)} still in play`
-            : `${s.won} job${s.won === 1 ? '' : 's'} won`;
-        } else if (!s.avgJobValue) {
-          note.textContent = 'Set your average job value in Settings to see recovered revenue.';
-        } else if (s.qualified > 0) {
-          note.textContent = `${fmtMoney(s.potential)} in qualified leads — mark them won as they convert.`;
-        } else {
-          note.textContent = 'Mark leads won to track the money Cove brings in.';
-        }
+        const data = await fetch('/api/me/leads?days=30').then(r => r.json());
+        if (!data.ok) return;
+        const leads = data.leads || [];
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        set('stat-captured', leads.length);
+        set('stat-qualified', leads.filter(l => l.status === 'completed').length);
+        set('stat-booked', leads.filter(l => l.appointment_at).length);
+        set('stat-won', leads.filter(l => l.outcome === 'won').length);
       } catch { /* silent — never block dashboard */ }
     }
 
@@ -1597,7 +1322,7 @@
       if (compEl) flow.completion = compEl.value.trim();
       const compBookEl = document.getElementById('flow-completion-booking');
       if (compBookEl) flow.completion_with_booking = compBookEl.value.trim();
-      // Booking + instant-quote toggles (stored in the flow_config JSONB)
+      // Booking toggle (stored in the flow_config JSONB)
       const bkEl = document.getElementById('flow-booking-enabled');
       if (bkEl) {
         flow.booking = {
@@ -1605,22 +1330,6 @@
           slots: Math.min(3, Math.max(1, Number(document.getElementById('flow-booking-slots')?.value) || 2)),
           prompt: (document.getElementById('flow-booking-prompt')?.value || '').trim() || undefined,
         };
-      }
-      const qzEl = document.getElementById('flow-quote-enabled');
-      if (qzEl) {
-        const trade = document.getElementById('flow-quote-trade')?.value || 'roofing';
-        const spec = { enabled: qzEl.checked, trade };
-        if (trade === 'roofing') {
-          const rates = {};
-          const lo = Number(document.getElementById('flow-rate-sqlow')?.value);
-          const hi = Number(document.getElementById('flow-rate-sqhigh')?.value);
-          const co = Number(document.getElementById('flow-rate-callout')?.value);
-          if (Number.isFinite(lo) && lo > 0) rates.per_square_low = lo;
-          if (Number.isFinite(hi) && hi > 0) rates.per_square_high = hi;
-          if (Number.isFinite(co) && co >= 0) rates.callout = co;
-          if (Object.keys(rates).length) spec.rates = rates;
-        }
-        flow.quote_spec = spec;
       }
       flowEdited = JSON.parse(JSON.stringify(flow));
     }
@@ -1655,7 +1364,7 @@
         requestAnimationFrame(() => { compBookEl.style.height = 'auto'; compBookEl.style.height = compBookEl.scrollHeight + 'px'; });
         compBookEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; }, { once: false });
       }
-      // Booking + instant-quote toggles
+      // Booking toggle
       const bkEl = document.getElementById('flow-booking-enabled');
       if (bkEl) {
         const b = flow.booking || {};
@@ -1667,32 +1376,6 @@
         if (promptEl) promptEl.value = b.prompt || '';
         if (fields) fields.style.display = b.enabled ? '' : 'none';
         bkEl.onchange = () => { if (fields) fields.style.display = bkEl.checked ? '' : 'none'; };
-      }
-      const qzEl = document.getElementById('flow-quote-enabled');
-      if (qzEl) {
-        const q = flow.quote_spec || {};
-        qzEl.checked = !!q.enabled;
-        const qfields = document.getElementById('flow-quote-fields');
-        const tradeEl = document.getElementById('flow-quote-trade');
-        if (tradeEl) tradeEl.value = q.trade || 'roofing';
-        const rr = q.rates || {};
-        const sqlow = document.getElementById('flow-rate-sqlow');
-        const sqhigh = document.getElementById('flow-rate-sqhigh');
-        const callout = document.getElementById('flow-rate-callout');
-        if (sqlow) sqlow.value = rr.per_square_low ?? '';
-        if (sqhigh) sqhigh.value = rr.per_square_high ?? '';
-        if (callout) callout.value = rr.callout ?? '';
-        const toggleRates = () => {
-          const t = tradeEl ? tradeEl.value : 'roofing';
-          const roof = document.getElementById('flow-quote-rates-roofing');
-          const hvac = document.getElementById('flow-quote-rates-hvac');
-          if (roof) roof.style.display = t === 'roofing' ? '' : 'none';
-          if (hvac) hvac.style.display = t === 'hvac' ? '' : 'none';
-        };
-        if (qfields) qfields.style.display = q.enabled ? '' : 'none';
-        toggleRates();
-        qzEl.onchange = () => { if (qfields) qfields.style.display = qzEl.checked ? '' : 'none'; };
-        if (tradeEl) tradeEl.onchange = toggleRates;
       }
       document.getElementById('flow-biz-name').addEventListener('input', updateFlowPreview, { once: true });
 
@@ -1990,53 +1673,7 @@
 
     // ─── Integrations ───
     function fillIntegrations() {
-      const bizId = business.id;
-      const base = window.location.origin;
-
-      const snippet = `<script src="${base}/cove.js" data-business="${bizId}"><\/script>`;
-      document.getElementById('embed-snippet').textContent = snippet;
-
-      const example = `<!-- Example: HTML contact form -->
-<form id="contact-form">
-  <input type="text"  name="name"  placeholder="Your name" />
-  <input type="tel"   name="phone" placeholder="Your phone" />
-  <input type="email" name="email" placeholder="Your email" />
-  <button type="submit">Send enquiry</button>
-</form>
-
-<script src="${base}/cove.js" data-business="${bizId}"><\/script>
-<script>
-  document.getElementById('contact-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const data = new FormData(e.target);
-    Cove.send({
-      name:  data.get('name'),
-      phone: data.get('phone'),
-      email: data.get('email'),
-    });
-    e.target.reset();
-    alert('Thanks! We\\'ll be in touch shortly.');
-  });
-<\/script>`;
-      document.getElementById('embed-example').textContent = example;
-
       fillIntWebhook();
-    }
-
-    function copySnippet() {
-      const text = document.getElementById('embed-snippet').textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('copy-snippet-btn');
-        btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000);
-      });
-    }
-
-    function copyExample() {
-      const text = document.getElementById('embed-example').textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('copy-example-btn');
-        btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000);
-      });
     }
 
 
@@ -2059,15 +1696,11 @@
       const optusNote = document.getElementById('dash-optus-note');
       const copyCodeBtn = document.getElementById('dash-copy-code-btn');
       const mobileSect = document.getElementById('dash-mobile-section');
-      const desktopSect = document.getElementById('dash-desktop-section');
-      const sendBtn = document.getElementById('dash-send-btn');
-      const sendStatus = document.getElementById('dash-send-status');
       if (!grid) return;
 
       // Detect mobile vs desktop
       const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       if (mobileSect) mobileSect.classList.toggle('hidden', !isMobile);
-      if (desktopSect) desktopSect.classList.toggle('hidden', isMobile);
 
       const buildCode = (carrier, num) => {
         // Dial codes need local AU format (04XX) — the + sign breaks the dialler
@@ -2098,11 +1731,6 @@
           currentCode = buildCode(carrier, num);
           if (dialCodeEl) dialCodeEl.textContent = currentCode;
           if (activateLink) activateLink.href = 'tel:' + currentCode;
-
-          const sendPhoneInput = document.getElementById('dash-send-phone');
-          if (sendPhoneInput && !sendPhoneInput.value && business?.owner_notify_phone) {
-            sendPhoneInput.value = business.owner_notify_phone;
-          }
 
           action.classList.remove('hidden');
           action.style.display = 'flex';
@@ -2148,36 +1776,6 @@
         copyCodeBtn.addEventListener('click', autoStartFwdTest);
       }
 
-      // Desktop: send code to phone via SMS
-      if (sendBtn) {
-        sendBtn.addEventListener('click', async () => {
-          const phone = document.getElementById('dash-send-phone')?.value.trim();
-          if (!phone || !currentCode) return;
-          sendBtn.disabled = true;
-          sendBtn.textContent = 'Sending…';
-          if (sendStatus) { sendStatus.textContent = ''; sendStatus.style.color = ''; }
-          try {
-            const res = await fetch('/api/demo/send', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ phone, message: `Your Cove call forwarding code:\n\n${currentCode}\n\nDial this on your mobile, then tap Call to activate.` }),
-            }).then(r => r.json());
-            if (res.ok) {
-              if (sendStatus) { sendStatus.textContent = 'Sent! Check your messages.'; sendStatus.style.color = 'var(--green)'; }
-              sendBtn.textContent = 'Sent ✓';
-              setTimeout(() => { sendBtn.disabled = false; sendBtn.textContent = 'Send'; }, 3000);
-            } else {
-              if (sendStatus) { sendStatus.textContent = res.error || 'Could not send — try again.'; sendStatus.style.color = 'var(--red,#dc2626)'; }
-              sendBtn.disabled = false;
-              sendBtn.textContent = 'Send';
-            }
-          } catch {
-            if (sendStatus) { sendStatus.textContent = 'Could not send — try again.'; sendStatus.style.color = 'var(--red,#dc2626)'; }
-            sendBtn.disabled = false;
-            sendBtn.textContent = 'Send';
-          }
-        });
-      }
     })();
 
     // ─── Test lead (send real SMS to owner) ───
@@ -2325,52 +1923,6 @@
       document.getElementById('int-panel-calls')?.classList.add('int-panel--active');
     });
 
-    // ─── Billing ───
-    function fillBilling() {
-      const status = user.subscription_status || 'inactive';
-      const badge = document.getElementById('billing-status-badge');
-      const text = document.getElementById('billing-status-text');
-      const reactivateBtn = document.getElementById('billing-reactivate-btn');
-
-      if (status === 'active') {
-        badge.innerHTML = '<span class="badge badge--live badge--dot">Active</span>';
-        text.textContent = 'Your subscription is active.';
-      } else if (status === 'trialing') {
-        badge.innerHTML = '<span class="badge badge--live badge--dot">Trial</span>';
-        text.textContent = 'You\'re on a free trial. Your card will be charged when it ends.';
-      } else if (status === 'past_due') {
-        badge.innerHTML = '<span class="badge badge--setup badge--dot">Payment failed</span>';
-        text.textContent = 'Your last payment failed. Update your card to keep Cove running.';
-      } else if (status === 'canceled') {
-        badge.innerHTML = '<span class="badge badge--paused badge--dot">Cancelled</span>';
-        text.textContent = 'Your subscription has been cancelled. Reactivate to start capturing leads again.';
-        reactivateBtn.classList.remove('hidden');
-      } else {
-        badge.innerHTML = '<span class="badge badge--paused badge--dot">Inactive</span>';
-        text.textContent = '';
-      }
-    }
-
-    document.getElementById('billing-portal-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('billing-portal-btn');
-      btn.disabled = true; btn.textContent = 'Opening…';
-      const data = await fetch('/api/billing/portal').then(r => r.json());
-      btn.disabled = false; btn.textContent = 'Manage billing →';
-      if (data.ok && data.url) { location.href = data.url; }
-      else { alert(data.error || 'Could not open billing portal.'); }
-    });
-
-    document.getElementById('billing-reactivate-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('billing-reactivate-btn');
-      btn.disabled = true; btn.textContent = 'Loading…';
-      try {
-        const data = await fetch('/api/billing/reactivate', { method: 'POST' }).then(r => r.json());
-        if (data.ok && data.url) { location.href = data.url; }
-        else { alert(data.error || 'Could not start checkout. Please try again.'); }
-      } catch { alert('Network error. Please try again.'); }
-      btn.disabled = false; btn.textContent = 'Reactivate subscription →';
-    });
-
     // ─── Settings ───
     function fillSettings() {
       document.getElementById('settings-name').value = user.name || '';
@@ -2384,7 +1936,6 @@
       document.getElementById('settings-pw-confirm').value = '';
       document.getElementById('settings-success').classList.add('hidden');
       document.getElementById('settings-error').classList.add('hidden');
-      document.getElementById('settings-preview-status').textContent = '';
     }
 
     document.getElementById('settings-save').addEventListener('click', async () => {
@@ -2456,32 +2007,6 @@
       btn.disabled = false; btn.textContent = 'Save changes';
     });
 
-    // ─── Preview SMS ───
-    document.getElementById('settings-preview-btn')?.addEventListener('click', async () => {
-      const phone = document.getElementById('settings-preview-phone').value.trim();
-      const statusEl = document.getElementById('settings-preview-status');
-      if (!phone) { statusEl.textContent = 'Enter a phone number first.'; statusEl.style.color = 'var(--red,#dc2626)'; return; }
-      const btn = document.getElementById('settings-preview-btn');
-      btn.disabled = true; btn.textContent = 'Sending…';
-      statusEl.textContent = ''; statusEl.style.color = '';
-      try {
-        const res = await fetch('/api/demo/send', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone, message: `Hi! This is a preview from ${business?.name || 'Cove'}.\n\nYou'll receive the exact SMS your leads get when they call. Reply as if you were a customer to see the full flow.` }),
-        }).then(r => r.json());
-        if (res.ok) {
-          statusEl.textContent = 'Sent! Check your messages.';
-          statusEl.style.color = 'var(--green)';
-        } else {
-          statusEl.textContent = res.error || 'Could not send — try again.';
-          statusEl.style.color = 'var(--red,#dc2626)';
-        }
-      } catch {
-        statusEl.textContent = 'Network error — try again.';
-        statusEl.style.color = 'var(--red,#dc2626)';
-      }
-      btn.disabled = false; btn.textContent = 'Send preview';
-    });
 
     // ─── Logout ───
     async function doLogout() {
@@ -2653,12 +2178,8 @@
           : lead.outcome === 'lost'
           ? `<span class="lead-badge lead-badge--stopped">Lost</span>`
           : '';
-        const kfmt = (n) => { const v = Number(n) || 0; return v >= 1000 ? '$' + Math.round(v / 1000) + 'k' : '$' + Math.round(v); };
         const bookedPill = lead.appointment_at
           ? `<span class="lead-badge lead-badge--new" title="${esc(lead.answers?._appointment_label || 'Appointment booked')}">📅 Booked</span>`
-          : '';
-        const quotePill = (lead.quote_low != null && lead.quote_high != null)
-          ? `<span class="lead-badge" title="Instant quote (estimate)">${kfmt(lead.quote_low)}–${kfmt(lead.quote_high)}</span>`
           : '';
         return `<tr class="lead-row${isUrgent ? ' lead-row--urgent' : ''}" data-index="${i}">
           <td class="name-cell">
@@ -2670,7 +2191,7 @@
             ${isNew ? '<span class="lead-badge lead-badge--new">New</span>' : ''}
             <span class="lead-badge ${cls}">${label}</span>
             ${calledBack ? '<span class="lead-badge lead-badge--called">Called back</span>' : ''}
-            ${bookedPill}${quotePill}
+            ${bookedPill}
             ${outcomePill}
           </td>
           <td class="time-cell">${timeAgo(lead.created_at)}</td>

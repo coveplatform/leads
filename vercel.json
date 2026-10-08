@@ -7,8 +7,5 @@
   },
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/index.js" }
-  ],
-  "crons": [
-    { "path": "/api/cron/monthly-roi", "schedule": "0 9 1 * *" }
   ]
 }

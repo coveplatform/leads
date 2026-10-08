@@ -1,6 +1,6 @@
 // Rule-based pre-processor for inbound SMS replies.
-// Runs before validate/fuzzy/AI — handles special intents, retry tracking,
-// leading-letter extraction, and free text quality checks.
+// Runs before option matching (flow-engine matchOption) — handles special
+// intents, retry tracking, and free text quality checks.
 
 // ─── Special Intent Patterns ───
 
@@ -65,26 +65,6 @@ export function isMeaninglessReply(text) {
   if (t.length < 3) return true;
   if (NON_ANSWER_PATTERN.test(t)) return true;
   return false;
-}
-
-/**
- * For A/B/C or 1/2/3 questions: check if the reply starts with a valid option
- * value followed by non-alphanumeric content.
- * e.g. "A please" → "A", "B - it's urgent" → "B", "1) yes" → "1"
- * Returns the matched value (uppercased), or null.
- */
-export function extractLeadingOption(text, validValues) {
-  const t = (text || "").trim();
-  for (const val of validValues) {
-    // Must be followed by end-of-string or a non-alphanumeric character
-    const re = new RegExp(`^${escapeRegex(val)}($|[^a-zA-Z0-9])`, "i");
-    if (re.test(t)) return val.toUpperCase();
-  }
-  return null;
-}
-
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 // ─── Retry Tracking ───

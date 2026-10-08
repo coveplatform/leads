@@ -166,10 +166,6 @@ export async function sendLeadNotifications({ business, lead, flowConfig, summar
             label: answers._appointment_label || null,
           }
         : null,
-      // Instant-quote range — null unless the quote toggle produced one.
-      quote: (lead.quote_low != null && lead.quote_high != null)
-        ? { low: Number(lead.quote_low), high: Number(lead.quote_high), unit: "job" }
-        : null,
     };
 
     for (const step of (flowConfig?.steps || [])) {

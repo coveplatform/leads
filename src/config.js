@@ -11,24 +11,29 @@ export const config = {
     return process.env.BASE_URL || `http://localhost:${this.port}`;
   },
 
+  // The public URL Twilio calls. Locally BASE_URL is localhost, which Twilio
+  // can't reach, so fall back to the production domain for webhook URLs and
+  // signature validation.
+  get publicBaseUrl() {
+    const raw = (process.env.BASE_URL || "").trim();
+    if (!raw || raw.startsWith("http://localhost") || raw.startsWith("http://127")) {
+      return (process.env.PRODUCTION_URL || "https://usecove.app").trim();
+    }
+    return raw;
+  },
+
   twilio: {
     get accountSid() { return process.env.TWILIO_ACCOUNT_SID || ""; },
     get authToken() { return process.env.TWILIO_AUTH_TOKEN || ""; },
   },
 
-  google: {
-    get clientId() { return process.env.GOOGLE_CLIENT_ID || ""; },
-    get clientSecret() { return process.env.GOOGLE_CLIENT_SECRET || ""; },
-  },
-
-  stripe: {
-    get secretKey() { return process.env.STRIPE_SECRET_KEY || ""; },
-    get priceId() { return process.env.STRIPE_PRICE_ID || ""; },
-    get priceIdAnnual() { return process.env.STRIPE_PRICE_ID_ANNUAL || ""; },
-    get webhookSecret() { return process.env.STRIPE_WEBHOOK_SECRET || ""; },
+  // Optional alerts to Kris (website enquiries). `from` is any Cove Twilio number.
+  adminAlert: {
+    get to() { return process.env.ADMIN_ALERT_PHONE || ""; },
+    get from() { return process.env.ADMIN_ALERT_FROM || ""; },
+    get email() { return process.env.ADMIN_ALERT_EMAIL || "hello@usecove.app"; },
   },
 
   get jwtSecret() { return process.env.JWT_SECRET || "change-me-in-production"; },
   get databaseUrl() { return process.env.DATABASE_URL || ""; },
-  get openaiApiKey() { return process.env.OPENAI_API_KEY || ""; },
 };

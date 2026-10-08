@@ -16,18 +16,13 @@
     <meta property="og:site_name" content="Cove" />
     <meta property="og:url" content="https://usecove.app/" />
     <meta property="og:title" content="Cove — Stop losing jobs while you're working" />
-    <meta property="og:description" content="Cove texts your missed calls back in 10 seconds, qualifies them, and sends you a ready-to-call summary — before they find someone else. 7-day free trial, cancel anytime." />
-    <meta property="og:image" content="https://usecove.app/og-image.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Cove — Instant SMS lead qualification" />
+    <meta property="og:description" content="Cove texts your missed calls back in 10 seconds, qualifies them, and sends you a ready-to-call summary — before they find someone else." />
     <meta property="og:locale" content="en_AU" />
 
     <!-- Twitter / X card -->
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Cove — Stop losing jobs while you're working" />
-    <meta name="twitter:description" content="Texts your missed calls back in 10 seconds, qualifies them, and sends you a ready-to-call summary. 7-day free trial." />
-    <meta name="twitter:image" content="https://usecove.app/og-image.png" />
+    <meta name="twitter:description" content="Texts your missed calls back in 10 seconds, qualifies them, and sends you a ready-to-call summary." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
@@ -46,8 +41,8 @@
           <a href="#how">How it works</a>
           <a href="#pricing">Pricing</a>
           <a href="#faq">FAQ</a>
-          <a href="/demo" class="btn btn--sm btn--ghost">See it live</a>
-          <a href="/login" class="btn btn--sm btn--primary">Get started</a>
+          <a href="#contact" class="btn btn--sm btn--primary">Get started</a>
+          <a href="/login" class="btn btn--sm btn--ghost">Sign in</a>
         </nav>
         <button class="nav__burger" aria-label="Menu" id="nav-burger">
           <span></span><span></span><span></span>
@@ -62,10 +57,8 @@
           <h1>Stop losing jobs<br/><em>while you&rsquo;re working.</em></h1>
           <p class="hero__sub">Cove texts your leads back in <strong>10 seconds</strong>, qualifies them, <strong>books the next job</strong>, and shows you the revenue it recovered &mdash; before they find someone else.</p>
           <div class="hero__ctas">
-            <a href="/login" class="btn btn--primary btn--lg hero__cta-main">Start free trial &rarr;</a>
-            <a href="/demo" class="btn btn--ghost-light btn--lg">&#9654;&nbsp; See it live</a>
+            <a href="#contact" class="btn btn--primary btn--lg hero__cta-main">Get started &rarr;</a>
           </div>
-          <p class="hero__cta-note">7-day free trial &middot; card charged on day 8 &middot; $89/mo after</p>
         </div>
         <div class="hero__phone-col">
           <div class="hero__phone-wrap">
@@ -252,33 +245,6 @@
       </div>
     </section>
 
-    <!-- LIVE DEMO -->
-    <section id="demo" class="demo">
-      <div class="demo__bg"></div>
-      <div class="container demo__inner">
-        <div class="demo__badge">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          <span>Text yourself &mdash; no sign-up needed</span>
-        </div>
-        <h2>Text yourself a live demo.</h2>
-        <p class="demo__subtitle">Enter your number and Cove sends the exact SMS your leads receive &mdash; right to your phone.</p>
-        <form id="demo-form" class="demo__form">
-          <div class="demo__input-group">
-            <div class="demo__input-wrapper">
-              <svg class="demo__input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              <input type="tel" id="demo-phone" name="phone" placeholder="+61 412 345 678" required autocomplete="tel" />
-            </div>
-            <button type="submit" class="btn btn--white btn--lg" id="demo-btn">
-              <span id="demo-btn-text">Send me the demo</span>
-              <svg id="demo-btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-            </button>
-          </div>
-          <p id="demo-status" class="demo__status"></p>
-        </form>
-        <p class="demo__note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Standard SMS rates may apply. Reply STOP to opt out anytime.</p>
-        <a href="/demo" style="display:inline-block;margin-top:20px;color:#fff;font-weight:700;font-size:1rem;text-decoration:underline;text-underline-offset:4px">&#9654;&nbsp; Don&rsquo;t want a text? See it live on screen &mdash; capture &rarr; quote &rarr; book &rarr;</a>
-      </div>
-    </section>
 
     <!-- PRICING -->
     <section id="pricing" class="pricing">
@@ -294,7 +260,6 @@
           <div class="pricing__tier reveal">
             <div class="pricing__tier-label">Self-serve</div>
             <div class="pricing__amount"><span class="pricing__dollar">$</span>89<span class="pricing__per">/mo</span></div>
-            <span class="pricing__trial-badge">7-day free trial &mdash; cancel before day 8</span>
             <p class="pricing__tier-sub">Live in under 15 minutes.</p>
             <ul class="pricing__list">
               <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Texts leads back in 10 seconds, 24/7</li>
@@ -305,7 +270,7 @@
               <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Monthly ROI report &mdash; the revenue Cove recovered</li>
               <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Webhook &amp; Zapier integrations</li>
             </ul>
-            <a href="/login" class="btn btn--primary btn--lg btn--full">Start free trial &rarr;</a>
+            <a href="#contact" class="btn btn--primary btn--lg btn--full">Get started &rarr;</a>
             <p class="pricing__risk">No lock-in. Cancel anytime. &middot; Or <strong>$890/yr</strong> (save 2 months)</p>
           </div>
           <!-- Done for you -->
@@ -419,8 +384,6 @@
           <a href="#pricing">Pricing</a>
           <a href="#faq">FAQ</a>
           <a href="#contact">Done for you</a>
-          <a href="/demo">See it live</a>
-          <a href="#demo">Text yourself a demo</a>
           <a href="/login">Sign in</a>
         </nav>
       </div>
@@ -437,7 +400,7 @@
 
     <!-- MOBILE STICKY CTA -->
     <div class="sticky-cta">
-      <a href="/login" class="btn btn--primary btn--full">Start free trial &mdash; 7 days free</a>
+      <a href="#contact" class="btn btn--primary btn--full">Get started</a>
     </div>
 
     <script src="/app.js" defer></script>

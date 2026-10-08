@@ -4,52 +4,47 @@ import { config } from "./config.js";
 const sql = neon(config.databaseUrl);
 
 // ─── Users ───
+// Owners log in with email + password. Accounts are created by the onboarding
+// script; there is no public signup.
 
-export async function createUser({ email, passwordHash, googleId, name }) {
+export async function createUser({ email, passwordHash, name }) {
   const rows = await sql`
-    INSERT INTO users (email, password_hash, google_id, name)
-    VALUES (${email}, ${passwordHash || null}, ${googleId || null}, ${name || null})
-    RETURNING id, email, name, google_id, subscription_status, onboarding_complete, created_at
+    INSERT INTO users (email, password_hash, name)
+    VALUES (${email}, ${passwordHash || null}, ${name || null})
+    RETURNING id, email, name, created_at
   `;
   return rows[0];
 }
 
 export async function getUserById(id) {
   const rows = await sql`
-    SELECT id, email, name, google_id, stripe_customer_id, stripe_subscription_id,
-           subscription_status, onboarding_complete, created_at
+    SELECT id, email, name, created_at
     FROM users WHERE id = ${id} LIMIT 1
   `;
   return rows[0] || null;
 }
 
+// Includes password_hash — for login checks only, never send to the client.
 export async function getUserByEmail(email) {
   const rows = await sql`
-    SELECT * FROM users WHERE email = ${email} LIMIT 1
+    SELECT id, email, name, password_hash, created_at
+    FROM users WHERE email = ${email} LIMIT 1
   `;
   return rows[0] || null;
 }
 
-export async function getUserByGoogleId(googleId) {
-  const rows = await sql`
-    SELECT id, email, name, google_id, stripe_customer_id, stripe_subscription_id,
-           subscription_status, onboarding_complete, created_at
-    FROM users WHERE google_id = ${googleId} LIMIT 1
-  `;
-  return rows[0] || null;
+export async function getUserPasswordHash(userId) {
+  const rows = await sql`SELECT password_hash FROM users WHERE id = ${userId} LIMIT 1`;
+  return rows[0]?.password_hash || null;
 }
 
 export async function updateUser(userId, fields) {
   const rows = await sql`
     UPDATE users SET
-      name                  = COALESCE(${fields.name ?? null}, name),
-      stripe_customer_id    = COALESCE(${fields.stripeCustomerId ?? null}, stripe_customer_id),
-      stripe_subscription_id = COALESCE(${fields.stripeSubscriptionId ?? null}, stripe_subscription_id),
-      subscription_status   = COALESCE(${fields.subscriptionStatus ?? null}, subscription_status),
-      onboarding_complete   = COALESCE(${fields.onboardingComplete ?? null}, onboarding_complete),
-      updated_at            = now()
+      name       = COALESCE(${fields.name ?? null}, name),
+      updated_at = now()
     WHERE id = ${userId}
-    RETURNING id, email, name, stripe_customer_id, subscription_status, onboarding_complete
+    RETURNING id, email, name
   `;
   return rows[0];
 }
@@ -62,65 +57,18 @@ export async function getBusinessByUserId(userId) {
 }
 
 export async function getRecentLeadsByBusinessId(businessId, days = 7) {
-  // Prefer the booking/quote columns (migration 009); fall back to the legacy
-  // shape if they don't exist yet, so the dashboard never breaks pre-migration.
-  const extended = () => days == null
+  return days == null
     ? sql`
         SELECT id, name, phone, status, current_step, answers, message, outcome, job_value,
-               appointment_at, booking_status, quote_low, quote_high, created_at, finished_at
+               appointment_at, booking_status, created_at, finished_at
         FROM leads WHERE business_id = ${businessId}
         ORDER BY created_at DESC LIMIT 200`
     : sql`
         SELECT id, name, phone, status, current_step, answers, message, outcome, job_value,
-               appointment_at, booking_status, quote_low, quote_high, created_at, finished_at
+               appointment_at, booking_status, created_at, finished_at
         FROM leads WHERE business_id = ${businessId}
           AND created_at > NOW() - ${days + ' days'}::interval
         ORDER BY created_at DESC LIMIT 200`;
-  const legacy = () => days == null
-    ? sql`
-        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value, created_at, finished_at
-        FROM leads WHERE business_id = ${businessId}
-        ORDER BY created_at DESC LIMIT 200`
-    : sql`
-        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value, created_at, finished_at
-        FROM leads WHERE business_id = ${businessId}
-          AND created_at > NOW() - ${days + ' days'}::interval
-        ORDER BY created_at DESC LIMIT 200`;
-  try {
-    return await extended();
-  } catch (err) {
-    const undefinedColumn = err?.code === "42703" || /column .* does not exist/i.test(err?.message || "");
-    if (undefinedColumn) return await legacy();
-    throw err;
-  }
-}
-
-// ─── Dashboard scoreboard stats ───
-// Aggregates lead outcomes for the "recovered revenue" overview. days=null = all-time.
-export async function getBusinessStats(businessId, days = 30) {
-  const rows = days == null
-    ? await sql`
-        SELECT
-          COUNT(*)::int                                              AS captured,
-          COUNT(*) FILTER (WHERE status = 'completed')::int          AS qualified,
-          COUNT(*) FILTER (WHERE outcome = 'won')::int               AS won,
-          COUNT(*) FILTER (WHERE outcome = 'lost')::int              AS lost,
-          COALESCE(SUM(job_value) FILTER (WHERE outcome = 'won'), 0) AS won_value
-        FROM leads
-        WHERE business_id = ${businessId}
-      `
-    : await sql`
-        SELECT
-          COUNT(*)::int                                              AS captured,
-          COUNT(*) FILTER (WHERE status = 'completed')::int          AS qualified,
-          COUNT(*) FILTER (WHERE outcome = 'won')::int               AS won,
-          COUNT(*) FILTER (WHERE outcome = 'lost')::int              AS lost,
-          COALESCE(SUM(job_value) FILTER (WHERE outcome = 'won'), 0) AS won_value
-        FROM leads
-        WHERE business_id = ${businessId}
-          AND created_at > NOW() - ${days + ' days'}::interval
-      `;
-  return rows[0];
 }
 
 export async function getBusinessById(id) {
@@ -207,16 +155,14 @@ export async function updateLead(leadId, fields) {
   return rows[0];
 }
 
-// ─── Booking / quote writes (migration 009) ───
-// One write path for the booking step: stamp the proposed slot, the quote range,
-// and (when finalising) the completed status. Every field is COALESCE-guarded so
+// ─── Booking writes (migration 009) ───
+// One write path for the booking step: stamp the proposed slot and (when
+// finalising) the completed status. Every field is COALESCE-guarded so
 // callers set only what they need. Lives apart from updateLead so the generic
 // lead update path stays independent of the 009 columns.
 export async function setLeadBooking(leadId, {
   appointmentAt = null,
   bookingStatus = null,
-  quoteLow = null,
-  quoteHigh = null,
   answers = null,
   status = null,
   currentStep = null,
@@ -228,8 +174,6 @@ export async function setLeadBooking(leadId, {
     UPDATE leads SET
       appointment_at    = COALESCE(${appointmentAt}::timestamptz, appointment_at),
       booking_status    = COALESCE(${bookingStatus}, booking_status),
-      quote_low         = COALESCE(${quoteLow}, quote_low),
-      quote_high        = COALESCE(${quoteHigh}, quote_high),
       answers           = COALESCE(${answersJson}::jsonb, answers),
       status            = COALESCE(${status}, status),
       current_step      = COALESCE(${currentStep ?? null}, current_step),
@@ -238,35 +182,6 @@ export async function setLeadBooking(leadId, {
       updated_at        = now()
     WHERE id = ${leadId}
     RETURNING *
-  `;
-  return rows[0];
-}
-
-// ─── ROI aggregate (recovered revenue) ───
-// avgJobValue anchors estimated value where actual / quote figures are absent.
-//   captured        = calls/enquiries recovered (every lead)
-//   qualified       = conversations completed
-//   booked          = leads with a proposed/confirmed appointment
-//   won_value       = actual booked $ of won jobs (job_value, else avg)
-//   booked_pipeline = booked-but-not-yet-won jobs, at quote-mid (else avg)
-export async function getRoiAggregate(businessId, since, until, avgJobValue = 0) {
-  const avg = Number(avgJobValue) || 0;
-  const rows = await sql`
-    SELECT
-      COUNT(*)::int                                              AS captured,
-      COUNT(*) FILTER (WHERE status = 'completed')::int          AS qualified,
-      COUNT(*) FILTER (WHERE appointment_at IS NOT NULL)::int    AS booked,
-      COUNT(*) FILTER (WHERE outcome = 'won')::int               AS won,
-      COUNT(*) FILTER (WHERE outcome = 'lost')::int              AS lost,
-      COALESCE(SUM(COALESCE(job_value, ${avg}::numeric))
-               FILTER (WHERE outcome = 'won'), 0)                AS won_value,
-      COALESCE(SUM(COALESCE((quote_low + quote_high) / 2.0, ${avg}::numeric))
-               FILTER (WHERE appointment_at IS NOT NULL
-                         AND (outcome IS NULL OR outcome NOT IN ('won', 'lost'))), 0) AS booked_pipeline
-    FROM leads
-    WHERE business_id = ${businessId}
-      AND created_at >= ${since}::timestamptz
-      AND created_at <  ${until}::timestamptz
   `;
   return rows[0];
 }
@@ -333,31 +248,6 @@ export async function getAllBusinesses() {
   return rows;
 }
 
-export async function getSignupFunnel() {
-  const rows = await sql`
-    SELECT
-      u.id           AS user_id,
-      u.email,
-      u.name,
-      u.subscription_status,
-      u.onboarding_complete,
-      u.created_at   AS signed_up_at,
-      b.id           AS business_id,
-      b.name         AS business_name,
-      b.twilio_from_number,
-      b.is_active,
-      b.forwarding_verified,
-      COUNT(l.id)::int AS lead_count
-    FROM users u
-    LEFT JOIN businesses b ON b.user_id = u.id
-    LEFT JOIN leads l ON l.business_id = b.id
-    GROUP BY u.id, u.email, u.name, u.subscription_status, u.onboarding_complete, u.created_at,
-             b.id, b.name, b.twilio_from_number, b.is_active, b.forwarding_verified
-    ORDER BY u.created_at DESC
-  `;
-  return rows;
-}
-
 export async function getAllLeadsWithBusiness() {
   const rows = await sql`
     SELECT 
@@ -369,18 +259,6 @@ export async function getAllLeadsWithBusiness() {
     ORDER BY l.created_at DESC
   `;
   return rows;
-}
-
-export async function checkDemoRateLimit(phone) {
-  const rows = await sql`
-    SELECT COUNT(*) as cnt FROM demo_rate_limits
-    WHERE phone = ${phone} AND sent_at > NOW() - INTERVAL '1 hour'
-  `;
-  return Number(rows[0]?.cnt || 0);
-}
-
-export async function recordDemoSend(phone) {
-  await sql`INSERT INTO demo_rate_limits (phone) VALUES (${phone})`;
 }
 
 // ─── Inbound SMS idempotency ───
@@ -417,10 +295,13 @@ export async function rateLimitExceeded(bucket, key, windowSeconds, max) {
   return count >= max;
 }
 
-export async function checkDuplicateLead(phone, minutesWindow) {
+// An active lead for this phone at this business created in the last N minutes.
+// Scoped per business: the same caller ringing two Cove clients gets two leads.
+export async function checkDuplicateLead(businessId, phone, minutesWindow) {
   const rows = await sql`
     SELECT id FROM leads
-    WHERE phone = ${phone}
+    WHERE business_id = ${businessId}
+      AND phone = ${phone}
       AND status = 'active'
       AND created_at > NOW() - ${minutesWindow + ' minutes'}::interval
     LIMIT 1
@@ -449,34 +330,7 @@ export async function getMessagesByLeadId(leadId) {
   return rows;
 }
 
-// ─── Password Reset ───
-
-export async function setPasswordResetToken(userId, token, expiresAt) {
-  await sql`
-    UPDATE users
-    SET password_reset_token = ${token}, password_reset_expires = ${expiresAt}, updated_at = now()
-    WHERE id = ${userId}
-  `;
-}
-
-export async function getUserByResetToken(token) {
-  const rows = await sql`
-    SELECT id, email, name, password_reset_expires
-    FROM users
-    WHERE password_reset_token = ${token}
-      AND password_reset_expires > now()
-    LIMIT 1
-  `;
-  return rows[0] || null;
-}
-
-export async function clearPasswordResetToken(userId) {
-  await sql`
-    UPDATE users
-    SET password_reset_token = NULL, password_reset_expires = NULL, updated_at = now()
-    WHERE id = ${userId}
-  `;
-}
+// ─── Passwords ───
 
 export async function updatePassword(userId, passwordHash) {
   await sql`
@@ -485,90 +339,12 @@ export async function updatePassword(userId, passwordHash) {
   `;
 }
 
-// ─── Google OAuth ───
-
-export async function linkGoogleAccount(userId, googleId) {
-  await sql`
-    UPDATE users SET google_id = ${googleId}, updated_at = now()
-    WHERE id = ${userId}
-  `;
-}
-
-// ─── Stripe / Subscription ───
-
-export async function getUserByStripeCustomerId(stripeCustomerId) {
-  const rows = await sql`
-    SELECT * FROM users WHERE stripe_customer_id = ${stripeCustomerId} LIMIT 1
-  `;
-  return rows[0] || null;
-}
-
-export async function activateUserSubscription(userId, subscriptionId) {
-  await sql`
-    UPDATE users SET
-      stripe_subscription_id = ${subscriptionId},
-      subscription_status    = 'active',
-      onboarding_complete    = true,
-      trial_started_at       = COALESCE(trial_started_at, now()),
-      updated_at             = now()
-    WHERE id = ${userId}
-  `;
-}
-
-export async function syncUserSubscriptionStatus(stripeCustomerId, subscriptionId, status) {
-  await sql`
-    UPDATE users SET
-      stripe_subscription_id = ${subscriptionId},
-      subscription_status    = ${status},
-      updated_at             = now()
-    WHERE stripe_customer_id = ${stripeCustomerId}
-  `;
-}
-
-// ─── Trial Emails ───
-
-export async function getUserWithTrialInfo(userId) {
-  const rows = await sql`
-    SELECT id, email, name, trial_started_at, trial_emails_sent
-    FROM users WHERE id = ${userId} LIMIT 1
-  `;
-  return rows[0] || null;
-}
-
-export async function markTrialEmailSent(userId, bit) {
-  await sql`
-    UPDATE users
-    SET trial_emails_sent = COALESCE(trial_emails_sent, 0) | ${bit}
-    WHERE id = ${userId}
-  `;
-}
-
 // ─── Business Activation ───
 
 export async function setBusinessActive(businessId, isActive) {
   await sql`
-    UPDATE businesses SET is_active = ${isActive}, updated_at = now()
+    UPDATE businesses SET is_active = ${isActive}
     WHERE id = ${businessId}
-  `;
-}
-
-export async function setBusinessActiveByUserId(userId, isActive) {
-  await sql`
-    UPDATE businesses SET is_active = ${isActive}, updated_at = now()
-    WHERE user_id = ${userId}
-  `;
-}
-
-// ─── Onboarding ───
-
-export async function resetOnboarding(userId) {
-  await sql`
-    UPDATE users SET onboarding_complete = false, updated_at = now()
-    WHERE id = ${userId}
-  `;
-  await sql`
-    UPDATE businesses SET twilio_from_number = null, is_active = false
-    WHERE user_id = ${userId}
   `;
 }
 

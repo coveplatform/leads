@@ -1,21 +1,44 @@
 # Cove
 
-Instant lead qualification system for service businesses. SMS-based triage with customizable flows, AI generation, and integration with Podium/CRM platforms. Deployed on **Vercel** with **Neon Postgres**.
+Missed-call recovery and SMS booking for Australian trades. A customer rings the
+business, the call forwards to the business's Cove (Twilio) number, Cove texts
+the caller one qualifying question, offers a time window, and alerts the owner.
+
+Clients are onboarded by hand (no signup, no billing in the app). Deployed on
+**Vercel** with **Neon Postgres**. The previous self-serve SaaS version (Stripe,
+trials, Google login, AI, instant quotes, demo) is preserved on the
+`saas-archive` branch.
 
 ## Stack
 
-- **Runtime:** Vercel serverless (Node 18+)
+- **Runtime:** Vercel serverless, Node 18+ (`scripts/migrate.mjs` needs Node 22)
 - **Database:** Neon Postgres (`@neondatabase/serverless`)
-- **SMS:** Twilio
-- **AI:** OpenAI GPT-4o-mini (optional — for flow generation + smart reply parsing)
-- **Frontend:** Static HTML/CSS/JS in `public/`
+- **SMS + voice:** Twilio
+- **Frontend:** static HTML/CSS/JS in `public/`, no build step
+
+## Layout
+
+```
+src/server.js              Express setup, pages, route mounting
+src/routes/webhooks.js     Twilio voice + SMS, generic lead webhook, public lead API, enquiry form
+src/routes/auth.js         login, logout, me, password change
+src/routes/owner.js        /api/me/* — the owner dashboard API
+src/routes/admin.js        /api/admin/* — Kris only
+src/middleware.js          auth guards, Twilio signature check, rate limiting
+src/services/leads.js      starting a lead (opt-out + per-business dedupe + first text)
+src/services/conversation.js  reply handling: STOP, matching, booking, owner alert
+src/services/twilio-numbers.js  buying + wiring a Twilio number
+src/flow-engine.js         templates, deterministic reply matching, message builders
+src/booking.js             booking windows from operating hours
+src/integrations.js        owner notifications (SMS, email, webhooks), operating hours
+```
 
 ## Local development
 
 ```bash
 npm install
-cp .env.example .env   # fill in your values
-npm run dev             # http://localhost:3000
+cp .env.example .env   # fill in DATABASE_URL, TWILIO_*, JWT_SECRET, BASE_URL
+npm run dev            # http://localhost:3000
 ```
 
 ## Environment variables
@@ -23,146 +46,61 @@ npm run dev             # http://localhost:3000
 | Variable | Required | Description |
 |---|---|---|
 | `DATABASE_URL` | Yes | Neon Postgres connection string |
-| `TWILIO_ACCOUNT_SID` | Yes | Twilio account SID |
-| `TWILIO_AUTH_TOKEN` | Yes | Twilio auth token |
-| `DEMO_TWILIO_NUMBER` | No | Twilio number for live demo on homepage |
-| `ADMIN_PASSWORD` | No | Password for admin dashboard + flow builder |
-| `OPENAI_API_KEY` | No | Enables AI flow generation + smart reply parsing |
-| `COVE_MONTHLY_PRICE` | No | Subscription price used to frame ROI (default `89`) |
-| `CRON_SECRET` | No | Bearer token guarding the monthly ROI email cron |
+| `JWT_SECRET` | Yes | Signs owner session cookies |
+| `BASE_URL` | Yes | Public URL, e.g. `https://usecove.app` |
+| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | Yes | Twilio credentials (the token also validates webhook signatures) |
+| `TWILIO_BUNDLE_SID` / `TWILIO_ADDRESS_SID` / `TWILIO_MESSAGING_SERVICE_SID` | For provisioning | AU regulatory bundle, address and messaging service |
+| `ADMIN_EMAILS` | No | Logins allowed into `/admin` (default: Kris) |
+| `RESEND_API_KEY` / `NOTIFY_EMAIL` | No | Owner email alerts |
+| `ADMIN_ALERT_EMAIL` / `ADMIN_ALERT_PHONE` / `ADMIN_ALERT_FROM` | No | Where website enquiries alert Kris |
 | `SMS_DRY_RUN` | No | `1` makes `sendSms` log instead of calling Twilio (tests only) |
-| `DEBUG` | No | Set `true` for verbose logging |
+| `DEBUG` | No | `true` for verbose logging |
 
-## Database setup
+## Database
 
-1. Create a Neon project at https://console.neon.tech
-2. Copy the connection string into `DATABASE_URL`
-3. Run `sql/schema.sql` in the Neon SQL Editor
-4. Run `migrations/002_flow_engine.sql` to add flow engine columns
-5. Run remaining migrations in order. Latest: `migrations/009_booking_roi.sql`
-   (booking + quote columns) — or `node scripts/run-migration-009.mjs`
-
-## Features
-
-### SMS Qualification Flow
-- Instant text-back + one high-signal question per missed call
-- 7 industry templates (dental, plumbing, electrical, HVAC, roofing, legal, general)
-- AI-powered flow generation — describe a business and get a custom question
-- Urgent value triggers (e.g. "Emergency" sends an instant alert to the owner)
-- Edited in onboarding and the dashboard flow view
-
-### In-conversation Booking
-- After triage, Cove offers real appointment windows over SMS and soft-books the pick
-- Slots are generated from the business's `operating_hours` (skips closed days / past times) — no external calendar needed for the MVP (`booking_status = 'proposed'`, owner confirms)
-- Owner gets a punchy "🔥 Booked lead" alert; the booked time + range flow through to webhooks/CRM
-- Toggled per business in the dashboard flow editor (stored in `flow_config.booking`)
-
-### Recovered-revenue / ROI engine
-- `GET /api/me/roi?period=month|last_month|all` aggregates calls recovered, conversations, booked, est. value, won jobs vs. subscription cost
-- Surfaced as the **Overview hero** ("This month: 23 calls recovered · 9 booked · ~$61,000 in jobs · you paid $89")
-- Monthly "what Cove made you" email via Resend, driven by a Vercel cron (`/api/cron/monthly-roi`)
-
-### Instant quote (toggle / upsell)
-- Drops a ballpark **range** before booking, always with an "estimate only" disclaimer
-- Two modes: `matrix` (option → band, e.g. HVAC) and `formula` (numeric inputs → band, e.g. roofing)
-- Owner/AI-authored formulas run through a whitelist guard (`src/quote-formula.js`) — no `eval`/injection
-- Per-business rates, anchored to `avg_job_value`. Stored in `flow_config.quote_spec`
-- **Magic demo** at `/demo` (backed by `POST /api/quote/simulate`) renders capture → quote → book with no Twilio
-
-### AI Smart Replies
-- When `OPENAI_API_KEY` is set, leads can reply in natural language
-- AI interprets "my pipe burst and I need someone now" → maps to option A (Emergency)
-- Falls back to structured validation if AI is unavailable
-
-### Integration Webhooks
-- **Podium:** `POST /api/webhook/podium/:businessId` — catches Podium webchat leads
-- **Generic:** `POST /api/webhook/generic/:businessId` — works with any platform (Zapier, ServiceTitan, Housecall Pro, Jobber)
-- Built-in 30-minute de-duplication prevents double SMS
-
-### Edge Case Handling
-- Rate limiting on demo endpoint (2 per hour per phone)
-- Lead de-duplication (30-minute window)
-- STOP/UNSUBSCRIBE keyword handling
-- Graceful fallback to industry template if no custom flow set
-
-## Admin Dashboard (`/admin.html`)
-
-Password-protected. Manage businesses, view leads, and access the flow builder.
-
-## Deploy to Vercel
+Migrations live in `migrations/` and run in filename order:
 
 ```bash
-npm i -g vercel
-vercel
+node scripts/migrate.mjs --dry-run   # list pending
+node scripts/migrate.mjs             # apply, recording each in schema_migrations
 ```
 
-Set environment variables in Vercel dashboard → Settings → Environment Variables.
+Run migrations **after** deploying the code that needs them. `011_strip_saas.sql`
+drops the Stripe, trial, OAuth, reset-token and quote columns; the previous
+release still reads them, so deploy first, then migrate.
 
-Set Twilio inbound SMS webhook to: `https://your-app.vercel.app/api/sms/inbound`
+## How a missed call flows
 
-## API
+1. `/api/voice/inbound` finds the active business by the called number, stamps
+   the forwarding heartbeat, and starts a lead: skipped if the caller sent STOP
+   to this business or already has an active lead there from the last 30 minutes.
+2. The caller gets the intro + one question (e.g. plumbing: A emergency / B today / C can wait).
+3. Replies to `/api/sms/inbound` are matched deterministically: the option
+   value, a leading value ("A please"), the label or a prefix of it, or a
+   per-option synonym ("burst pipe" → emergency). Unmatched replies are re-asked
+   twice, then the owner is told to call.
+4. With booking on and the business open, Cove offers windows and soft-books the
+   pick (`booking_status = 'proposed'`); otherwise it sends the completion line.
+5. The owner gets an SMS summary (plus email/webhooks if configured).
 
-### Core
-- `GET /health`
-- `POST /api/lead` — Create lead + start SMS flow
-- `POST /api/sms/inbound` — Twilio webhook (receives replies; triage → quote → booking)
-- `POST /api/website-inquiry` — Marketing site contact form
-- `POST /api/demo` — Send demo SMS flow to a phone number
+`businesses.is_active` is the only on/off switch. Billing never drops calls.
 
-### Booking · ROI · Quote
-- `GET /api/me/roi?period=month|last_month|all` — recovered-revenue aggregate (dashboard hero)
-- `POST /api/quote/simulate` — render a capture → quote → book transcript, no Twilio (powers `/demo`)
-- `GET /api/cron/monthly-roi` — monthly "what Cove made you" email (Vercel cron; guarded by `CRON_SECRET`)
+## Lead sources
+
+- Forwarded missed calls (`/api/voice/inbound`)
+- Customers texting the Cove number directly (`/api/sms/inbound`)
+- `POST /api/webhook/generic/:businessId` — Zapier, Make, website forms (`x-cove-secret` header if the business has one)
+- `POST /api/lead` — `{ businessId, phone, name?, email?, message? }`
 
 ## Testing
 
 ```bash
-npm test                              # unit + HTTP integration (no DB needed)
-SMS_DRY_RUN=1 node scripts/test-inbound-e2e.mjs   # full inbound E2E (needs a real DATABASE_URL)
+npm test                                          # unit + HTTP tests, no DB needed
+SMS_DRY_RUN=1 node scripts/test-inbound-e2e.mjs   # missed call → reply → booking, needs a real DATABASE_URL
 ```
 
-### Admin
-- `POST /api/admin/auth` — Authenticate with admin password
-- `GET /api/admin/businesses` — List all businesses
-- `POST /api/admin/businesses` — Create a business
-- `GET /api/admin/leads` — List all leads with business info
+## Deploy
 
-### Flow Management
-- `GET /api/admin/businesses/:id/flow` — Get flow config for a business
-- `PUT /api/admin/businesses/:id/flow` — Save custom flow config
-- `GET /api/admin/industries` — List available industry templates
-- `GET /api/admin/industries/:id/template` — Get a specific template
-- `POST /api/admin/ai/generate-flow` — AI-generate a flow for an industry
-
-### Integration Webhooks
-- `POST /api/webhook/podium/:businessId` — Podium webchat lead intake
-- `POST /api/webhook/generic/:businessId` — Generic lead intake (any platform)
-
-## Podium Integration Setup
-
-Add this to the business's website alongside their Podium webchat widget:
-
-```html
-<script>
-window.PodiumEventsCallback = function(event, properties) {
-  if (event === 'Conversation Started') {
-    fetch('https://your-app.vercel.app/api/webhook/podium/BUSINESS_ID', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        customerName: properties['customer-name'],
-        customerPhone: properties['customer-phone'],
-        customerMessage: properties['customer-message']
-      })
-    });
-  }
-};
-</script>
-```
-
-## Notes
-
-- Use E.164 phone format (`+614...`) for reliable matching.
-- Twilio enforces SMS compliance; STOP/UNSUBSCRIBE handling is built in.
-- Flow config is stored as JSONB on the businesses table — no separate flows table needed.
-- Flows are an instant text-back + one qualifying question (see `src/flow-engine.js` templates).
+Push to `main`; Vercel deploys it. Each Cove number's voice webhook points at
+`/api/voice/inbound` and SMS webhook at `/api/sms/inbound` on `BASE_URL`
+(`node scripts/fix-webhooks.mjs` repairs them).

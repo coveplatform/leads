@@ -2,11 +2,10 @@
 // Replaces the hardcoded dental-only flow.js
 
 import { formatAppointment } from "./booking.js";
-import { fmtRange } from "./quote.js";
 
-// Step kinds. Existing flows have no `type` and default to 'question', so they
-// are unchanged. 'booking' and 'quote' steps are injected after triage.
-export const STEP_TYPES = { QUESTION: "question", BOOKING: "booking", QUOTE: "quote" };
+// Step kinds. Existing flows have no `type` and default to 'question'. A
+// 'booking' step is injected after triage when booking is on.
+export const STEP_TYPES = { QUESTION: "question", BOOKING: "booking" };
 export function getStepType(step) {
   return step?.type || STEP_TYPES.QUESTION;
 }
@@ -51,9 +50,9 @@ export const INDUSTRY_TEMPLATES = {
         question: "How urgent is it?\nA) Emergency — water/gas leak now\nB) Need someone today\nC) Can wait a few days",
         invalid_text: "Please reply A, B or C.",
         options: [
-          { value: "A", label: "Emergency — active leak" },
-          { value: "B", label: "Urgent — same day" },
-          { value: "C", label: "Not urgent" },
+          { value: "A", label: "Emergency — active leak", synonyms: ["emergency", "leak", "leaking", "burst", "flood", "flooding", "gas"] },
+          { value: "B", label: "Urgent — same day", synonyms: ["today", "same day", "asap"] },
+          { value: "C", label: "Not urgent", synonyms: ["no rush", "can wait", "few days", "next week", "whenever"] },
         ],
         urgent_values: ["A"],
       },
@@ -71,8 +70,8 @@ export const INDUSTRY_TEMPLATES = {
         question: "Is this a safety issue (sparking, burning smell, no power)?\nA) Yes\nB) No — general electrical work",
         invalid_text: "Please reply A or B.",
         options: [
-          { value: "A", label: "Safety issue" },
-          { value: "B", label: "General work" },
+          { value: "A", label: "Safety issue", synonyms: ["yes", "sparking", "sparks", "burning", "smoke", "no power", "shock"] },
+          { value: "B", label: "General work", synonyms: ["no", "general"] },
         ],
         urgent_values: ["A"],
       },
@@ -90,11 +89,11 @@ export const INDUSTRY_TEMPLATES = {
         question: "What's happening?\n1) Not working at all\n2) Not heating/cooling properly\n3) Strange noise or smell\n4) New installation\n5) Service / maintenance",
         invalid_text: "Please reply with a number from 1 to 5.",
         options: [
-          { value: "1", label: "Not working at all" },
-          { value: "2", label: "Not cooling/heating properly" },
-          { value: "3", label: "Strange noise or smell" },
-          { value: "4", label: "New installation" },
-          { value: "5", label: "Service / maintenance" },
+          { value: "1", label: "Not working at all", synonyms: ["dead", "won't turn on", "wont turn on", "not working"] },
+          { value: "2", label: "Not cooling/heating properly", synonyms: ["not cooling", "not heating", "warm air", "cold air"] },
+          { value: "3", label: "Strange noise or smell", synonyms: ["noise", "noisy", "smell", "smells", "rattling"] },
+          { value: "4", label: "New installation", synonyms: ["install", "new unit", "new system"] },
+          { value: "5", label: "Service / maintenance", synonyms: ["service", "maintenance", "clean"] },
         ],
         urgent_values: ["1", "3"],
       },
@@ -112,10 +111,10 @@ export const INDUSTRY_TEMPLATES = {
         question: "What do you need?\n1) Roof replacement\n2) Repair / leak\n3) New roof (new build)\n4) Inspection / quote\n5) Something else",
         invalid_text: "Please reply with a number from 1 to 5.",
         options: [
-          { value: "1", label: "Roof replacement" },
-          { value: "2", label: "Repair / leak" },
-          { value: "3", label: "New roof" },
-          { value: "4", label: "Inspection / quote" },
+          { value: "1", label: "Roof replacement", synonyms: ["replace", "replacement", "reroof", "re-roof"] },
+          { value: "2", label: "Repair / leak", synonyms: ["repair", "leak", "leaking", "storm", "damage"] },
+          { value: "3", label: "New roof", synonyms: ["new build"] },
+          { value: "4", label: "Inspection / quote", synonyms: ["inspection", "inspect", "quote"] },
           { value: "5", label: "Something else" },
         ],
         urgent_values: ["2"],
@@ -154,9 +153,9 @@ export const INDUSTRY_TEMPLATES = {
         question: "How urgent is this?\nA) Very urgent — need help today\nB) This week\nC) Not urgent — just enquiring",
         invalid_text: "Please reply A, B or C.",
         options: [
-          { value: "A", label: "Very urgent — today" },
+          { value: "A", label: "Very urgent — today", synonyms: ["today", "asap", "emergency"] },
           { value: "B", label: "This week" },
-          { value: "C", label: "Not urgent" },
+          { value: "C", label: "Not urgent", synonyms: ["no rush", "enquiring", "just asking", "whenever"] },
         ],
         urgent_values: ["A"],
       },
@@ -183,42 +182,68 @@ export function getFlowStep(flowConfig, stepNumber) {
   return flowConfig.steps[stepNumber - 1] || null;
 }
 
-export function validateReply(step, text) {
-  if (step.free_text) return String(text || "").trim().length > 0;
-  const normalized = String(text || "").trim().toUpperCase();
-  if (step.options.some((opt) => opt.value.toUpperCase() === normalized)) return true;
-  // Fuzzy fallback: match against option labels
-  if (fuzzyMatchReply(step, text)) return true;
-  return false;
+// ─── Reply matching ───
+// Deterministic, in order: exact option value ("a", "2"), a leading option
+// value ("A please", "1) yes"), an option label or a prefix of one
+// ("emergency", "not urg"), then per-option synonyms ("burst pipe" → the
+// option listing "burst"). Anything ambiguous returns null so the caller
+// re-asks.
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export function fuzzyMatchReply(step, text) {
-  if (!text || !step.options?.length) return null;
-  const input = String(text).trim().toLowerCase();
-  if (input.length < 2) return null;
+function normalizeText(text) {
+  return String(text || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
 
-  // Try exact label match first
-  for (const opt of step.options) {
-    if (opt.label && opt.label.toLowerCase() === input) return opt.value;
+export function matchOption(step, text) {
+  const options = step?.options || [];
+  const input = normalizeText(text);
+  if (!input || options.length === 0) return null;
+
+  // 1. Exact value
+  const exact = options.find((o) => String(o.value).toLowerCase() === input);
+  if (exact) return exact;
+
+  // 2. Leading value followed by a non-alphanumeric char ("A please", "2.")
+  for (const o of options) {
+    const re = new RegExp(`^${escapeRegex(String(o.value))}($|[^a-z0-9])`, "i");
+    if (re.test(input)) return o;
   }
 
-  // Try keyword containment: if user's text contains the full label or vice versa
-  for (const opt of step.options) {
-    if (!opt.label) continue;
-    const label = opt.label.toLowerCase();
-    // User typed "emergency" and label is "emergency — today"
-    if (label.includes(input) || input.includes(label)) return opt.value;
-    // Check individual words: "emergency" matches label containing "emergency"
-    const labelWords = label.split(/[\s\-—,\/]+/).filter(w => w.length > 2);
-    const inputWords = input.split(/[\s\-—,\/]+/).filter(w => w.length > 2);
-    for (const iw of inputWords) {
-      for (const lw of labelWords) {
-        if (lw.startsWith(iw) || iw.startsWith(lw)) return opt.value;
+  // 3. Label, or a prefix of the label (at least 3 chars to avoid noise)
+  if (input.length >= 3) {
+    const byLabel = options.filter((o) => {
+      const label = normalizeText(o.label);
+      return label && (label === input || label.startsWith(input) || input.startsWith(label));
+    });
+    if (byLabel.length === 1) return byLabel[0];
+  }
+
+  // 4. Synonyms as whole words/phrases anywhere in the reply. The longest
+  // matching synonym wins, so "no power" beats "no"; a tie is ambiguous.
+  let best = null;
+  let bestLen = 0;
+  let tie = false;
+  for (const o of options) {
+    for (const syn of o.synonyms || []) {
+      const word = normalizeText(syn);
+      if (!word) continue;
+      if (!new RegExp(`(^|[^a-z0-9])${escapeRegex(word)}($|[^a-z0-9])`, "i").test(input)) continue;
+      if (word.length > bestLen) {
+        best = o; bestLen = word.length; tie = false;
+      } else if (word.length === bestLen && best !== o) {
+        tie = true;
       }
     }
   }
+  return best && !tie ? best : null;
+}
 
-  return null;
+export function validateReply(step, text) {
+  if (step.free_text) return String(text || "").trim().length > 0;
+  return matchOption(step, text) !== null;
 }
 
 export function parseReply(step, text) {
@@ -228,33 +253,18 @@ export function parseReply(step, text) {
       [`${step.key}_label`]: String(text || "").trim(),
     };
   }
-  const normalized = String(text || "").trim().toUpperCase();
-  // Try exact value match
-  let option = step.options.find(
-    (opt) => opt.value.toUpperCase() === normalized,
-  );
-  // Try fuzzy label match
-  if (!option) {
-    const fuzzyVal = fuzzyMatchReply(step, text);
-    if (fuzzyVal) {
-      option = step.options.find((opt) => opt.value === fuzzyVal);
-    }
-  }
+  const option = matchOption(step, text);
   return {
-    [`${step.key}_code`]: option ? option.value : normalized,
+    [`${step.key}_code`]: option ? option.value : String(text || "").trim().toUpperCase(),
     [`${step.key}_label`]: option ? option.label : text,
   };
 }
 
 export function isUrgentAnswer(step, text) {
   if (!step.urgent_values || step.urgent_values.length === 0) return false;
-  const normalized = String(text || "").trim().toUpperCase();
-  // Direct match
-  if (step.urgent_values.some((v) => v.toUpperCase() === normalized)) return true;
-  // Fuzzy match: check if fuzzy-resolved value is an urgent value
-  const fuzzyVal = fuzzyMatchReply(step, text);
-  if (fuzzyVal && step.urgent_values.some((v) => v.toUpperCase() === fuzzyVal.toUpperCase())) return true;
-  return false;
+  const option = matchOption(step, text);
+  if (!option) return false;
+  return step.urgent_values.some((v) => String(v).toUpperCase() === String(option.value).toUpperCase());
 }
 
 export function buildIntro(flowConfig, name, businessName) {
@@ -308,10 +318,7 @@ export function buildSummary(lead, business, flowConfig) {
     }
   }
 
-  // Quote range (instant-quote toggle) and booked appointment, when present.
-  if (lead.quote_low != null && lead.quote_high != null) {
-    lines.push(`Est. quote: ${fmtRange({ low: lead.quote_low, high: lead.quote_high })} (estimate only)`);
-  }
+  // Booked appointment, when present.
   const apptLabel = formatAppointment(lead, business.operating_hours?.timezone);
   if (apptLabel) {
     const statusNote = lead.booking_status === "confirmed" ? "confirmed" : "proposed — confirm with caller";
@@ -342,8 +349,8 @@ export function buildSummary(lead, business, flowConfig) {
 }
 
 // Punchy owner SMS for a fresh booking:
-//   "🔥 Booked lead — Sarah, roof replacement, Tomorrow 8–10am, est. ~$16k–$22k"
-export function buildBookedAlert(lead, business, { appointmentLabel, quote, flowConfig } = {}) {
+//   "🔥 Booked lead — Sarah, roof replacement, Tomorrow 8–10am"
+export function buildBookedAlert(lead, business, { appointmentLabel, flowConfig } = {}) {
   const answers = lead.answers || {};
   // Job descriptor = the first answered triage label.
   let descriptor = "";
@@ -357,7 +364,6 @@ export function buildBookedAlert(lead, business, { appointmentLabel, quote, flow
   ];
   if (descriptor) lines.push(descriptor);
   if (appointmentLabel) lines.push(`📅 ${appointmentLabel}`);
-  if (quote) lines.push(`Est. ${fmtRange(quote)} (estimate only)`);
   lines.push("→ Confirm the time with them.");
   return lines.join("\n");
 }

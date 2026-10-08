@@ -1,7 +1,7 @@
 {
   "name": "cove-platform",
   "version": "1.0.0",
-  "description": "Lead-to-SMS quote accelerator MVP for small businesses",
+  "description": "Missed-call recovery and SMS booking for Australian trades",
   "type": "module",
   "main": "src/server.js",
   "scripts": {
@@ -19,9 +19,6 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.3",
-    "openai": "^6.24.0",
-    "resend": "^6.9.2",
-    "stripe": "^20.3.1",
     "twilio": "^5.10.4"
   }
 }
