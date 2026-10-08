@@ -1,2376 +1,385 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — Cove</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="icon" type="image/png" href="/favicon.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/dash.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#fafaf8" />
+<title>Cove</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #fafaf8; --card: #fff; --ink: #18181b; --muted: #6b6b73; --faint: #a1a1aa; --line: #e7e5e0;
+    --brand: #e8540a; --brand-soft: #fff2ea; --red: #dc2626; --red-soft: #fef2f2;
+    --green: #15803d; --green-soft: #f0fdf4; --amber: #b45309; --amber-soft: #fffbeb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #111110; --card: #1c1c1a; --ink: #f4f4f5; --muted: #a1a1aa; --faint: #71717a; --line: #2e2e2b;
+      --brand-soft: #2a1a10; --red-soft: #2a1414; --green-soft: #12221a; --amber-soft: #2a2010; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 "Plus Jakarta Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  main { max-width: 640px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0 4px; }
+  h1 { font-size: 1.15rem; margin: 0; font-weight: 800; letter-spacing: -.01em; }
+  h2 { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 28px 0 10px; font-weight: 700; }
+  .sub { color: var(--muted); font-size: .85rem; }
+  .net { font-size: .78rem; color: var(--amber); background: var(--amber-soft); padding: 3px 9px; border-radius: 99px; display: none; white-space: nowrap; }
+  .net.on { display: inline-block; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+  .lead.urgent { border-left: 5px solid var(--red); }
+  .lead .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; cursor: pointer; }
+  .phone { font-weight: 800; font-size: 1.15rem; letter-spacing: .01em; }
+  .ago { color: var(--muted); font-size: .85rem; white-space: nowrap; }
+  .answer { margin: 4px 0 0; font-weight: 600; cursor: pointer; }
+  .urgent .answer { color: var(--red); }
+  .booking { margin-top: 6px; font-size: .9rem; color: var(--muted); }
+  .booking b { color: var(--ink); }
+  .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn { flex: 1; min-width: 72px; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; padding: 11px 10px; font: inherit; font-weight: 700; font-size: .95rem; text-align: center; text-decoration: none; cursor: pointer; display: inline-block; }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .btn.good { background: var(--green); border-color: var(--green); color: #fff; }
+  .btn.small { flex: 0 1 auto; padding: 7px 14px; font-size: .85rem; }
+  .btn:disabled { opacity: .5; }
+  .pill { display: inline-block; font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--brand-soft); color: var(--brand); margin-left: 6px; vertical-align: 2px; }
+  .pill.ok { background: var(--green-soft); color: var(--green); }
+  .pill.no { background: var(--red-soft); color: var(--red); }
+  .empty { text-align: center; color: var(--muted); padding: 22px 12px; }
+  .thread { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; display: none; }
+  .open .thread { display: block; }
+  .msg { font-size: .88rem; padding: 7px 10px; border-radius: 10px; margin: 5px 0; max-width: 88%; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg.inbound { background: var(--brand-soft); }
+  .msg.outbound { background: var(--bg); border: 1px solid var(--line); margin-left: auto; }
+  .msg.system { color: var(--muted); font-size: .8rem; text-align: center; max-width: 100%; }
+  .msg time { display: block; font-size: .7rem; color: var(--faint); margin-top: 2px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .stat { text-align: center; padding: 6px 2px; }
+  .stat b { display: block; font-size: 1.5rem; font-weight: 800; }
+  .stat span { font-size: .75rem; color: var(--muted); }
+  .sentence { margin: 8px 2px 0; color: var(--muted); text-align: center; }
+  details.card { padding: 0; }
+  details > summary { list-style: none; padding: 14px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::after { content: "+"; color: var(--faint); font-weight: 400; }
+  details[open] > summary::after { content: "–"; }
+  details .inner { padding: 0 14px 14px; }
+  .item { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); cursor: pointer; font-size: .92rem; }
+  .item:first-child { border-top: 0; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+  label.toggle { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); gap: 12px; }
+  label.toggle:first-child { border-top: 0; }
+  input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--brand); flex: none; }
+  input[type=search], input[type=password], input[type=url], textarea {
+    width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin: 4px 0 10px; }
+  textarea { min-height: 70px; resize: vertical; }
+  .k { font-size: .8rem; color: var(--muted); font-weight: 600; }
+  code { font-size: .9rem; background: var(--bg); border: 1px solid var(--line); padding: 1px 5px; border-radius: 6px; overflow-wrap: anywhere; }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: .9rem; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: calc(100% - 32px); }
+  .toast.on { opacity: 1; }
+</style>
 </head>
-<body class="dash-root">
-
-  <!-- ─── Mobile top bar ─── -->
-  <div class="mob-topbar" id="mob-topbar">
-    <button class="mob-burger" id="mob-menu-btn" aria-label="Open menu">
-      <span></span><span></span><span></span>
-    </button>
-    <a href="#" class="cove-logo mob-topbar__logo" onclick="showView('overview');return false;">
-      <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
-        <path d="M5 19.5 Q9 17 14 19.5 Q19 22 23 19.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" fill="none"/>
-        <path d="M5 14.5 Q9 12 14 14.5 Q19 17 23 14.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" fill="none" opacity="0.65"/>
-        <path d="M5 9.5 Q9 7 14 9.5 Q19 12 23 9.5" stroke="url(#mob-lg)" stroke-width="2.3" stroke-linecap="round" fill="none" opacity="0.4"/>
-        <defs><linearGradient id="mob-lg" x1="5" y1="9.5" x2="23" y2="9.5" gradientUnits="userSpaceOnUse"><stop stop-color="#e8540a"/><stop offset="1" stop-color="#ff7240"/></linearGradient></defs>
-      </svg>
-      <span>cove</span>
-    </a>
-    <button class="mob-topbar__settings-btn" id="mob-settings-btn" aria-label="Account settings">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-    </button>
-  </div>
-  <div class="mob-backdrop" id="mob-backdrop"></div>
-
-  <!-- ─── Sidebar ─── -->
-  <aside class="sidebar">
-    <div class="sidebar__top">
-      <a href="#" class="cove-logo" onclick="showView('overview');return false;">
-        <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-          <path d="M5 19.5 Q9 17 14 19.5 Q19 22 23 19.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" fill="none"/>
-          <path d="M5 14.5 Q9 12 14 14.5 Q19 17 23 14.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" fill="none" opacity="0.65"/>
-          <path d="M5 9.5 Q9 7 14 9.5 Q19 12 23 9.5" stroke="url(#d-lg)" stroke-width="2.3" stroke-linecap="round" fill="none" opacity="0.4"/>
-          <defs><linearGradient id="d-lg" x1="5" y1="9.5" x2="23" y2="9.5" gradientUnits="userSpaceOnUse"><stop stop-color="#e8540a"/><stop offset="1" stop-color="#ff7240"/></linearGradient></defs>
-        </svg>
-        <span>cove</span>
-      </a>
-    </div>
-
-    <!-- Business name -->
-    <div class="sidebar__biz">
-      <div class="sidebar__biz-label">Business</div>
-      <div class="sidebar__biz-name" id="sidebar-biz-name">—</div>
-    </div>
-
-    <nav class="sidebar__nav">
-      <button class="sidebar__item active" data-view="overview">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Overview
-      </button>
-      <button class="sidebar__item" data-view="leads">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Leads
-      </button>
-      <button class="sidebar__item" data-view="flow">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        SMS Questions
-      </button>
-      <button class="sidebar__item" data-view="notifications">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        Alerts &amp; Hours
-      </button>
-      <button class="sidebar__item" data-view="integrations">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        Lead sources
-      </button>
-      <button class="sidebar__item" data-view="settings">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Settings
-      </button>
-    </nav>
-
-    <div class="sidebar__bottom">
-      <div class="sidebar__user">
-        <div class="sidebar__user-name" id="sidebar-name">—</div>
-        <div class="sidebar__user-email" id="sidebar-email">—</div>
-      </div>
-      <button class="sidebar__item sidebar__item--help" data-view="help" type="button">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="3"/></svg>
-        Help &amp; support
-      </button>
-      <button class="sidebar__item sidebar__item--signout" id="logout-btn">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Sign out
-      </button>
-    </div>
-  </aside>
-
-  <!-- ─── Main ─── -->
-  <main class="dash-main">
-
-    <!-- ═══ OVERVIEW ═══ -->
-    <div id="view-overview">
-      <div class="page-header">
-        <div class="page-header__title-row">
-          <h1 class="page-header__title" id="biz-name-header">Your business</h1>
-          <span id="live-badge"></span>
-        </div>
-        <div class="fwd-health" id="fwd-health" style="display:none">
-          <span class="fwd-health__dot"></span>
-          <span id="fwd-health-text">Checking forwarding…</span>
-          <button class="fwd-health__retest" id="fwd-health-retest" type="button" style="display:none">Re-test now</button>
-        </div>
-      </div>
-
-      <!-- Getting started panel (hidden once dismissed or all done) -->
-      <div class="gs-panel" id="gs-panel" style="display:none">
-        <div class="gs-panel__header">
-          <div>
-            <div class="gs-panel__eyebrow">Setup checklist</div>
-            <div class="gs-panel__title">Get your first lead today.</div>
-            <div class="gs-panel__progress"><span id="gs-done-count">1</span> of 4 steps complete</div>
-          </div>
-          <button class="gs-panel__dismiss" id="gs-dismiss" type="button">Dismiss</button>
-        </div>
-        <div class="gs-steps">
-          <div class="gs-step gs-step--done">
-            <div class="gs-step__icon"></div>
-            <div class="gs-step__content">
-              <div class="gs-step__title">Account created</div>
-            </div>
-          </div>
-          <div class="gs-step" id="gs-step-notif">
-            <div class="gs-step__icon"></div>
-            <div class="gs-step__content">
-              <div class="gs-step__title">Add your mobile number</div>
-              <div class="gs-step__sub">So you get a text the moment a lead qualifies. Takes 10 seconds.</div>
-            </div>
-            <button class="gs-step__action" data-view="notifications" type="button">Add number &rarr;</button>
-          </div>
-          <div class="gs-step" id="gs-step-forward">
-            <div class="gs-step__icon"></div>
-            <div class="gs-step__content">
-              <div class="gs-step__title">Set up call forwarding</div>
-              <div class="gs-step__sub">Pick your carrier, tap the code. Takes 30 seconds on your phone.</div>
-            </div>
-            <button class="gs-step__action" data-view="integrations" data-itab="calls" type="button">Set up &rarr;</button>
-          </div>
-          <div class="gs-step" id="gs-step-flow">
-            <div class="gs-step__icon"></div>
-            <div class="gs-step__content">
-              <div class="gs-step__title">Review your SMS questions</div>
-              <div class="gs-step__sub">Your questions are ready. Check they sound right for your business — edit anything.</div>
-            </div>
-            <button class="gs-step__action" data-view="flow" type="button">Review &rarr;</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Setup: number provisioning -->
-      <div id="setup-alert" class="banner-wrap hidden">
-        <div class="alert-card alert-card--amber">
-          <div class="alert-card__icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-          </div>
-          <div class="alert-card__body">
-            <div class="alert-card__title">Cove is getting ready</div>
-            <p class="alert-card__sub">This usually takes 1–2 minutes. Refresh the page to check. If it's been more than 5 minutes, something may have gone wrong — contact us and we'll sort it.</p>
-            <div class="alert-card__actions">
-              <button class="btn btn--secondary btn--sm" onclick="location.reload()">↻ Refresh</button>
-              <a href="mailto:hello@usecove.app?subject=Number+not+provisioned" class="btn btn--ghost btn--sm">Contact support</a>
-            </div>
-          </div>
-        </div>
-        <div class="setup-steps">
-          <div class="setup-step" id="sstep-1">
-            <div class="setup-step__dot setup-step__dot--done"></div>
-            <div class="setup-step__text">Account created &amp; payment confirmed</div>
-          </div>
-          <div class="setup-step" id="sstep-2">
-            <div class="setup-step__dot setup-step__dot--spin"></div>
-            <div class="setup-step__text">Setting everything up…</div>
-          </div>
-          <div class="setup-step" id="sstep-3">
-            <div class="setup-step__dot"></div>
-            <div class="setup-step__text">Set up call forwarding on your phone</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- First lead celebration (shown once when first lead arrives) -->
-      <div id="first-lead-banner" class="banner-wrap hidden">
-        <div class="alert-card alert-card--green">
-          <div class="alert-card__icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div class="alert-card__body">
-            <div class="alert-card__title">Your first lead just came in. Cove is working.</div>
-            <p class="alert-card__sub">From here, every missed call gets texted back automatically. Check the lead below and call them back while they're still warm.</p>
-            <div class="alert-card__actions">
-              <button class="btn btn--ghost btn--sm" id="dismiss-first-lead-btn">Got it</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Forwarding reminder — persistent until first lead arrives -->
-      <div id="forwarding-banner" class="hidden">
-        <!-- idle state -->
-        <div class="fwd-banner" id="fwd-state-idle">
-          <span class="fwd-banner__dot"></span>
-          <div class="fwd-banner__body">
-            <div class="fwd-banner__title">One last step — activate call forwarding</div>
-            <div class="fwd-banner__sub" id="fwd-idle-sub">Cove is ready, but needs call forwarding set up on your phone to start capturing leads.</div>
-          </div>
-          <div class="fwd-banner__actions">
-            <button class="btn btn--primary btn--sm" id="fwd-banner-setup-btn">Set up →</button>
-            <button class="btn btn--ghost btn--sm" id="fwd-test-btn">Test forwarding</button>
-          </div>
-        </div>
-        <!-- listening state -->
-        <div class="fwd-banner fwd-banner--calling hidden" id="fwd-state-calling">
-          <span class="fwd-banner__dot fwd-banner__dot--pulse"></span>
-          <div class="fwd-banner__body">
-            <div class="fwd-banner__title">Listening for forwarded call…</div>
-            <div class="fwd-banner__sub">Call your business number from another phone — Cove will pick up and confirm here.</div>
-          </div>
-          <button class="btn btn--ghost btn--sm" id="fwd-cancel-listen-btn" style="flex-shrink:0">Cancel</button>
-        </div>
-        <!-- verified state -->
-        <div class="fwd-banner fwd-banner--verified hidden" id="fwd-state-verified">
-          <span class="fwd-banner__dot fwd-banner__dot--green"></span>
-          <div class="fwd-banner__body">
-            <div class="fwd-banner__title">Forwarding confirmed ✓</div>
-            <div class="fwd-banner__sub">Missed calls will now be forwarded to Cove automatically.</div>
-          </div>
-          <div class="fwd-banner__actions">
-            <button class="btn btn--ghost btn--sm" id="fwd-dismiss-btn">Dismiss</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Scoreboard — last 30 days -->
-      <div class="stats-strip" id="stats-strip">
-        <div class="stat-item">
-          <div class="stat-item__val" id="stat-captured">0</div>
-          <div class="stat-item__key">Calls caught · 30 days</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-item__val stat-item__val--green" id="stat-qualified">0</div>
-          <div class="stat-item__key">Qualified leads</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-item__val" id="stat-booked">0</div>
-          <div class="stat-item__key">Booked</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-item__val" id="stat-won">0</div>
-          <div class="stat-item__key">Jobs won</div>
-        </div>
-      </div>
-
-      <!-- Recent leads -->
-      <div class="section">
-        <div class="section__title">Recent activity — last 7 days</div>
-        <div class="card leads-card">
-          <div class="leads-table-wrap">
-            <div id="leads-container">
-              <div class="leads-loading">Loading…</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ LEADS ═══ -->
-    <div id="view-leads" class="hidden">
-      <div class="page-header">
-        <h1 class="page-header__title">Leads</h1>
-        <p class="page-header__sub">Every missed caller who entered your SMS flow. Click a row to see the full conversation.</p>
-      </div>
-
-      <div class="leads-filter-tabs">
-        <button class="leads-filter-btn leads-filter-btn--active" data-days="7">Last 7 days</button>
-        <button class="leads-filter-btn" data-days="30">Last 30 days</button>
-        <button class="leads-filter-btn" data-days="all">All time</button>
-      </div>
-
-      <div class="card leads-card">
-        <div class="leads-table-wrap">
-          <div id="all-leads-container">
-            <div class="leads-loading">Loading…</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ MY FLOW ═══ -->
-    <div id="view-flow" class="hidden">
-      <div class="page-header">
-        <h1 class="page-header__title">SMS Questions</h1>
-        <p class="page-header__sub">These are texted to every missed caller, one at a time. Edit anything — changes go live instantly.</p>
-      </div>
-
-      <!-- Full-width: Business name + welcome message -->
-      <div class="card card--mb">
-        <div class="card__section flow-setup">
-          <input type="text" id="flow-biz-name" class="flow-biz-input" placeholder="Your business name" />
-          <div class="flow-setup__divider"></div>
-          <div class="flow-setup__msg-row">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="flow-setup__msg-icon"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.73 12 19.79 19.79 0 0 1 1.66 3.38 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 15.91 16l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            <span>First message — sent instantly when someone misses a call</span>
-          </div>
-          <textarea id="flow-intro" class="flow-intro-ta textarea--noresize" placeholder="Hi {firstName}, this is {businessName}. We just missed your call — quick question:"></textarea>
-          <p class="flow-setup__hint"><code class="inline-code">{firstName}</code> and <code class="inline-code">{businessName}</code> are replaced automatically.</p>
-        </div>
-      </div>
-
-      <div class="flow-layout">
-
-        <!-- Left: SMS Questions -->
-        <div class="flow-layout__editor">
-          <div class="section">
-            <div class="section__title-row">
-              <span class="section__title section__title--flush">SMS Questions</span>
-            </div>
-            <p class="section__sub">Each message is sent one at a time. The lead replies with a letter (A/B/C) or types a free answer.</p>
-            <div class="flow-section" id="flow-cards"></div>
-            <button class="flow-add-btn" id="flow-add-btn" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Add question
-            </button>
-          </div>
-          <!-- Final message -->
-          <div class="section" style="margin-top:1.25rem;">
-            <div class="section__title-row">
-              <span class="section__title section__title--flush">Final message</span>
-            </div>
-            <p class="section__sub">Sent to the lead after they answer all questions.</p>
-            <div class="flow-setup__msg-row" style="margin-bottom:.5rem;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>Standard</span>
-            </div>
-            <textarea id="flow-completion" class="flow-intro-ta textarea--noresize" placeholder="Thanks! {businessName} will be in touch shortly."></textarea>
-            <div class="flow-setup__msg-row" style="margin-top:.75rem;margin-bottom:.5rem;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <span>With booking link (if you have one set)</span>
-            </div>
-            <textarea id="flow-completion-booking" class="flow-intro-ta textarea--noresize" placeholder="Thanks! {businessName} will be in touch shortly. Book directly: {bookingLink}"></textarea>
-            <p class="flow-setup__hint">Use <code class="inline-code">{businessName}</code> and <code class="inline-code">{bookingLink}</code> as placeholders.</p>
-          </div>
-
-          <!-- Booking — book the next appointment inside the conversation -->
-          <div class="section" style="margin-top:1.25rem;">
-            <div class="section__title-row">
-              <span class="section__title section__title--flush">Booking</span>
-            </div>
-            <p class="section__sub">Offer appointment times right inside the text conversation. Slots come from your operating hours (set them under <strong>Alerts &amp; Hours</strong>).</p>
-            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600">
-              <input type="checkbox" id="flow-booking-enabled" />
-              <span>Let leads book a time over SMS</span>
-            </label>
-            <div id="flow-booking-fields" style="margin-top:12px;display:none">
-              <div class="flow-q-label">Booking prompt</div>
-              <textarea id="flow-booking-prompt" class="flow-intro-ta textarea--noresize" placeholder="Want to grab the first available slot?"></textarea>
-              <div class="flow-q-label" style="margin-top:10px">Time slots to offer</div>
-              <input type="number" id="flow-booking-slots" min="1" max="3" value="2" style="width:80px" />
-            </div>
-          </div>
-
-        </div><!-- /flow-layout__editor -->
-
-        <!-- Right: live preview -->
-        <div class="flow-layout__preview">
-          <div class="fpp">
-            <div class="fpp__topbar">
-              <span class="fpp__topbar-label">Customer preview</span>
-              <span class="fpp__topbar-sub">This is exactly what your customer sees on their phone</span>
-            </div>
-            <div class="fpp__phone">
-              <div class="fpp__statusbar">
-                <span class="fpp__time">9:41</span>
-                <div class="fpp__status-icons">
-                  <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="3" width="3" height="8" rx="1" fill="white" opacity=".4"/><rect x="4.5" y="2" width="3" height="9" rx="1" fill="white" opacity=".6"/><rect x="9" y=".5" width="3" height="10.5" rx="1" fill="white" opacity=".8"/><rect x="13.5" y="0" width="2.5" height="11" rx="1" fill="white"/></svg>
-                  <svg width="20" height="11" viewBox="0 0 20 11" fill="none"><rect x=".5" y=".5" width="16" height="10" rx="2.5" stroke="white" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="13" height="8" rx="2" fill="white"/><path d="M18 3.5v4a2 2 0 0 0 0-4Z" fill="white" opacity=".4"/></svg>
-                </div>
-              </div>
-              <div class="fpp__contact-bar">
-                <div class="fpp__back">
-                  <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#0a84ff" stroke-width="2.2" stroke-linecap="round"><path d="M8 1L1.5 7.5L8 14"/></svg>
-                  <span>3</span>
-                </div>
-                <div class="fpp__contact-info">
-                  <div class="fpp__avatar">C</div>
-                  <div class="fpp__contact-name">Cove</div>
-                </div>
-                <div class="fpp__contact-actions">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.73 12 19.79 19.79 0 0 1 1.66 3.38 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 15.91 16l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                </div>
-              </div>
-              <div class="fpp__screen" id="flow-preview-screen"></div>
-              <div class="fpp__homebar"></div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /flow-layout -->
-
-
-      <div class="save-bar">
-        <span class="saved" id="flow-saved">Saved</span>
-        <button class="btn btn--primary" id="flow-save">Save changes</button>
-      </div>
-    </div>
-
-    <!-- ═══ NOTIFICATIONS ═══ -->
-    <div id="view-notifications" class="hidden">
-      <div class="page-header">
-        <h1 class="page-header__title">Alerts &amp; Hours</h1>
-        <p class="page-header__sub">Where Cove sends you a summary when a lead finishes answering, and when you're available to take them.</p>
-      </div>
-
-      <div class="card">
-        <div class="card__section">
-          <div class="section__title">Lead summaries</div>
-          <div class="form-section">
-            <div class="form-group">
-              <label for="notif-phone">SMS — your mobile number</label>
-              <input type="tel" id="notif-phone" placeholder="+61 412 345 678" />
-              <span class="hint">You'll get a text with their name, what they need, and urgency.</span>
-            </div>
-            <div class="toggle-row" style="margin-bottom:10px">
-              <div class="toggle-row__info">
-                <div class="toggle-row__label">Email lead summaries</div>
-                <div class="toggle-row__sub">Get an email every time a lead qualifies.</div>
-              </div>
-              <label class="toggle" aria-label="Enable email notifications">
-                <input type="checkbox" id="notif-email-toggle" />
-                <div class="toggle__track"></div>
-                <div class="toggle__thumb"></div>
-              </label>
-            </div>
-            <div id="notif-email-wrap" class="hidden">
-              <div class="form-group">
-                <input type="email" id="notif-email" placeholder="you@yourbusiness.com.au" />
-                <span class="hint">We'll email you a summary with the lead's name, need, and phone number.</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="notif-webhook">Webhook URL <span class="label-optional">(optional)</span></label>
-              <input type="url" id="notif-webhook" placeholder="https://hooks.zapier.com/…" />
-              <span class="hint">Connect to Zapier, CRMs like Jobber or ServiceTitan, or any webhook.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="card__divider"></div>
-
-        <div class="card__section">
-          <div class="toggle-row toggle-row--flush">
-            <div class="toggle-row__info">
-              <div class="toggle-row__label">Operating hours</div>
-              <div class="toggle-row__sub">Leads outside these hours get an "after hours" message instead.</div>
-            </div>
-            <label class="toggle" aria-label="Enable operating hours">
-              <input type="checkbox" id="hours-enabled" />
-              <div class="toggle__track"></div>
-              <div class="toggle__thumb"></div>
-            </label>
-          </div>
-
-          <div id="hours-config" class="hours-config hidden">
-            <div class="form-group">
-              <label for="hours-tz">Timezone</label>
-              <select id="hours-tz">
-                <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
-                <option value="Australia/Melbourne">Australia/Melbourne</option>
-                <option value="Australia/Brisbane">Australia/Brisbane (AEST)</option>
-                <option value="Australia/Perth">Australia/Perth (AWST)</option>
-                <option value="Australia/Adelaide">Australia/Adelaide (ACST)</option>
-                <option value="Australia/Darwin">Australia/Darwin</option>
-                <option value="Australia/Hobart">Australia/Hobart</option>
-              </select>
-            </div>
-            <div class="hours-grid">
-              <div class="form-group">
-                <label for="hours-open">Open from</label>
-                <select id="hours-open"></select>
-              </div>
-              <div class="form-group">
-                <label for="hours-close">Until</label>
-                <select id="hours-close"></select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Closed days</label>
-              <div class="days-row" id="days-row">
-                <span class="day-chip" data-day="0">Sun</span>
-                <span class="day-chip" data-day="1">Mon</span>
-                <span class="day-chip" data-day="2">Tue</span>
-                <span class="day-chip" data-day="3">Wed</span>
-                <span class="day-chip" data-day="4">Thu</span>
-                <span class="day-chip" data-day="5">Fri</span>
-                <span class="day-chip" data-day="6">Sat</span>
-              </div>
-              <span class="hint">Highlighted = closed that day.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="notif-success" class="alert alert--success alert--mt hidden">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Settings saved.</span>
-      </div>
-
-      <div class="save-bar">
-        <button class="btn btn--primary" id="notif-save">Save changes</button>
-      </div>
-    </div>
-
-    <!-- ═══ INTEGRATIONS ═══ -->
-    <div id="view-integrations" class="hidden">
-      <div class="page-header">
-        <h1 class="page-header__title">Lead sources</h1>
-        <p class="page-header__sub">The ways leads reach Cove. Set up one or all of them.</p>
-      </div>
-
-      <!-- Tab bar -->
-      <div class="int-tabs">
-        <button class="int-tab int-tab--active" data-itab="calls">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          Missed calls
-          <span id="itab-calls-badge" class="int-tab-badge"></span>
-        </button>
-        <button class="int-tab" data-itab="crm">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          CRM
-          <span class="int-tab-badge int-tab-badge--opt">Optional</span>
-        </button>
-      </div>
-
-      <!-- Panel: Missed calls -->
-      <div class="int-panel int-panel--active" id="int-panel-calls">
-
-        <!-- Cove number display -->
-        <div class="int-number-box">
-          <div class="int-number-box__inner">
-            <div class="int-number-box__icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            </div>
-            <div>
-              <div class="int-number-box__label">Your Cove forwarding number</div>
-              <div class="int-number-box__num cove-number-display" id="billing-number">—</div>
-            </div>
-          </div>
-          <p class="int-number-box__sub">Forward missed calls here — your existing business number stays exactly the same</p>
-        </div>
-
-        <div class="int-section">
-          <div class="int-section__label">What happens</div>
-          <div class="int-how-list">
-            <div class="int-how-item">
-              <span class="int-how-num">1</span>
-              <div><strong>A customer calls your number</strong><p>Could be from your website, Google, word of mouth — anywhere</p></div>
-            </div>
-            <div class="int-how-item">
-              <span class="int-how-num">2</span>
-              <div><strong>You don't pick up</strong><p>You're on another call, on the tools, or it's after hours</p></div>
-            </div>
-            <div class="int-how-item">
-              <span class="int-how-num">3</span>
-              <div><strong>Your carrier forwards the call to Cove</strong><p>One-time setup on your phone — takes 30 seconds</p></div>
-            </div>
-            <div class="int-how-item int-how-item--hl">
-              <span class="int-how-num int-how-num--hl">4</span>
-              <div><strong>Cove texts them back instantly</strong><p>They get a message, answer your questions, and you get a lead summary</p></div>
-            </div>
-          </div>
-        </div>
-        <div class="int-section">
-          <div class="int-section__label">Set up missed call forwarding on your phone</div>
-          <p class="int-section__desc">This sets up <strong>no-answer forwarding only</strong> — calls you pick up are completely unaffected. Cove only kicks in when you don't answer. Pick your carrier and tap the code.</p>
-          <div class="cf-carrier-grid" id="dash-carrier-grid">
-            <button class="cf-carrier-tile" data-carrier="telstra">
-              <span class="cf-carrier-name">Telstra</span><span class="cf-carrier-sub">Dial code</span>
-            </button>
-            <button class="cf-carrier-tile" data-carrier="optus">
-              <span class="cf-carrier-name">Optus</span><span class="cf-carrier-sub">Dial code</span>
-            </button>
-            <button class="cf-carrier-tile" data-carrier="vodafone">
-              <span class="cf-carrier-name">Vodafone</span><span class="cf-carrier-sub">Dial code</span>
-            </button>
-            <button class="cf-carrier-tile" data-carrier="other">
-              <span class="cf-carrier-name">Other</span><span class="cf-carrier-sub">TPG, Boost…</span>
-            </button>
-          </div>
-          <!-- Dial code action (Telstra / Vodafone / Other) -->
-          <div id="dash-cf-action" class="hidden" style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
-            <div id="dash-optus-note" class="hidden"></div>
-            <!-- Dial code display -->
-            <div class="cf-code-row">
-              <span class="cf-code-display" id="dash-dial-code"></span>
-              <button class="btn btn--ghost btn--sm" id="dash-copy-code-btn" type="button">Copy</button>
-            </div>
-            <!-- Mobile: tap to activate -->
-            <div id="dash-mobile-section">
-              <a id="dash-activate-link" href="#" class="cf-activate-btn">Tap to activate — opens your dialler</a>
-              <p style="font-size:12px;color:var(--text-muted);margin:4px 0 0;text-align:center">Just tap <strong>Call</strong> — takes 5 seconds</p>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Test the full SMS flow -->
-        <div class="int-section">
-          <div class="int-section__label">Test the full flow</div>
-          <p class="int-section__desc" style="margin-bottom:12px">Sends a real SMS to your notification number right now — simulates a missed call so you can reply and see the whole qualification flow end-to-end.</p>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <button class="btn btn--secondary btn--sm" id="int-test-lead-btn" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:5px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              Send test SMS
-            </button>
-            <span id="int-test-lead-status" style="font-size:12.5px;color:var(--text-muted)"></span>
-          </div>
-        </div>
-
-        <!-- Test forwarding -->
-        <div class="int-section">
-          <div class="int-section__label">Test your forwarding</div>
-          <div id="int-fwd-test-wrap">
-
-            <!-- Idle -->
-            <div id="int-fwd-idle">
-              <p class="int-section__desc" style="margin-bottom:12px">Tap the code above, then call your business number from any other phone. Cove will pick up and you'll get a confirmation here within seconds.</p>
-              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                <button class="btn btn--secondary btn--sm" id="int-fwd-start-btn" type="button">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:5px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.73 12 19.79 19.79 0 0 1 1.66 3.38 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 13 13.91l.27-.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 20 16z"/></svg>
-                  Start listening
-                </button>
-                <span id="int-fwd-verified-badge" class="lead-badge lead-badge--done" style="display:none">Forwarding confirmed ✓</span>
-              </div>
-            </div>
-
-            <!-- Listening -->
-            <div id="int-fwd-listening" class="hidden">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-                <div class="setup-step__dot setup-step__dot--spin" style="width:10px;height:10px;flex-shrink:0"></div>
-                <span style="font-size:13.5px;font-weight:500">Listening for forwarded call… <span id="int-fwd-timer">2:00</span></span>
-              </div>
-              <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 10px">Call your business number from another phone now — Cove will pick up and you'll see confirmation here.</p>
-              <button class="btn btn--ghost btn--sm" id="int-fwd-cancel-btn" type="button">Cancel</button>
-            </div>
-
-            <!-- Success -->
-            <div id="int-fwd-success" class="hidden">
-              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#dcfce7;border-radius:10px;border:1px solid #bbf7d0">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <div>
-                  <div style="font-size:13.5px;font-weight:600;color:#15803d">Forwarding confirmed</div>
-                  <div style="font-size:12px;color:#166534">Cove received your test call. Missed calls will now be qualified automatically.</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Timeout -->
-            <div id="int-fwd-timeout" class="hidden">
-              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fef9ec;border-radius:10px;border:1px solid #fde68a;margin-bottom:10px">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-                <div style="font-size:12.5px;color:#92400e">No call detected. Make sure you dialled the carrier code first, then try again.</div>
-              </div>
-              <button class="btn btn--secondary btn--sm" id="int-fwd-retry-btn" type="button">Try again</button>
-            </div>
-
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Panel: CRM -->
-      <div class="int-panel" id="int-panel-crm">
-        <div class="int-section">
-          <div class="int-section__label">What this does</div>
-          <div class="int-how-list">
-            <div class="int-how-item">
-              <span class="int-how-num">1</span>
-              <div><strong>Cove qualifies a lead</strong><p>From a missed call</p></div>
-            </div>
-            <div class="int-how-item int-how-item--hl">
-              <span class="int-how-num int-how-num--hl">2</span>
-              <div><strong>Their details appear in your CRM automatically</strong><p>Jobber, HubSpot, ServiceM8, Google Sheets — wherever you track jobs</p></div>
-            </div>
-          </div>
-        </div>
-        <div class="int-section">
-          <div class="int-dfy-card">
-            <div class="int-dfy-card__badge">Done-for-you</div>
-            <div class="int-dfy-card__title">We set this up for you</div>
-            <p class="int-dfy-card__desc">Tell us what CRM you use, we connect it to Cove. Usually takes us about 30 minutes and it just works from then on.</p>
-            <a href="mailto:hello@usecove.app?subject=CRM%20setup%20for%20Cove" class="btn btn--primary btn--sm">Email us to get started →</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ SETTINGS ═══ -->
-    <div id="view-settings" class="hidden">
-      <div class="page-header">
-        <h1 class="page-header__title">Account settings</h1>
-        <p class="page-header__sub">Manage your business, profile, and account security.</p>
-      </div>
-
-      <!-- Business -->
-      <div class="card card--mb">
-        <div class="card__section">
-          <div class="section__title">Business</div>
-          <div class="form-section">
-            <div class="form-group">
-              <label for="settings-biz-name">Business name</label>
-              <input type="text" id="settings-biz-name" placeholder="Bay Plumbing" />
-            </div>
-            <div class="form-group">
-              <label for="settings-booking">Booking link <span class="label-optional">(optional)</span></label>
-              <input type="url" id="settings-booking" placeholder="https://yoursite.com/book" />
-              <span class="hint">Sent to leads when they complete the qualification flow.</span>
-            </div>
-            <div class="form-group">
-              <label for="settings-avg-value">Average job value <span class="label-optional">(optional)</span></label>
-              <input type="number" id="settings-avg-value" inputmode="numeric" min="0" step="50" placeholder="350" />
-              <span class="hint">Used to estimate recovered revenue on your dashboard. We use the actual value when you mark a lead won.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <!-- Profile -->
-      <div class="card card--mb">
-        <div class="card__section">
-          <div class="section__title">Profile</div>
-          <div class="form-section">
-            <div class="form-group">
-              <label for="settings-name">Display name</label>
-              <input type="text" id="settings-name" placeholder="Your name" autocomplete="name" />
-            </div>
-            <div class="form-group">
-              <label for="settings-email">Email address</label>
-              <input type="email" id="settings-email" disabled style="opacity:.55;cursor:not-allowed;" />
-              <span class="hint">Email cannot be changed. Contact support if you need to update it.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Change password -->
-      <div class="card card--mb">
-        <div class="card__section">
-          <div class="section__title">Change password</div>
-          <div class="form-section">
-            <div class="form-group">
-              <label for="settings-pw-current">Current password</label>
-              <input type="password" id="settings-pw-current" autocomplete="current-password" />
-            </div>
-            <div class="form-group">
-              <label for="settings-pw-new">New password</label>
-              <input type="password" id="settings-pw-new" placeholder="Min. 8 characters" autocomplete="new-password" />
-            </div>
-            <div class="form-group">
-              <label for="settings-pw-confirm">Confirm new password</label>
-              <input type="password" id="settings-pw-confirm" autocomplete="new-password" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="settings-success" class="alert alert--success alert--mt hidden">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span id="settings-success-msg">Changes saved.</span>
-      </div>
-      <div id="settings-error" class="alert alert--error alert--mt hidden">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-        <span id="settings-error-msg">Something went wrong.</span>
-      </div>
-
-      <div class="save-bar">
-        <button class="btn btn--primary" id="settings-save">Save changes</button>
-      </div>
-
-      <div class="card" style="margin-top:1.5rem;">
-        <div class="card__section" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-          <div>
-            <div style="font-size:.9rem;font-weight:600;color:var(--text)">Sign out</div>
-            <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px">Sign out of your Cove account on this device.</div>
-          </div>
-          <button class="btn btn--secondary" id="settings-logout-btn">Sign out</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ HELP ═══ -->
-    <div id="view-help" class="hidden">
-      <div class="page-header">
-        <h1 class="page-header__title">Help &amp; support</h1>
-        <p class="page-header__sub">Common questions answered — or reach us directly if you're stuck.</p>
-      </div>
-
-      <!-- FAQ accordion -->
-      <div class="card card--mb">
-        <div class="card__section">
-          <div class="section__title">Common questions</div>
-        </div>
-
-        <details class="faq-item">
-          <summary class="faq-item__q">How does Cove work?</summary>
-          <div class="faq-item__a">
-            <p>When a customer calls your number and you don't answer, your phone carrier forwards the missed call to Cove. Cove then immediately texts that person back with your qualification questions — one at a time.</p>
-            <p>When they finish replying, you get a summary sent to your phone or email: their name, what they need, and their number. You call back only the leads worth your time.</p>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary class="faq-item__q">How do I set up call forwarding?</summary>
-          <div class="faq-item__a">
-            <p>Go to <strong>Lead sources → Missed calls</strong> in the sidebar. Pick your carrier (Telstra, Optus, Vodafone, or other) and follow the steps — it takes about 30 seconds on your phone.</p>
-            <p>If you're on a desktop right now, you can send the setup code to your mobile from that same page.</p>
-            <button class="btn btn--secondary btn--sm" data-view="integrations" data-itab="calls" type="button" style="margin-top:4px">Go to Lead sources →</button>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary class="faq-item__q">What does my customer actually see?</summary>
-          <div class="faq-item__a">
-            <p>They get a normal-looking text message from your Cove number. The first message introduces your business and asks the first question. It looks like a real person texting — not a robot.</p>
-            <p>You can see exactly what they see — and edit the messages — under <strong>SMS Questions</strong>.</p>
-            <button class="btn btn--secondary btn--sm" data-view="flow" type="button" style="margin-top:4px">Go to SMS Questions →</button>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary class="faq-item__q">How do I test that it's working?</summary>
-          <div class="faq-item__a">
-            <p>Call your number from a different phone and don't answer — just let it ring out. Within a few seconds, that number should receive your first SMS question from Cove.</p>
-            <p>If nothing arrives, the most common cause is that call forwarding isn't active yet on your phone. Check <strong>Lead sources → Missed calls</strong> and make sure you've dialled the setup code.</p>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary class="faq-item__q">Can I edit my questions?</summary>
-          <div class="faq-item__a">
-            <p>Yes — go to <strong>SMS Questions</strong>, make your changes, and hit Save. Changes go live instantly. There's no minimum number of questions and no limit on edits.</p>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary class="faq-item__q">What happens if someone calls after hours?</summary>
-          <div class="faq-item__a">
-            <p>If you've turned on operating hours under <strong>Alerts &amp; Hours</strong>, anyone who calls outside those hours gets an after-hours message instead of your full question flow. You can set your hours and choose which days you're closed.</p>
-            <button class="btn btn--secondary btn--sm" data-view="notifications" type="button" style="margin-top:4px">Go to Alerts &amp; Hours →</button>
-          </div>
-        </details>
-
-        <details class="faq-item faq-item--last">
-          <summary class="faq-item__q">My Cove number isn't texting people — what do I do?</summary>
-          <div class="faq-item__a">
-            <p>A few things to check first:</p>
-            <ul class="faq-list">
-              <li>Call forwarding is active on your phone (test by calling yourself from another number)</li>
-              <li>Your account is active — check the badge next to your business name on the Overview page</li>
-              <li>Your SMS Questions have at least one message saved</li>
-            </ul>
-            <p>Still not working? Email us below — we'll sort it out quickly.</p>
-          </div>
-        </details>
-      </div>
-
-      <!-- Contact / support card -->
-      <div class="help-contact-card">
-        <div class="help-contact-card__icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        </div>
-        <div class="help-contact-card__body">
-          <div class="help-contact-card__title">Still need help?</div>
-          <p class="help-contact-card__sub">We're a small team and we take support seriously. Email us and we'll get back to you — usually within a few hours on business days.</p>
-          <a href="mailto:hello@usecove.app" class="btn btn--primary btn--sm">Email hello@usecove.app</a>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <script>
-    // ─── State ───
-    let business = null;
-    let user = null;
-    let leadsData = [];
-    let flowEdited = null;
-    let currentLeadsDays = 7;
-    let currentThreadLeadId = null;
-
-    // Per-user localStorage keys — prevents one account's dismissals affecting another
-    function lsKey(k) { return user?.id ? `${k}_${user.id}` : k; }
-    function lsGet(k) { return localStorage.getItem(lsKey(k)); }
-    function lsSet(k, v) { localStorage.setItem(lsKey(k), v); }
-    function lsRemove(k) { localStorage.removeItem(lsKey(k)); }
-
-    // ─── Navigation ───
-    const views = ['overview', 'leads', 'flow', 'notifications', 'integrations', 'settings', 'help'];
-
-    function showView(name) {
-      views.forEach(v => {
-        document.getElementById('view-' + v).classList.add('hidden');
-        const btn = document.querySelector(`[data-view="${v}"]`);
-        if (btn) btn.classList.remove('active');
-      });
-      document.getElementById('view-' + name).classList.remove('hidden');
-      const activeBtn = document.querySelector(`[data-view="${name}"]`);
-      if (activeBtn) activeBtn.classList.add('active');
-      if (name === 'leads') loadAllLeads(currentLeadsDays);
-      if (name === 'flow' && business) renderFlowEditor();
-      if (name === 'notifications' && business) fillNotificationForm();
-      if (name === 'integrations' && business) fillIntegrations();
-      if (name === 'settings' && user) fillSettings();
-      closeMobileMenu();
+<body>
+<main>
+  <header>
+    <div><h1 id="biz">Cove</h1><div class="sub" id="health"></div></div>
+    <span class="net" id="net">Reconnecting…</span>
+  </header>
+
+  <h2>Needs you now</h2>
+  <div id="now"><div class="card empty">Loading…</div></div>
+
+  <h2>This week</h2>
+  <div class="card"><div class="stats" id="stats"></div><p class="sentence" id="sentence"></p></div>
+
+  <h2>Everything else</h2>
+  <details class="card"><summary>Older leads</summary><div class="inner">
+    <input type="search" id="search" placeholder="Search by phone number" inputmode="tel" />
+    <div id="older"></div>
+  </div></details>
+  <details class="card"><summary>Call forwarding</summary><div class="inner" id="fwd"></div></details>
+  <details class="card"><summary>Alerts &amp; follow-up texts</summary><div class="inner" id="alerts"><p class="sub">Loading…</p></div></details>
+  <details class="card"><summary>Your question</summary><div class="inner" id="flow"><p class="sub">Loading…</p></div></details>
+  <details class="card"><summary>Account</summary><div class="inner">
+    <button class="btn" id="test-btn">Send me a test text</button>
+    <p class="sub" id="test-note"></p>
+    <div class="k" style="margin-top:14px">Change password</div>
+    <input type="password" id="pw-old" placeholder="Current password" autocomplete="current-password" />
+    <input type="password" id="pw-new" placeholder="New password (8+ characters)" autocomplete="new-password" />
+    <div class="row"><button class="btn" id="pw-btn">Change password</button><button class="btn" id="logout">Sign out</button></div>
+  </div></details>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const state = { leads: new Map(), since: null, business: null, settings: null, flow: null, open: new Set() };
+
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2500); }
+function setOnline(ok) { $("net").classList.toggle("on", !ok); }
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, { ...opts, headers: { "Content-Type": "application/json" }, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  if (res.status === 401) { location.href = "/login"; throw new Error("Signed out"); }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) throw new Error(data.error || `Request failed (${res.status})`);
+  return data;
+}
+
+// "+61412345678" → "0412 345 678"
+function phone(e164) {
+  const m = /^\+61(4\d{2})(\d{3})(\d{3})$/.exec(e164 || "");
+  if (m) return `0${m[1]} ${m[2]} ${m[3]}`;
+  const l = /^\+61(\d)(\d{4})(\d{4})$/.exec(e164 || "");
+  return l ? `(0${l[1]}) ${l[2]} ${l[3]}` : (e164 || "Unknown");
+}
+// Dates in the business's timezone, whatever the phone is set to.
+const tz = () => state.business?.operating_hours?.timezone || "Australia/Sydney";
+const fmt = (ts, opts) => { try { return new Date(ts).toLocaleString("en-AU", { timeZone: tz(), ...opts }); } catch { return new Date(ts).toLocaleString("en-AU", opts); } };
+function ago(ts) {
+  const m = Math.round((Date.now() - new Date(ts)) / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m} min ago`;
+  if (m < 60 * 24) return `${Math.round(m / 60)} h ago`;
+  return fmt(ts, { weekday: "short", day: "numeric", month: "short" });
+}
+const isUrgent = (l) => !!l.answers?.urgent_alert_sent;
+function answerOf(l) {
+  const a = l.answers || {};
+  const key = Object.keys(a).find((k) => k.endsWith("_label") && !k.startsWith("_"));
+  if (key) return a[key];
+  if (l.status === "stopped") return "Opted out (STOP)";
+  if (a._exit_reason === "call_requested") return "Asked you to call them";
+  if (l.source === "rebook") return l.message;
+  return l.status === "active" ? "Hasn't replied yet" : (l.message || "");
+}
+function bookingHtml(l) {
+  if (!l.appointment_at || !["proposed", "confirmed"].includes(l.booking_status)) return "";
+  const day = fmt(l.appointment_at, { weekday: "short", day: "numeric", month: "short" });
+  const w = l.answers?._appointment_window;
+  const label = w ? `${day}, ${w.name}` : (l.answers?._appointment_label || day);
+  const pill = l.booking_status === "confirmed" ? '<span class="pill ok">Confirmed</span>' : '<span class="pill">Waiting on you</span>';
+  return `<div class="booking">📅 <b>${esc(label)}</b> ${pill}</div>`;
+}
+const needsYou = (l) => l.status !== "stopped" && (
+  l.booking_status === "proposed" ||
+  (!l.answers?._called_back && !l.outcome && Date.now() - new Date(l.created_at) < 48 * 3600e3));
+
+function card(l) {
+  const urgent = isUrgent(l);
+  const outcome = l.outcome ? `<span class="pill ${l.outcome === "won" ? "ok" : "no"}">${l.outcome === "won" ? "Won" : "Lost"}</span>` : "";
+  return `<div class="card lead ${urgent ? "urgent" : ""} ${state.open.has(l.id) ? "open" : ""}" data-id="${l.id}">
+    <div class="top" data-act="toggle"><span class="phone">${esc(phone(l.phone))}${l.source === "test" ? '<span class="pill">Test</span>' : ""}${outcome}</span><span class="ago">${ago(l.created_at)}</span></div>
+    <p class="answer" data-act="toggle">${urgent ? "🚨 " : ""}${esc(answerOf(l))}</p>
+    ${bookingHtml(l)}
+    ${l.booking_status === "proposed" ? `<div class="row"><button class="btn good" data-act="confirm">Confirm</button><button class="btn" data-act="decline">Decline</button></div>` : ""}
+    <div class="row"><a class="btn primary" href="tel:${esc(l.phone)}">Call</a><a class="btn" href="sms:${esc(l.phone)}">Text</a>
+      ${l.answers?._called_back ? "" : `<button class="btn" data-act="done">Done</button>`}</div>
+    <div class="thread" id="t-${l.id}"></div>
+  </div>`;
+}
+
+function render() {
+  const all = [...state.leads.values()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  const now = all.filter(needsYou).sort((a, b) => (isUrgent(b) - isUrgent(a)) || (new Date(b.created_at) - new Date(a.created_at)));
+  $("now").innerHTML = now.length ? now.map(card).join("")
+    : `<div class="card empty">All caught up ✓<br><span class="sub">New missed calls land here.</span></div>`;
+  if (!$("search").value) renderOlder(all.filter((l) => !needsYou(l)));
+  for (const id of state.open) loadThread(id, false);
+}
+
+function renderOlder(list) {
+  $("older").innerHTML = list.length ? list.slice(0, 60).map((l) => `<div class="item" data-id="${l.id}" data-act="older">
+    <span><b>${esc(phone(l.phone))}</b><br><span class="sub">${esc(answerOf(l))}</span></span>
+    <span class="sub" style="text-align:right;white-space:nowrap">${ago(l.created_at)}<br>${l.outcome === "won" ? "Won" : l.outcome === "lost" ? "Lost" : l.answers?._called_back ? "Done" : ""}</span></div>`).join("")
+    : `<div class="empty">Nothing here yet.</div>`;
+}
+
+const KINDS = { reminder: "Reminder", review_request: "Review request", rebook_nudge: "Rebook nudge", unanswered_nudge: "Follow-up nudge" };
+async function loadThread(id, fetchIt = true) {
+  const el = $(`t-${id}`);
+  if (!el) return;
+  if (!fetchIt && el.dataset.html) { el.innerHTML = el.dataset.html; return; }
+  try {
+    const { lead, messages, scheduled } = await api(`/api/me/leads/${id}`);
+    state.leads.set(lead.id, lead);
+    const html = messages.map((m) => `<div class="msg ${m.direction}">${esc(m.body)}<time>${ago(m.created_at)}</time></div>`).join("")
+      + scheduled.map((s) => `<div class="msg system">⏰ ${KINDS[s.kind] || s.kind} queued for ${esc(fmt(s.send_at, { weekday: "short", hour: "numeric", minute: "2-digit" }))}</div>`).join("")
+      + `<div class="row"><button class="btn small" data-act="won">Won the job</button><button class="btn small" data-act="lost">Lost it</button></div>`;
+    el.dataset.html = html;
+    el.innerHTML = html;
+  } catch (e) { el.innerHTML = `<p class="sub">${esc(e.message)}</p>`; }
+}
+
+async function act(id, action, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    if (action === "confirm" || action === "decline") {
+      const { lead } = await api(`/api/me/leads/${id}/booking`, { method: "POST", body: { action } });
+      state.leads.set(id, lead);
+      toast(action === "confirm" ? "Confirmed — we've texted them" : "Declined — we've told them you'll call");
+    } else if (action === "done") {
+      await api(`/api/me/leads/${id}/mark-called`, { method: "POST" });
+      const l = state.leads.get(id);
+      l.answers = { ...(l.answers || {}), _called_back: true };
+      toast("Done");
+    } else if (action === "won" || action === "lost") {
+      const { lead } = await api(`/api/me/leads/${id}/outcome`, { method: "POST", body: { outcome: action } });
+      state.leads.set(id, { ...state.leads.get(id), ...lead });
+      toast(action === "won" ? "Nice one — marked won" : "Marked lost");
+      loadSummary();
     }
+    $(`t-${id}`)?.removeAttribute("data-html");
+    render();
+  } catch (e) { toast(e.message); if (btn) btn.disabled = false; }
+}
 
-    document.querySelectorAll('.sidebar__item[data-view]').forEach(btn => {
-      btn.addEventListener('click', () => showView(btn.dataset.view));
-    });
+document.addEventListener("click", async (e) => {
+  const el = e.target.closest("[data-act]");
+  if (el) {
+    const id = el.closest("[data-id]")?.dataset.id;
+    const action = el.dataset.act;
+    if (action === "toggle") {
+      const box = el.closest(".lead");
+      if (box.classList.toggle("open")) { state.open.add(id); loadThread(id); } else state.open.delete(id);
+    } else if (action === "older") {
+      const l = state.leads.get(id);
+      if (l) { state.open.add(id); el.outerHTML = card(l); loadThread(id); }
+    } else if (id) act(id, action, el);
+    return;
+  }
+  if (e.target.id === "flow-save") {
+    const flow = structuredClone(state.flow);
+    flow.steps[0].question = $("q-text").value.trim();
+    document.querySelectorAll(".opt").forEach((t) => { flow.steps[0].options[t.dataset.i].label = t.value.trim(); });
+    try { await api("/api/me/flow", { method: "PUT", body: { flowConfig: flow } }); state.flow = flow; toast("Question saved"); }
+    catch (err) { toast(err.message); }
+  } else if (e.target.id === "review-save") {
+    try { await api("/api/me/settings", { method: "PUT", body: { review_link: $("review-link").value } }); toast("Saved"); }
+    catch (err) { toast(err.message); }
+  }
+});
 
-    // Wire up in-page nav buttons (e.g. inside the help FAQ)
-    document.querySelectorAll('#view-help [data-view]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        showView(btn.dataset.view);
-        if (btn.dataset.itab) activateIntTab(btn.dataset.itab);
-      });
-    });
+async function poll() {
+  const since = state.since;
+  try {
+    const { leads, serverTime } = await api(`/api/me/leads${since ? `?since=${encodeURIComponent(since)}` : "?days=30"}`);
+    for (const l of leads) state.leads.set(l.id, { ...state.leads.get(l.id), ...l });
+    state.since = serverTime;
+    setOnline(true);
+    if (leads.length || !since) render();
+  } catch { setOnline(false); }
+}
 
-    // ─── Mobile menu ───
-    const mobMenuBtn = document.getElementById('mob-menu-btn');
-    const mobBackdrop = document.getElementById('mob-backdrop');
-    const sidebar = document.querySelector('.sidebar');
+async function loadSummary() {
+  try {
+    const { week } = await api("/api/me/summary");
+    $("stats").innerHTML = [["Calls caught", week.leads], ["Replied", week.replied], ["Booked", week.booked], ["Won", week.won]]
+      .map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join("");
+    $("sentence").textContent = week.leads
+      ? `${week.leads} call${week.leads === 1 ? "" : "s"} you'd have lost, ${week.booked} booked.`
+      : "No missed calls yet this week.";
+  } catch { $("sentence").textContent = "Couldn't load this week's numbers."; }
+}
 
-    function openMobileMenu() {
-      sidebar.classList.add('sidebar--open');
-      mobBackdrop.classList.add('mob-backdrop--visible');
-      document.body.style.overflow = 'hidden';
+function renderHealth() {
+  const last = state.business?.last_inbound_call_at;
+  const days = last ? (Date.now() - new Date(last)) / 86400e3 : null;
+  const [color, text] = days == null ? ["var(--faint)", "No forwarded calls yet"]
+    : days <= 3 ? ["var(--green)", `Forwarding working · last call ${ago(last)}`]
+    : days <= 14 ? ["var(--amber)", `Quiet · last forwarded call ${ago(last)}`]
+    : ["var(--red)", `No forwarded calls for ${Math.round(days)} days — check forwarding`];
+  $("health").innerHTML = `<span class="dot" style="background:${color}"></span>${esc(text)}`;
+  const f = state.settings?.forwarding;
+  $("fwd").innerHTML = `<p class="sub" style="margin-top:0"><span class="dot" style="background:${color}"></span>${esc(text)}.</p>` + (f ? `
+    <p>New phone or carrier? Turn forwarding back on from your mobile:</p>
+    <a class="btn primary" href="${esc(f.link)}">Turn on forwarding</a>
+    <p class="sub">Or dial <code>${esc(f.codes.noAnswer)}</code> and press call. Forward when busy too: <code>${esc(f.codes.busy)}</code>. Turn it all off: <code>${esc(f.codes.cancelAll)}</code>.</p>` : "");
+}
+
+function renderAlerts() {
+  const s = state.settings;
+  const fu = s.settings.followups;
+  const t = (key, label, on, hint = "") => `<label class="toggle"><span>${label}${hint ? `<br><span class="sub">${hint}</span>` : ""}</span><input type="checkbox" data-key="${key}" ${on ? "checked" : ""}></label>`;
+  $("alerts").innerHTML = `<div>` +
+    t("missed_call_alert", "Text me the moment a call is missed", s.settings.missedCallAlert) +
+    t("notifications.sms", "Text me each lead's details", s.notifications.sms) +
+    t("notifications.urgent_only", "Only urgent or booked leads", s.notifications.urgent_only, "Details texts for the rest are skipped") +
+    t("followups.unanswered_nudge", "Nudge callers who don't reply", fu.unanswered_nudge.enabled, "Once, 2 hours later, in your hours") +
+    t("followups.reminder", "Remind customers the evening before", fu.reminder.enabled, "After you confirm a booking") +
+    t("followups.review_request", "Ask for a Google review", fu.review_request.enabled, "Morning after you mark a job won") +
+    t("followups.rebook_nudge", "Offer a check-up months later", fu.rebook_nudge.enabled) +
+    `</div><div class="k" style="margin-top:12px">Google review link</div>
+     <input type="url" id="review-link" placeholder="https://g.page/r/…" value="${esc(s.review_link || "")}">
+     <button class="btn" id="review-save">Save review link</button>`;
+}
+
+document.addEventListener("change", async (e) => {
+  const key = e.target.dataset?.key;
+  if (!key) return;
+  const [a, b] = key.split(".");
+  const body = a === "followups" ? { followups: { [b]: { enabled: e.target.checked } } }
+    : a === "notifications" ? { notifications: { [b]: e.target.checked } } : { [a]: e.target.checked };
+  try { await api("/api/me/settings", { method: "PUT", body }); toast("Saved"); }
+  catch (err) { toast(err.message); e.target.checked = !e.target.checked; }
+});
+
+function renderFlow() {
+  const step = state.flow.steps[0];
+  $("flow").innerHTML = `<p class="sub" style="margin-top:0">The one question missed callers get. Keep the letters or numbers in the question matching the options.</p>
+    <div class="k">Question</div><textarea id="q-text" rows="5">${esc(step.question)}</textarea>
+    ${(step.options || []).map((o, i) => `<div class="k">Option ${esc(o.value)}</div><textarea class="opt" data-i="${i}" style="min-height:44px" rows="1">${esc(o.label)}</textarea>`).join("")}
+    <button class="btn primary" id="flow-save">Save question</button>`;
+}
+
+$("test-btn").onclick = async () => {
+  $("test-btn").disabled = true;
+  try { await api("/api/me/send-test-lead", { method: "POST" }); $("test-note").textContent = "Sent — reply on your phone like a customer would."; poll(); }
+  catch (e) { $("test-note").textContent = e.message; }
+  $("test-btn").disabled = false;
+};
+$("pw-btn").onclick = async () => {
+  try {
+    await api("/api/auth/update-profile", { method: "PATCH", body: { currentPassword: $("pw-old").value, newPassword: $("pw-new").value } });
+    toast("Password changed"); $("pw-old").value = $("pw-new").value = "";
+  } catch (e) { toast(e.message); }
+};
+$("logout").onclick = async () => { await fetch("/api/auth/logout", { method: "POST" }); location.href = "/login"; };
+
+let searchTimer;
+$("search").oninput = () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(async () => {
+    const q = $("search").value.replace(/\D/g, "");
+    if (q.length < 3) return render();
+    try { const { leads } = await api(`/api/me/leads?q=${q}`); leads.forEach((l) => state.leads.set(l.id, l)); renderOlder(leads); }
+    catch { setOnline(false); }
+  }, 300);
+};
+
+(async function start() {
+  try {
+    const me = await api("/api/auth/me");
+    if (!me.business) {
+      document.querySelector("main").innerHTML = `<div class="card empty" style="margin-top:20vh">Your Cove account isn't set up yet.<br>Kris will let you know when it is.</div>`;
+      return;
     }
-    function closeMobileMenu() {
-      sidebar.classList.remove('sidebar--open');
-      mobBackdrop.classList.remove('mob-backdrop--visible');
-      document.body.style.overflow = '';
-    }
-    if (mobMenuBtn) mobMenuBtn.addEventListener('click', openMobileMenu);
-    if (mobBackdrop) mobBackdrop.addEventListener('click', closeMobileMenu);
-    const mobSettingsBtn = document.getElementById('mob-settings-btn');
-    if (mobSettingsBtn) mobSettingsBtn.addEventListener('click', () => showView('settings'));
-
-    // ─── Load data ───
-    async function init() {
-      try {
-        // Dev bypass: /dashboard?dev=1 skips auth for testing
-        if (new URLSearchParams(window.location.search).has('dev')) {
-          user = { id: 'dev', name: 'Test User', email: 'test@cove.app', onboarding_complete: true };
-          business = { id: 'dev', name: 'Bay Plumbing', is_active: true, twilio_from_number: '+61491570006', owner_notify_phone: '+61400000001', integrations: {} };
-          document.getElementById('sidebar-name').textContent = user.name;
-          document.getElementById('sidebar-email').textContent = user.email;
-          const bizEl = document.getElementById('sidebar-biz-name');
-          if (bizEl) bizEl.textContent = business.name;
-
-          // Fake leads for preview
-          const _now = Date.now();
-          leadsData = [
-            { id: 'fake-1', name: 'Sarah Mitchell', phone: '+61411111111', status: 'completed', created_at: new Date(_now - 3600000).toISOString(), answers: { job_type_label: 'Burst pipe — urgent', location_label: 'Bondi Beach' } },
-            { id: 'fake-2', name: 'James Okafor', phone: '+61422222222', status: 'completed', created_at: new Date(_now - 7200000).toISOString(), answers: { job_type_label: 'Hot water system replacement', location_label: 'Newtown' } },
-            { id: 'fake-3', name: 'Emily Tan', phone: '+61433333333', status: 'active', created_at: new Date(_now - 900000).toISOString(), answers: { job_type_label: 'Blocked drain', location_label: 'Surry Hills' } },
-            { id: 'fake-4', name: 'Marcus Webb', phone: '+61444444444', status: 'active', created_at: new Date(_now - 9000000).toISOString(), answers: { job_type_label: 'Leaking tap', location_label: 'Coogee' } },
-            { id: 'fake-5', name: 'Anna Rossi', phone: '+61455555555', status: 'stopped', created_at: new Date(_now - 86400000).toISOString(), answers: {} },
-          ];
-          const _done = leadsData.filter(l => l.status === 'completed').length;
-          // Dev preview scoreboard
-          document.getElementById('stat-captured').textContent = leadsData.length;
-          document.getElementById('stat-qualified').textContent = _done;
-          document.getElementById('stat-won').textContent = '2';
-
-          fillOverview();
-          updateGetStartedPanel();
-          renderLeads(leadsData);
-          return;
-        }
-
-        const meData = await fetch('/api/auth/me').then(r => r.json());
-        if (!meData.ok) { location.href = '/login'; return; }
-
-        user = meData.user;
-        business = meData.business;
-
-        // Accounts are set up by Kris; a login without a business can't do anything here.
-        if (!business) {
-          document.body.innerHTML = '<div style="font-family:sans-serif;max-width:420px;margin:15vh auto;padding:0 16px;text-align:center;color:#3f3f46"><h1 style="font-size:1.2rem">Your Cove account isn\'t set up yet</h1><p>Kris will finish setting it up and let you know. Questions? <a href="mailto:hello@usecove.app">hello@usecove.app</a></p></div>';
-          return;
-        }
-
-        // Sidebar
-        document.getElementById('sidebar-name').textContent = user.name || user.email;
-        document.getElementById('sidebar-email').textContent = user.email;
-        if (business?.name) {
-          const bizEl = document.getElementById('sidebar-biz-name');
-          if (bizEl) bizEl.textContent = business.name;
-        }
-
-        // Overview
-        fillOverview();
-        await loadLeads();
-        loadStats();
-        updateForwardingHealth();
-        setInterval(async () => {
-          try { await loadLeads(); loadStats(); updateForwardingHealth(); } catch {}
-        }, 30000);
-        updateGetStartedPanel();
-
-      } catch (e) {
-        console.error(e);
-        location.href = '/login';
-      }
-    }
-
-    function fillOverview() {
-      document.getElementById('biz-name-header').textContent = business.name || 'Your business';
-
-      // Status badge
-      const badge = document.getElementById('live-badge');
-      if (business.is_active && business.twilio_from_number && business.forwarding_verified) {
-        badge.innerHTML = '<span class="badge badge--live badge--dot">Live</span>';
-        document.getElementById('setup-alert').classList.add('hidden');
-      } else if (business.is_active && business.twilio_from_number) {
-        badge.innerHTML = '<span class="badge badge--setup badge--dot">Almost live</span>';
-        document.getElementById('setup-alert').classList.add('hidden');
-      } else {
-        badge.innerHTML = '<span class="badge badge--setup badge--dot">Setting up</span>';
-        document.getElementById('setup-alert').classList.remove('hidden');
-      }
-
-      // Billing number
-      document.getElementById('billing-number').textContent = business.twilio_from_number || 'Being provisioned…';
-
-      // Lead sources tab — missed calls status badge
-      const callsBadge = document.getElementById('itab-calls-badge');
-      if (callsBadge) {
-        if (business.forwarding_verified) {
-          callsBadge.textContent = 'Active';
-          callsBadge.className = 'int-tab-badge int-tab-badge--active';
-        } else if (business.twilio_from_number) {
-          callsBadge.textContent = 'Setup needed';
-          callsBadge.className = 'int-tab-badge int-tab-badge--needs-setup';
-        }
-      }
-
-
-
-      // ── Forwarding banner: verify test flow ──
-      (function initForwardingBanner() {
-        const banner      = document.getElementById('forwarding-banner');
-        const stateIdle   = document.getElementById('fwd-state-idle');
-        const stateCalling= document.getElementById('fwd-state-calling');
-        const stateVerified=document.getElementById('fwd-state-verified');
-        if (!banner) return;
-
-        function showState(name) {
-          stateIdle.classList.toggle('hidden', name !== 'idle');
-          stateCalling.classList.toggle('hidden', name !== 'calling');
-          stateVerified.classList.toggle('hidden', name !== 'verified');
-        }
-
-        let pollInterval = null;
-        let pollTimeout = null;
-        // Baseline timestamp captured when a test starts. Confirmation requires a
-        // NEW forwarded call (timestamp advances past the baseline) — so re-testing
-        // an already-verified account still proves forwarding works right now.
-        function startPolling(baselineCallAt) {
-          if (pollInterval) return;
-          pollInterval = setInterval(async () => {
-            try {
-              const r = await fetch('/api/me/forwarding-status').then(x => x.json());
-              const gotNewCall = r.last_call_at && r.last_call_at !== baselineCallAt;
-              if (gotNewCall) {
-                clearInterval(pollInterval); clearTimeout(pollTimeout);
-                pollInterval = pollTimeout = null;
-                business.forwarding_verified = true;
-                showState('verified');
-                const callsBadge = document.getElementById('itab-calls-badge');
-                if (callsBadge) { callsBadge.textContent = 'Active'; callsBadge.className = 'int-tab-badge int-tab-badge--active'; }
-                updateForwardingHealth();
-              }
-            } catch { /* silent */ }
-          }, 3000);
-          // Give up after 2 minutes
-          pollTimeout = setTimeout(() => {
-            clearInterval(pollInterval); pollInterval = null; pollTimeout = null;
-            showState('idle');
-            const sub = document.getElementById('fwd-idle-sub');
-            if (sub) {
-              sub.textContent = "No call detected. Make sure you've activated the carrier code, then try again.";
-              sub.style.color = 'var(--amber, #d97706)';
-            }
-          }, 120000);
-        }
-
-        // "Test forwarding" button — capture baseline, then listen for a NEW forwarded call
-        async function beginTest() {
-          showState('calling');
-          let baseline = null;
-          try {
-            const r = await fetch('/api/me/forwarding-status').then(x => x.json());
-            baseline = r.last_call_at || null;
-          } catch { /* treat as no baseline */ }
-          startPolling(baseline);
-        }
-        document.getElementById('fwd-test-btn')?.addEventListener('click', beginTest);
-        // Re-test link in the heartbeat health line reuses the same flow.
-        document.getElementById('fwd-health-retest')?.addEventListener('click', () => {
-          banner.classList.remove('hidden');
-          beginTest();
-          banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        });
-
-        // Cancel listening
-        document.getElementById('fwd-cancel-listen-btn')?.addEventListener('click', () => {
-          clearInterval(pollInterval); clearTimeout(pollTimeout);
-          pollInterval = pollTimeout = null;
-          showState('idle');
-        });
-
-        // Dismiss verified state
-        document.getElementById('fwd-dismiss-btn')?.addEventListener('click', () => {
-          banner.classList.add('hidden');
-          lsSet('cf-dismissed', '1');
-        });
-      })();
-
-    }
-
-    function updateGetStartedPanel() {
-      const panel = document.getElementById('gs-panel');
-      if (!panel) return;
-      if (lsGet('gs_dismissed')) return;
-
-      let doneCount = 1; // Account always done
-
-      // Step: notifications — owner_notify_phone set
-      const hasNotif = !!(business.owner_notify_phone || business.integrations?.notifications?.sms?.numbers?.length);
-      if (hasNotif) { document.getElementById('gs-step-notif')?.classList.add('gs-step--done'); doneCount++; }
-
-      // Step: flow reviewed — tracked by whether user has saved a flow config on the server
-      if (business.flow_config) { document.getElementById('gs-step-flow')?.classList.add('gs-step--done'); doneCount++; }
-
-      // Step: call forwarding — only when forwarding is actually verified
-      if (business.forwarding_verified) { document.getElementById('gs-step-forward')?.classList.add('gs-step--done'); doneCount++; }
-
-      const countEl = document.getElementById('gs-done-count');
-      if (countEl) countEl.textContent = doneCount;
-
-      if (doneCount >= 4) { lsSet('gs_dismissed', '1'); return; }
-
-      panel.style.display = 'block';
-
-      document.getElementById('gs-dismiss')?.addEventListener('click', () => {
-        panel.style.display = 'none';
-        lsSet('gs_dismissed', '1');
-      });
-
-      panel.querySelectorAll('.gs-step__action[data-view]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          showView(btn.dataset.view);
-          // If a specific tab is requested, activate it
-          if (btn.dataset.itab) {
-            const tabBtn = document.querySelector(`.int-tab[data-itab="${btn.dataset.itab}"]`);
-            if (tabBtn) tabBtn.click();
-          }
-        });
-      });
-    }
-
-    async function loadLeads() {
-      const data = await fetch('/api/me/leads').then(r => r.json());
-      if (!data.ok) return;
-      leadsData = data.leads || [];
-
-      const total = leadsData.length;
-
-      // Show/hide forwarding banner
-      const banner = document.getElementById('forwarding-banner');
-      if (banner && business?.is_active && business?.twilio_from_number) {
-        const alreadyVerified = business.forwarding_verified;
-        const dismissed = lsGet('cf-dismissed');
-        if (alreadyVerified || dismissed) {
-          banner.classList.add('hidden');
-        } else {
-          banner.classList.remove('hidden');
-        }
-      }
-
-      // First lead celebration
-      if (total > 0 && !lsGet('first_lead_celebrated')) {
-        lsSet('first_lead_celebrated', '1');
-        const celebBanner = document.getElementById('first-lead-banner');
-        if (celebBanner) {
-          celebBanner.classList.remove('hidden');
-          document.getElementById('dismiss-first-lead-btn')?.addEventListener('click', () => {
-            celebBanner.classList.add('hidden');
-          });
-        }
-      }
-
-      renderLeads(leadsData);
-    }
-
-    function fmtMoney(n) {
-      const v = Number(n) || 0;
-      return '$' + Math.round(v).toLocaleString('en-AU');
-    }
-
-    // ─── Scoreboard — counts from the last 30 days of leads ───
-    async function loadStats() {
-      try {
-        const data = await fetch('/api/me/leads?days=30').then(r => r.json());
-        if (!data.ok) return;
-        const leads = data.leads || [];
-        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-        set('stat-captured', leads.length);
-        set('stat-qualified', leads.filter(l => l.status === 'completed').length);
-        set('stat-booked', leads.filter(l => l.appointment_at).length);
-        set('stat-won', leads.filter(l => l.outcome === 'won').length);
-      } catch { /* silent — never block dashboard */ }
-    }
-
-    // ─── Forwarding heartbeat health line ───
-    async function updateForwardingHealth() {
-      const wrap = document.getElementById('fwd-health');
-      if (!wrap || !business?.twilio_from_number) return;
-      try {
-        const r = await fetch('/api/me/forwarding-status').then(x => x.json());
-        if (!r.ok) return;
-        wrap.style.display = 'inline-flex';
-        const textEl = document.getElementById('fwd-health-text');
-        const retest = document.getElementById('fwd-health-retest');
-        wrap.classList.remove('fwd-health--live', 'fwd-health--warn');
-
-        if (r.health === 'live') {
-          wrap.classList.add('fwd-health--live');
-          textEl.textContent = `Call forwarding live · last forwarded call ${timeAgo(r.last_call_at)}`;
-          retest.style.display = 'none';
-        } else if (r.health === 'verified') {
-          wrap.classList.add('fwd-health--live');
-          textEl.textContent = r.last_call_at
-            ? `Forwarding confirmed · no calls in a while`
-            : 'Forwarding confirmed · waiting for your first missed call';
-          retest.style.display = 'inline';
-        } else {
-          wrap.classList.add('fwd-health--warn');
-          textEl.textContent = 'Call forwarding not confirmed yet';
-          retest.style.display = 'inline';
-        }
-      } catch { /* silent */ }
-    }
-
-    function getLeadStatus(lead) {
-      if (lead.status === 'completed') return { label: 'Completed', cls: 'lead-badge--done' };
-      if (lead.status === 'stopped') return { label: 'Opted out', cls: 'lead-badge--stopped' };
-      const age = (Date.now() - new Date(lead.created_at).getTime()) / 60000;
-      if (lead.status === 'active' && age > 60) return { label: 'No reply', cls: 'lead-badge--abandoned' };
-      return { label: 'In progress', cls: 'lead-badge--active' };
-    }
-
-    function getLeadNeed(lead) {
-      const answers = lead.answers || {};
-      const keys = Object.keys(answers).filter(k => k.endsWith('_label') && !k.startsWith('_'));
-      if (keys.length) return answers[keys[0]];
-      if (lead.message) return lead.message.replace(/^\[(.*?)\]\s*/, '').slice(0, 50);
-      return '—';
-    }
-
-    function timeAgo(date) {
-      const secs = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-      if (secs < 60) return 'just now';
-      if (secs < 3600) return Math.floor(secs / 60) + 'm ago';
-      if (secs < 86400) return Math.floor(secs / 3600) + 'h ago';
-      return Math.floor(secs / 86400) + 'd ago';
-    }
-
-    // Note: this function is overridden below by the full renderLeads with click handlers
-    function renderLeads(leads) {}
-
-    // ─── Flow editor ───
-    function getFlowConfig() {
-      if (flowEdited) return flowEdited;
-      if (business?.flow_config) return business.flow_config;
-      return null;
-    }
-
-    function captureFlowEdits() {
-      const flow = getFlowConfig();
-      if (!flow?.steps) return;
-      // Capture question text
-      document.querySelectorAll('.flow-question-input').forEach((ta, i) => {
-        if (flow.steps[i]) flow.steps[i].question = ta.value.trim();
-      });
-      // Capture option labels
-      document.querySelectorAll('.flow-opts-edit').forEach(wrap => {
-        const si = Number(wrap.dataset.optStep);
-        if (!flow.steps[si] || flow.steps[si].free_text) return;
-        const letters = 'ABCD';
-        flow.steps[si].options = Array.from(wrap.querySelectorAll('.flow-opt-input')).map((inp, j) => ({
-          value: letters[j],
-          label: inp.value.trim() || `Option ${letters[j]}`,
-        }));
-      });
-      // Capture intro
-      const introEl = document.getElementById('flow-intro');
-      if (introEl) flow.intro = introEl.value.trim();
-      // Capture completion messages
-      const compEl = document.getElementById('flow-completion');
-      if (compEl) flow.completion = compEl.value.trim();
-      const compBookEl = document.getElementById('flow-completion-booking');
-      if (compBookEl) flow.completion_with_booking = compBookEl.value.trim();
-      // Booking toggle (stored in the flow_config JSONB)
-      const bkEl = document.getElementById('flow-booking-enabled');
-      if (bkEl) {
-        flow.booking = {
-          enabled: bkEl.checked,
-          slots: Math.min(3, Math.max(1, Number(document.getElementById('flow-booking-slots')?.value) || 2)),
-          prompt: (document.getElementById('flow-booking-prompt')?.value || '').trim() || undefined,
-        };
-      }
-      flowEdited = JSON.parse(JSON.stringify(flow));
-    }
-
-    function renderFlowEditor() {
-      const flow = getFlowConfig();
-      document.getElementById('flow-biz-name').value = business.name || '';
-
-      const container = document.getElementById('flow-cards');
-      if (!flow || !flow.steps) {
-        container.innerHTML = '<div style="color:var(--text-faint);font-size:13.5px;padding:16px 0">No questions yet. Click <strong>Add question</strong> below to get started.</div>';
-        return;
-      }
-
-      // Populate intro field
-      const introEl = document.getElementById('flow-intro');
-      if (introEl) {
-        introEl.value = flow.intro || '';
-        requestAnimationFrame(() => { introEl.style.height = 'auto'; introEl.style.height = introEl.scrollHeight + 'px'; });
-        introEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; updateFlowPreview(); }, { once: false });
-      }
-      // Populate completion fields
-      const compEl = document.getElementById('flow-completion');
-      if (compEl) {
-        compEl.value = flow.completion || '';
-        requestAnimationFrame(() => { compEl.style.height = 'auto'; compEl.style.height = compEl.scrollHeight + 'px'; });
-        compEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; updateFlowPreview(); }, { once: false });
-      }
-      const compBookEl = document.getElementById('flow-completion-booking');
-      if (compBookEl) {
-        compBookEl.value = flow.completion_with_booking || '';
-        requestAnimationFrame(() => { compBookEl.style.height = 'auto'; compBookEl.style.height = compBookEl.scrollHeight + 'px'; });
-        compBookEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; }, { once: false });
-      }
-      // Booking toggle
-      const bkEl = document.getElementById('flow-booking-enabled');
-      if (bkEl) {
-        const b = flow.booking || {};
-        bkEl.checked = !!b.enabled;
-        const fields = document.getElementById('flow-booking-fields');
-        const slotsEl = document.getElementById('flow-booking-slots');
-        const promptEl = document.getElementById('flow-booking-prompt');
-        if (slotsEl) slotsEl.value = b.slots || 2;
-        if (promptEl) promptEl.value = b.prompt || '';
-        if (fields) fields.style.display = b.enabled ? '' : 'none';
-        bkEl.onchange = () => { if (fields) fields.style.display = bkEl.checked ? '' : 'none'; };
-      }
-      document.getElementById('flow-biz-name').addEventListener('input', updateFlowPreview, { once: true });
-
-      container.innerHTML = flow.steps.map((step, i) => `
-        <div class="flow-card">
-          <div class="flow-card__header">
-            <span class="flow-card__num">Message ${i + 1}</span>
-            <div class="flow-card__header-actions">
-              <button class="flow-card__type-btn" data-step="${i}" type="button">
-                ${step.free_text ? 'Switch to multiple choice' : 'Switch to open answer'}
-              </button>
-              ${flow.steps.length > 1 ? `<button class="flow-card__del-btn" data-step="${i}" aria-label="Delete question" type="button">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>` : ''}
-            </div>
-          </div>
-          <div class="flow-card__body">
-            <div class="flow-q-label">Question</div>
-            <textarea class="flow-question-input" data-step="${i}" placeholder="e.g. What kind of job do you need done?">${esc(step.question)}</textarea>
-            ${!step.free_text ? `
-            <div class="flow-replies-label">Answer options</div>
-            <div class="flow-opts-edit" data-opt-step="${i}">
-              ${(step.options || []).map((o, j) => `
-                <div class="flow-opt-row">
-                  <span class="flow-opt-letter">${o.value}</span>
-                  <input class="flow-opt-input" type="text" value="${esc(o.label)}" placeholder="Option ${o.value}…" data-step="${i}" data-opt="${j}" />
-                  ${(step.options.length > 1) ? `<button class="flow-opt-del" data-step="${i}" data-opt="${j}" type="button" aria-label="Remove option">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  </button>` : ''}
-                </div>`).join('')}
-              ${step.options.length < 4 ? `<button class="flow-opt-add" data-step="${i}" type="button">+ Add option</button>` : ''}
-            </div>` : `
-            <div class="flow-free-note">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              The lead types any reply — their answer gets included in your notification.
-            </div>`}
-          </div>
-        </div>
-      `).join('');
-
-      // Bind type-switch buttons
-      container.querySelectorAll('.flow-card__type-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          captureFlowEdits();
-          const step = flowEdited.steps[Number(btn.dataset.step)];
-          step.free_text = !step.free_text;
-          if (!step.free_text && !step.options?.length) {
-            step.options = [{value:'A',label:'Option A'},{value:'B',label:'Option B'}];
-          }
-          renderFlowEditor();
-        });
-      });
-
-      // Bind delete-question buttons
-      container.querySelectorAll('.flow-card__del-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          captureFlowEdits();
-          flowEdited.steps.splice(Number(btn.dataset.step), 1);
-          renderFlowEditor();
-        });
-      });
-
-      // Bind delete-option buttons
-      container.querySelectorAll('.flow-opt-del').forEach(btn => {
-        btn.addEventListener('click', () => {
-          captureFlowEdits();
-          const si = Number(btn.dataset.step), oi = Number(btn.dataset.opt);
-          flowEdited.steps[si].options.splice(oi, 1);
-          const letters = 'ABCD';
-          flowEdited.steps[si].options.forEach((o, j) => { o.value = letters[j]; });
-          renderFlowEditor();
-        });
-      });
-
-      // Bind add-option buttons
-      container.querySelectorAll('.flow-opt-add').forEach(btn => {
-        btn.addEventListener('click', () => {
-          captureFlowEdits();
-          const si = Number(btn.dataset.step);
-          const opts = flowEdited.steps[si].options;
-          opts.push({ value: 'ABCD'[opts.length], label: '' });
-          renderFlowEditor();
-          setTimeout(() => {
-            const wrap = document.querySelector(`.flow-opts-edit[data-opt-step="${si}"]`);
-            wrap?.querySelectorAll('.flow-opt-input')[opts.length - 1]?.focus();
-          }, 30);
-        });
-      });
-
-      // Auto-size question textareas + live preview on input
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        container.querySelectorAll('.flow-question-input').forEach(ta => {
-          ta.style.overflow = 'hidden';
-          ta.style.height = '0';
-          ta.style.height = ta.scrollHeight + 'px';
-          ta.addEventListener('input', function() {
-            this.style.height = '0';
-            this.style.height = this.scrollHeight + 'px';
-            updateFlowPreview();
-          });
-        });
-        container.querySelectorAll('.flow-opt-input').forEach(inp => {
-          inp.addEventListener('input', updateFlowPreview);
-        });
-        updateFlowPreview();
-      }));
-    }
-
-    // ─── Live SMS preview ───
-    function updateFlowPreview() {
-      const screen = document.getElementById('flow-preview-screen');
-      if (!screen) return;
-
-      const bizName = document.getElementById('flow-biz-name')?.value.trim() || business?.name || 'Your business';
-      const intro = document.getElementById('flow-intro')?.value.trim() || `Hi there, this is ${bizName}. Quick question:`;
-      const flow = getFlowConfig();
-
-      const mkBubble = (dir, html) => `<div class="fpp-bubble fpp-bubble--${dir}">${html}</div>`;
-
-      if (!flow?.steps?.length) {
-        screen.innerHTML = `<div class="fpp-empty">Generate a flow to see a preview here.</div>`;
-        return;
-      }
-
-      // Build current steps from DOM (live)
-      const steps = flow.steps.map((step, i) => {
-        const ta = document.querySelector(`.flow-question-input[data-step="${i}"]`);
-        const question = ta ? ta.value : step.question;
-        let options = step.options;
-        if (!step.free_text) {
-          const inps = document.querySelectorAll(`.flow-opts-edit[data-opt-step="${i}"] .flow-opt-input`);
-          if (inps.length) options = Array.from(inps).map((inp, j) => ({ value: 'ABCD'[j], label: inp.value || `Option ${'ABCD'[j]}` }));
-        }
-        return { ...step, question, options };
-      });
-
-      let html = mkBubble('in', esc(intro));
-      steps.forEach(step => {
-        let msg = esc(step.question || '…');
-        if (!step.free_text && step.options?.length) {
-          msg += '<br><br>' + step.options.map(o => `${o.value}) ${esc(o.label || '…')}`).join('<br>');
-        }
-        html += mkBubble('in', msg);
-        html += mkBubble('out', step.free_text ? '<em>Their reply…</em>' : esc(step.options?.[0]?.value || 'A'));
-      });
-      const completionTpl = document.getElementById('flow-completion')?.value.trim()
-        || flow.completion
-        || 'Thanks! {businessName} will be in touch shortly.';
-      const completionMsg = completionTpl.replace(/{businessName}/g, bizName).replace(/{firstName}/g, 'Sarah');
-      html += mkBubble('in', esc(completionMsg));
-
-      screen.innerHTML = html;
-      screen.scrollTop = screen.scrollHeight;
-    }
-
-    document.getElementById('flow-add-btn').addEventListener('click', () => {
-      captureFlowEdits();
-      if (!flowEdited) {
-        const base = getFlowConfig();
-        flowEdited = base ? JSON.parse(JSON.stringify(base)) : { steps: [] };
-      }
-      flowEdited.steps.push({ question: '', free_text: false, options: [{value:'A',label:'Option A'},{value:'B',label:'Option B'}] });
-      renderFlowEditor();
-      setTimeout(() => {
-        const inputs = document.querySelectorAll('.flow-question-input');
-        inputs[inputs.length - 1]?.focus();
-      }, 50);
-    });
-
-    document.getElementById('flow-save').addEventListener('click', async () => {
-      captureFlowEdits();
-
-      const bizName = document.getElementById('flow-biz-name').value.trim();
-
-      const btn = document.getElementById('flow-save');
-      btn.disabled = true; btn.textContent = 'Saving…';
-
-      const currentFlow = flowEdited || business.flow_config;
-      if (currentFlow) {
-        await fetch('/api/me/flow', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ flowConfig: currentFlow }),
-        });
-        business.flow_config = currentFlow;
-        flowEdited = null;
-      }
-
-      await fetch('/api/me/business', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: bizName }),
-      });
-
-      business.name = bizName;
-
-      document.getElementById('flow-saved').classList.add('visible');
-      setTimeout(() => document.getElementById('flow-saved').classList.remove('visible'), 2000);
-      btn.disabled = false; btn.textContent = 'Save changes';
-      document.getElementById('biz-name-header').textContent = bizName;
-    });
-
-    // ─── Notifications form ───
-    let closedDays = [0, 6];
-
-    function fillNotificationForm() {
-      document.getElementById('notif-phone').value = business.owner_notify_phone || '';
-      const hasEmail = !!business.owner_notify_email;
-      document.getElementById('notif-email-toggle').checked = hasEmail;
-      document.getElementById('notif-email-wrap').classList.toggle('hidden', !hasEmail);
-      document.getElementById('notif-email').value = business.owner_notify_email || '';
-
-      const integrations = business.integrations || {};
-      document.getElementById('notif-webhook').value = integrations.completion_webhook_url || '';
-
-      const hours = business.operating_hours || {};
-      document.getElementById('hours-enabled').checked = !!hours.enabled;
-
-      if (hours.enabled) {
-        document.getElementById('hours-config').classList.remove('hidden');
-      }
-
-      const openSel = document.getElementById('hours-open');
-      const closeSel = document.getElementById('hours-close');
-      if (!openSel.options.length) {
-        for (let h = 0; h <= 23; h++) {
-          const label = h === 0 ? '12:00 AM' : h < 12 ? `${h}:00 AM` : h === 12 ? '12:00 PM' : `${h - 12}:00 PM`;
-          openSel.add(new Option(label, h));
-          closeSel.add(new Option(label, h));
-        }
-      }
-      openSel.value = hours.open_hour ?? 8;
-      closeSel.value = hours.close_hour ?? 18;
-
-      if (hours.timezone) document.getElementById('hours-tz').value = hours.timezone;
-
-      closedDays = hours.closed_days || [0, 6];
-      document.querySelectorAll('.day-chip').forEach(chip => {
-        const d = Number(chip.dataset.day);
-        chip.classList.toggle('closed', closedDays.includes(d));
-      });
-    }
-
-    document.getElementById('notif-email-toggle').addEventListener('change', (e) => {
-      document.getElementById('notif-email-wrap').classList.toggle('hidden', !e.target.checked);
-    });
-
-    document.getElementById('hours-enabled').addEventListener('change', (e) => {
-      document.getElementById('hours-config').classList.toggle('hidden', !e.target.checked);
-    });
-
-    document.querySelectorAll('.day-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        const d = Number(chip.dataset.day);
-        if (closedDays.includes(d)) {
-          closedDays = closedDays.filter(x => x !== d);
-        } else {
-          closedDays.push(d);
-        }
-        chip.classList.toggle('closed', closedDays.includes(d));
-      });
-    });
-
-    document.getElementById('notif-save').addEventListener('click', async () => {
-      const btn = document.getElementById('notif-save');
-      btn.disabled = true; btn.textContent = 'Saving…';
-      document.getElementById('notif-success').classList.add('hidden');
-
-      const hoursEnabled = document.getElementById('hours-enabled').checked;
-      const operatingHours = hoursEnabled ? {
-        enabled: true,
-        timezone: document.getElementById('hours-tz').value,
-        open_hour: Number(document.getElementById('hours-open').value),
-        close_hour: Number(document.getElementById('hours-close').value),
-        closed_days: closedDays,
-      } : { enabled: false };
-
-      await fetch('/api/me/notifications', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          notifyPhone: document.getElementById('notif-phone').value.trim(),
-          notifyEmail: document.getElementById('notif-email-toggle').checked
-            ? document.getElementById('notif-email').value.trim() || null
-            : null,
-          webhookUrl: document.getElementById('notif-webhook').value.trim() || null,
-          operatingHours,
-        }),
-      });
-
-      document.getElementById('notif-success').classList.remove('hidden');
-      btn.disabled = false; btn.textContent = 'Save changes';
-      setTimeout(() => document.getElementById('notif-success').classList.add('hidden'), 3000);
-    });
-
-    // ─── Integrations ───
-    function fillIntegrations() {
-      fillIntWebhook();
-    }
-
-
-    // ─── Integration tabs ───
-    document.querySelectorAll('.int-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.int-tab').forEach(t => t.classList.remove('int-tab--active'));
-        document.querySelectorAll('.int-panel').forEach(p => p.classList.remove('int-panel--active'));
-        tab.classList.add('int-tab--active');
-        document.getElementById('int-panel-' + tab.dataset.itab).classList.add('int-panel--active');
-      });
-    });
-
-    // ─── Missed calls: inline carrier setup ───
-    (function() {
-      const grid = document.getElementById('dash-carrier-grid');
-      const action = document.getElementById('dash-cf-action');
-      const dialCodeEl = document.getElementById('dash-dial-code');
-      const activateLink = document.getElementById('dash-activate-link');
-      const optusNote = document.getElementById('dash-optus-note');
-      const copyCodeBtn = document.getElementById('dash-copy-code-btn');
-      const mobileSect = document.getElementById('dash-mobile-section');
-      if (!grid) return;
-
-      // Detect mobile vs desktop
-      const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      if (mobileSect) mobileSect.classList.toggle('hidden', !isMobile);
-
-      const buildCode = (carrier, num) => {
-        // Dial codes need local AU format (04XX) — the + sign breaks the dialler
-        const local = toLocalAU(num);
-        if (carrier === 'optus')    return `**21*${local}#`; // unconditional — bypasses Message Bank
-        if (carrier === 'vodafone') return `*61*${local}*11*20#`;
-        return `**61*${local}*11*20#`; // telstra, other
-      };
-
-      // Convert +61XXXXXXXXX → 04XXXXXXXX for display in carrier app fields
-      const toLocalAU = n => n && n.startsWith('+61') ? '0' + n.slice(3) : n;
-
-      let currentCode = '';
-
-      grid.addEventListener('click', e => {
-        const tile = e.target.closest('.cf-carrier-tile');
-        if (!tile) return;
-
-        const carrier = tile.dataset.carrier;
-        const num = business?.twilio_from_number || '+61XXXXXXXXX';
-
-        // Highlight selected tile
-        grid.querySelectorAll('.cf-carrier-tile').forEach(t => t.classList.remove('active'));
-        tile.classList.add('active');
-
-        {
-          // All carriers: show dial code
-          currentCode = buildCode(carrier, num);
-          if (dialCodeEl) dialCodeEl.textContent = currentCode;
-          if (activateLink) activateLink.href = 'tel:' + currentCode;
-
-          action.classList.remove('hidden');
-          action.style.display = 'flex';
-        }
-      });
-
-      // Copy code to clipboard
-      if (copyCodeBtn) {
-        copyCodeBtn.addEventListener('click', () => {
-          if (!currentCode) return;
-          navigator.clipboard.writeText(currentCode).then(() => {
-            copyCodeBtn.textContent = 'Copied!';
-            setTimeout(() => { copyCodeBtn.textContent = 'Copy'; }, 2000);
-          }).catch(() => {
-            // Fallback for older browsers
-            const ta = document.createElement('textarea');
-            ta.value = currentCode;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-            copyCodeBtn.textContent = 'Copied!';
-            setTimeout(() => { copyCodeBtn.textContent = 'Copy'; }, 2000);
-          });
-        });
-      }
-
-      // After tapping activate or copying code, auto-start the forwarding test listener
-      function autoStartFwdTest() {
-        if (business?.forwarding_verified) return;
-        setTimeout(() => {
-          const startBtn = document.getElementById('int-fwd-start-btn');
-          const testSection = document.getElementById('int-fwd-test-wrap');
-          if (startBtn) startBtn.click();
-          if (testSection) testSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 1200);
-      }
-
-      if (activateLink) {
-        activateLink.addEventListener('click', autoStartFwdTest);
-      }
-      if (copyCodeBtn) {
-        copyCodeBtn.addEventListener('click', autoStartFwdTest);
-      }
-
-    })();
-
-    // ─── Test lead (send real SMS to owner) ───
-    document.getElementById('int-test-lead-btn')?.addEventListener('click', async function() {
-      const btn = this;
-      const status = document.getElementById('int-test-lead-status');
-      btn.disabled = true;
-      btn.textContent = 'Sending…';
-      status.textContent = '';
-      try {
-        const r = await fetch('/api/me/send-test-lead', { method: 'POST' }).then(x => x.json());
-        if (r.ok) {
-          status.textContent = 'SMS sent — reply to it on your phone to test the flow.';
-          status.style.color = 'var(--green, #16a34a)';
-        } else {
-          status.textContent = r.error || 'Failed to send.';
-          status.style.color = 'var(--red, #dc2626)';
-        }
-      } catch {
-        status.textContent = 'Network error.';
-        status.style.color = 'var(--red, #dc2626)';
-      }
-      btn.disabled = false;
-      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:5px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Send test SMS';
-    });
-
-    // ─── Missed calls: forwarding test ───
-    (function() {
-      const startBtn   = document.getElementById('int-fwd-start-btn');
-      const cancelBtn  = document.getElementById('int-fwd-cancel-btn');
-      const retryBtn   = document.getElementById('int-fwd-retry-btn');
-      const idleEl     = document.getElementById('int-fwd-idle');
-      const listenEl   = document.getElementById('int-fwd-listening');
-      const successEl  = document.getElementById('int-fwd-success');
-      const timeoutEl  = document.getElementById('int-fwd-timeout');
-      const timerEl    = document.getElementById('int-fwd-timer');
-      const verifiedBadge = document.getElementById('int-fwd-verified-badge');
-      if (!startBtn) return;
-
-      // Show verified badge immediately if already confirmed
-      if (business?.forwarding_verified) {
-        if (verifiedBadge) verifiedBadge.style.display = '';
-        if (successEl) { successEl.classList.remove('hidden'); }
-      }
-
-      let pollInterval = null;
-      let countdownInterval = null;
-      let secondsLeft = 120;
-
-      function showState(state) {
-        idleEl?.classList.toggle('hidden', state !== 'idle');
-        listenEl?.classList.toggle('hidden', state !== 'listening');
-        successEl?.classList.toggle('hidden', state !== 'success');
-        timeoutEl?.classList.toggle('hidden', state !== 'timeout');
-      }
-
-      function stopPolling() {
-        clearInterval(pollInterval); pollInterval = null;
-        clearInterval(countdownInterval); countdownInterval = null;
-      }
-
-      function startTest() {
-        secondsLeft = 120;
-        showState('listening');
-        if (timerEl) timerEl.textContent = '2:00';
-
-        countdownInterval = setInterval(() => {
-          secondsLeft--;
-          const m = Math.floor(secondsLeft / 60);
-          const s = secondsLeft % 60;
-          if (timerEl) timerEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
-          if (secondsLeft <= 0) {
-            stopPolling();
-            showState('timeout');
-          }
-        }, 1000);
-
-        pollInterval = setInterval(async () => {
-          try {
-            const r = await fetch('/api/me/forwarding-status').then(x => x.json());
-            if (r.forwarding_verified) {
-              stopPolling();
-              business.forwarding_verified = true;
-              if (verifiedBadge) verifiedBadge.style.display = '';
-              showState('success');
-              // Update the missed calls tab badge to Active
-              const callsBadge = document.getElementById('itab-calls-badge');
-              if (callsBadge) { callsBadge.textContent = 'Active'; callsBadge.className = 'int-tab-badge int-tab-badge--active'; }
-              // Also update the forwarding banner if it's visible
-              document.getElementById('forwarding-banner')?.classList.add('hidden');
-              const badge = document.getElementById('live-badge');
-              if (badge) badge.innerHTML = '<span class="badge badge--live badge--dot">Live</span>';
-            }
-          } catch { /* silent */ }
-        }, 3000);
-      }
-
-      startBtn?.addEventListener('click', startTest);
-      retryBtn?.addEventListener('click', startTest);
-      cancelBtn?.addEventListener('click', () => { stopPolling(); showState('idle'); });
-    })();
-
-    // ─── CRM tab: pre-fill webhook input + save ───
-    function fillIntWebhook() {
-      const input = document.getElementById('int-webhook-input');
-      if (input && business?.integrations?.completion_webhook_url) {
-        input.value = business.integrations.completion_webhook_url;
-      }
-    }
-    document.getElementById('save-webhook-btn')?.addEventListener('click', async function() {
-      const input = document.getElementById('int-webhook-input');
-      const url = input?.value.trim() || null;
-      this.disabled = true; this.textContent = 'Saving…';
-      try {
-        const res = await fetch('/api/notifications', {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ webhookUrl: url }),
-        }).then(r => r.json());
-        const statusEl = document.getElementById('webhook-save-status');
-        if (res.ok) {
-          if (business.integrations) business.integrations.completion_webhook_url = url;
-          const notifWebhook = document.getElementById('notif-webhook');
-          if (notifWebhook) notifWebhook.value = url || '';
-          this.textContent = 'Saved ✓'; this.disabled = false;
-          if (statusEl) { statusEl.textContent = url ? 'Connected — Cove will send qualified leads here.' : 'Webhook removed.'; statusEl.style.color = 'var(--green)'; }
-          setTimeout(() => { this.textContent = 'Save'; if (statusEl) statusEl.textContent = ''; }, 3000);
-        } else {
-          this.textContent = 'Save'; this.disabled = false;
-          if (statusEl) { statusEl.textContent = 'Could not save — try again.'; statusEl.style.color = 'var(--red, #dc2626)'; }
-        }
-      } catch {
-        this.textContent = 'Save'; this.disabled = false;
-        const statusEl = document.getElementById('webhook-save-status');
-        if (statusEl) { statusEl.textContent = 'Could not save — try again.'; statusEl.style.color = 'var(--red, #dc2626)'; }
-      }
-    });
-
-    // ─── Forwarding banner ───
-    document.getElementById('fwd-banner-setup-btn')?.addEventListener('click', () => {
-      showView('integrations');
-      // Activate the "Missed calls" tab
-      document.querySelectorAll('.int-tab').forEach(t => t.classList.remove('int-tab--active'));
-      document.querySelectorAll('.int-panel').forEach(p => p.classList.remove('int-panel--active'));
-      document.querySelector('.int-tab[data-itab="calls"]')?.classList.add('int-tab--active');
-      document.getElementById('int-panel-calls')?.classList.add('int-panel--active');
-    });
-
-    // ─── Settings ───
-    function fillSettings() {
-      document.getElementById('settings-name').value = user.name || '';
-      document.getElementById('settings-email').value = user.email || '';
-      document.getElementById('settings-biz-name').value = business?.name || '';
-      document.getElementById('settings-booking').value = business?.booking_link || '';
-      document.getElementById('settings-avg-value').value =
-        (business?.avg_job_value !== null && business?.avg_job_value !== undefined) ? business.avg_job_value : '';
-      document.getElementById('settings-pw-current').value = '';
-      document.getElementById('settings-pw-new').value = '';
-      document.getElementById('settings-pw-confirm').value = '';
-      document.getElementById('settings-success').classList.add('hidden');
-      document.getElementById('settings-error').classList.add('hidden');
-    }
-
-    document.getElementById('settings-save').addEventListener('click', async () => {
-      const btn = document.getElementById('settings-save');
-      const successEl = document.getElementById('settings-success');
-      const errorEl = document.getElementById('settings-error');
-      successEl.classList.add('hidden');
-      errorEl.classList.add('hidden');
-
-      const name = document.getElementById('settings-name').value.trim();
-      const pwCurrent = document.getElementById('settings-pw-current').value;
-      const pwNew = document.getElementById('settings-pw-new').value;
-      const pwConfirm = document.getElementById('settings-pw-confirm').value;
-
-      if (pwNew && pwNew !== pwConfirm) {
-        document.getElementById('settings-error-msg').textContent = 'New passwords do not match.';
-        errorEl.classList.remove('hidden');
-        return;
-      }
-      if (pwNew && pwNew.length < 8) {
-        document.getElementById('settings-error-msg').textContent = 'Password must be at least 8 characters.';
-        errorEl.classList.remove('hidden');
-        return;
-      }
-
-      btn.disabled = true; btn.textContent = 'Saving…';
-      try {
-        const bizName = document.getElementById('settings-biz-name').value.trim();
-        const bookingLink = document.getElementById('settings-booking').value.trim();
-        const avgRaw = document.getElementById('settings-avg-value').value.trim();
-        const avgJobValue = avgRaw === '' ? null : Number(avgRaw);
-
-        const payload = { name };
-        if (pwNew) { payload.currentPassword = pwCurrent; payload.newPassword = pwNew; }
-
-        const [profileRes] = await Promise.all([
-          fetch('/api/auth/update-profile', {
-            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-          }).then(r => r.json()),
-          fetch('/api/me/business', {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: bizName, bookingLink: bookingLink || null, avgJobValue }),
-          }),
-        ]);
-
-        if (profileRes.ok) {
-          user.name = name;
-          business.name = bizName;
-          business.booking_link = bookingLink || null;
-          business.avg_job_value = avgJobValue;
-          document.getElementById('sidebar-name').textContent = name || user.email;
-          document.getElementById('biz-name-header').textContent = bizName;
-          const bizEl = document.getElementById('sidebar-biz-name');
-          if (bizEl) bizEl.textContent = bizName;
-          document.getElementById('settings-success-msg').textContent = pwNew ? 'Settings and password saved.' : 'Settings saved.';
-          successEl.classList.remove('hidden');
-          document.getElementById('settings-pw-current').value = '';
-          document.getElementById('settings-pw-new').value = '';
-          document.getElementById('settings-pw-confirm').value = '';
-        } else {
-          document.getElementById('settings-error-msg').textContent = profileRes.error || 'Could not save changes. Try again.';
-          errorEl.classList.remove('hidden');
-        }
-      } catch (e) {
-        document.getElementById('settings-error-msg').textContent = 'Network error. Please try again.';
-        errorEl.classList.remove('hidden');
-      }
-      btn.disabled = false; btn.textContent = 'Save changes';
-    });
-
-
-    // ─── Logout ───
-    async function doLogout() {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      location.href = '/';
-    }
-    document.getElementById('logout-btn').addEventListener('click', doLogout);
-    document.getElementById('settings-logout-btn').addEventListener('click', doLogout);
-
-    // ─── Helpers ───
-    function esc(str) {
-      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    // ─── Init ───
-    init();
-
-    // ─── Conversation Thread ───
-
-    let threadLeadId = null;
-
-    function openThread(lead) {
-      threadLeadId = lead.id;
-      currentThreadLeadId = lead.id;
-      const panel = document.getElementById('thread-panel');
-      const overlay = document.getElementById('thread-overlay');
-
-      // Header — show phone as primary name when no name available
-      const hasName = lead.name && lead.name !== lead.phone;
-      const name = hasName ? lead.name : (lead.phone || '—');
-      const phone = hasName ? lead.phone : '';
-      const { label, cls } = getLeadStatus(lead);
-      document.getElementById('thread-name').textContent = name;
-      document.getElementById('thread-phone').textContent = phone;
-      document.getElementById('thread-badge').textContent = label;
-      document.getElementById('thread-badge').className = 'lead-badge ' + cls;
-
-      // Reset mark-called button
-      const btn = document.getElementById('mark-called-btn');
-      const lbl = document.getElementById('mark-called-label');
-      btn.disabled = false;
-      btn.classList.remove('thread-mark-called-btn--done');
-      if (lead.answers?._called_back) {
-        lbl.textContent = 'Called back ✓';
-        btn.classList.add('thread-mark-called-btn--done');
-        btn.disabled = true;
-      } else {
-        lbl.textContent = 'Mark as called back';
-      }
-
-      // Outcome (won/lost) state
-      setOutcomeUI(lead.outcome || null, lead.job_value);
-
-      // Show panel
-      panel.classList.add('open');
-      overlay.classList.add('show');
-      document.body.style.overflow = 'hidden';
-
-      loadMessages(lead.id);
-    }
-
-    function closeThread() {
-      document.getElementById('thread-panel').classList.remove('open');
-      document.getElementById('thread-overlay').classList.remove('show');
-      document.body.style.overflow = '';
-      threadLeadId = null;
-    }
-
-    async function loadMessages(leadId) {
-      const body = document.getElementById('thread-body');
-      body.innerHTML = '<div class="thread-loading">Loading…</div>';
-
-      // Dev mode: return fake conversation threads
-      if (leadId.startsWith('fake-')) {
-        const _t = Date.now();
-        const fakeConvos = {
-          'fake-1': [
-            { direction: 'outbound', body: 'Hi Sarah! Bay Plumbing here — thanks for calling. What can we help with today?', created_at: new Date(_t - 3500000).toISOString() },
-            { direction: 'inbound', body: 'Hi yes I have a burst pipe under the kitchen sink, water everywhere 😬', created_at: new Date(_t - 3480000).toISOString() },
-            { direction: 'outbound', body: 'That sounds urgent — we\'ll get someone to you ASAP. What suburb are you in?', created_at: new Date(_t - 3460000).toISOString() },
-            { direction: 'inbound', body: 'Bondi Beach', created_at: new Date(_t - 3440000).toISOString() },
-            { direction: 'outbound', body: 'Perfect — can you drop us your address? We can have someone there within 2 hours.', created_at: new Date(_t - 3420000).toISOString() },
-            { direction: 'inbound', body: '12 Campbell Parade. Please hurry!', created_at: new Date(_t - 3400000).toISOString() },
-            { direction: 'system', body: '✓ Lead qualified — owner notified', created_at: new Date(_t - 3395000).toISOString() },
-          ],
-          'fake-2': [
-            { direction: 'outbound', body: 'Hi James! Bay Plumbing here — thanks for calling. What can we help with?', created_at: new Date(_t - 7100000).toISOString() },
-            { direction: 'inbound', body: 'Hot water system stopped working this morning, no hot water at all', created_at: new Date(_t - 7080000).toISOString() },
-            { direction: 'outbound', body: 'Sorry to hear that — any idea how old the system is?', created_at: new Date(_t - 7060000).toISOString() },
-            { direction: 'inbound', body: 'About 12 years old, think it needs replacing', created_at: new Date(_t - 7040000).toISOString() },
-            { direction: 'outbound', body: 'Makes sense at that age. We\'ll come assess and quote. What suburb?', created_at: new Date(_t - 7020000).toISOString() },
-            { direction: 'inbound', body: 'Newtown — 7 King St', created_at: new Date(_t - 7000000).toISOString() },
-            { direction: 'system', body: '✓ Lead qualified — owner notified', created_at: new Date(_t - 6990000).toISOString() },
-          ],
-          'fake-3': [
-            { direction: 'outbound', body: 'Hi Emily! Bay Plumbing here — thanks for calling. What can we help with?', created_at: new Date(_t - 860000).toISOString() },
-            { direction: 'inbound', body: 'Blocked drain in the bathroom, been slow for a week', created_at: new Date(_t - 840000).toISOString() },
-            { direction: 'outbound', body: 'Got it — what suburb are you in?', created_at: new Date(_t - 820000).toISOString() },
-            { direction: 'inbound', body: 'Surry Hills', created_at: new Date(_t - 800000).toISOString() },
-          ],
-        };
-        const msgs = fakeConvos[leadId];
-        if (msgs) {
-          renderMessages(msgs);
-        } else {
-          body.innerHTML = '<div class="thread-empty">No messages recorded yet.<br><span>Messages from new leads will appear here.</span></div>';
-        }
-        return;
-      }
-
-      try {
-        const res = await fetch(`/api/me/leads/${leadId}/messages`);
-        const data = await res.json();
-        if (!data.ok || !data.messages.length) {
-          body.innerHTML = '<div class="thread-empty">No messages recorded yet.<br><span>Messages from new leads will appear here.</span></div>';
-          return;
-        }
-        renderMessages(data.messages);
-      } catch {
-        body.innerHTML = '<div class="thread-empty">Could not load messages.</div>';
-      }
-    }
-
-    function renderMessages(messages) {
-      const body = document.getElementById('thread-body');
-      body.innerHTML = messages.map(m => {
-        const time = new Date(m.created_at).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
-        const date = new Date(m.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
-        if (m.direction === 'system') {
-          return `<div class="thread-system">${esc(m.body)}</div>`;
-        }
-        const side = m.direction === 'outbound' ? 'out' : 'in';
-        return `<div class="thread-row thread-row--${side}">
-          <div class="thread-bubble thread-bubble--${side}">${esc(m.body).replace(/\n/g, '<br>')}</div>
-          <div class="thread-time">${date} ${time}</div>
-        </div>`;
-      }).join('');
-      body.scrollTop = body.scrollHeight;
-    }
-
-    // Build a leads table into any container element
-    function buildLeadsTable(leads, container, emptyLabel) {
-      if (!leads.length) {
-        container.innerHTML = `
-          <div class="leads-empty">
-            <div class="leads-empty__icon">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.73 12 19.79 19.79 0 0 1 1.66 3.38 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 13 13.91l.27-.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 20 16z"/></svg>
-            </div>
-            <div class="leads-empty__title">${emptyLabel || 'No leads yet'}</div>
-            <div class="leads-empty__sub">Once Cove is live and call forwarding is set up, leads will appear here automatically.</div>
-          </div>`;
-        return;
-      }
-      const now = Date.now();
-      const rows = leads.map((lead, i) => {
-        const { label, cls } = getLeadStatus(lead);
-        const need = getLeadNeed(lead);
-        // Use phone as display name when name is absent (missed calls always lack a name)
-        const hasName = lead.name && lead.name !== lead.phone;
-        const displayName = hasName ? lead.name : lead.phone;
-        const showPhone = hasName && lead.phone; // show phone as sub-line only when we already showed the name
-        const ageMs = now - new Date(lead.created_at).getTime();
-        const isNew = ageMs < 5 * 60 * 1000;
-        const isUrgent = lead.status === 'active' && ageMs < 30 * 60 * 1000;
-        const calledBack = lead.answers?._called_back;
-        const wonValue = lead.outcome === 'won' && lead.job_value ? ` ${fmtMoney(lead.job_value)}` : '';
-        const outcomePill = lead.outcome === 'won'
-          ? `<span class="lead-badge lead-badge--done">Won${wonValue}</span>`
-          : lead.outcome === 'lost'
-          ? `<span class="lead-badge lead-badge--stopped">Lost</span>`
-          : '';
-        const bookedPill = lead.appointment_at
-          ? `<span class="lead-badge lead-badge--new" title="${esc(lead.answers?._appointment_label || 'Appointment booked')}">📅 Booked</span>`
-          : '';
-        return `<tr class="lead-row${isUrgent ? ' lead-row--urgent' : ''}" data-index="${i}">
-          <td class="name-cell">
-            <div class="lead-name">${esc(displayName || '—')}</div>
-            ${showPhone ? `<div class="lead-phone">${esc(lead.phone)}</div>` : ''}
-            ${need !== '—' ? `<div class="lead-need-sub">${esc(need)}</div>` : ''}
-          </td>
-          <td class="status-cell">
-            ${isNew ? '<span class="lead-badge lead-badge--new">New</span>' : ''}
-            <span class="lead-badge ${cls}">${label}</span>
-            ${calledBack ? '<span class="lead-badge lead-badge--called">Called back</span>' : ''}
-            ${bookedPill}
-            ${outcomePill}
-          </td>
-          <td class="time-cell">${timeAgo(lead.created_at)}</td>
-          <td class="view-cell"><span class="thread-open-btn">View</span></td>
-        </tr>`;
-      }).join('');
-      container.innerHTML = `
-        <table class="leads-table">
-          <thead>
-            <tr>
-              <th>Lead</th>
-              <th>Status</th>
-              <th>Time</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
-      container.querySelectorAll('.lead-row').forEach(row => {
-        row.addEventListener('click', () => openThread(leads[Number(row.dataset.index)]));
-      });
-    }
-
-    // Override renderLeads — used by overview section (last 7 days)
-    function renderLeads(leads) {
-      buildLeadsTable(leads, document.getElementById('leads-container'), 'No leads yet this week');
-    }
-
-    // Full leads view loader
-    async function loadAllLeads(days) {
-      const container = document.getElementById('all-leads-container');
-      container.innerHTML = '<div class="leads-loading">Loading…</div>';
-      const param = days === 'all' ? 'all' : days;
-      const data = await fetch(`/api/me/leads?days=${param}`).then(r => r.json());
-      if (!data.ok) { container.innerHTML = '<div class="leads-loading">Could not load leads.</div>'; return; }
-      const label = days === 7 ? 'No leads in the last 7 days' : days === 30 ? 'No leads in the last 30 days' : 'No leads yet';
-      buildLeadsTable(data.leads || [], container, label);
-    }
-
-  </script>
-
-  <!-- Thread overlay -->
-  <div id="thread-overlay" class="thread-overlay"></div>
-
-  <!-- Thread panel -->
-  <div id="thread-panel" class="thread-panel">
-    <div class="thread-header">
-      <div class="thread-header__info">
-        <div class="thread-header__name" id="thread-name"></div>
-        <div class="thread-header__meta">
-          <span id="thread-phone" class="thread-header__phone"></span>
-          <span id="thread-badge" class="lead-badge"></span>
-        </div>
-      </div>
-      <button class="thread-close-btn" id="thread-close" aria-label="Close">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="thread-body" id="thread-body"></div>
-    <div class="thread-footer">
-      <button class="thread-mark-called-btn" id="mark-called-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.73 12 19.79 19.79 0 0 1 1.66 3.38 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91A16 16 0 0 0 13 13.91l.27-.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 20 16z"/></svg>
-        <span id="mark-called-label">Mark as called back</span>
-      </button>
-      <div class="thread-outcome">
-        <div class="thread-outcome__label">Did this lead turn into a job?</div>
-        <div class="thread-outcome__row">
-          <button class="outcome-btn outcome-btn--won" id="outcome-won-btn" type="button">Won</button>
-          <button class="outcome-btn outcome-btn--lost" id="outcome-lost-btn" type="button">Lost</button>
-        </div>
-        <div class="thread-outcome__row outcome-value" id="outcome-value-row" style="display:none">
-          <span class="outcome-value__prefix">Job value $</span>
-          <input type="number" inputmode="numeric" min="0" step="50" id="outcome-value-input" placeholder="0" />
-          <button class="btn btn--secondary btn--sm" id="outcome-value-save" type="button">Save</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    document.getElementById('thread-close').addEventListener('click', closeThread);
-    document.getElementById('thread-overlay').addEventListener('click', closeThread);
-
-    // Filter tabs in leads view
-    document.querySelectorAll('.leads-filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.leads-filter-btn').forEach(b => b.classList.remove('leads-filter-btn--active'));
-        btn.classList.add('leads-filter-btn--active');
-        const days = btn.dataset.days === 'all' ? 'all' : Number(btn.dataset.days);
-        currentLeadsDays = days;
-        loadAllLeads(days);
-      });
-    });
-
-    // ─── Lead outcome (won / lost) ───
-    function setOutcomeUI(outcome, jobValue) {
-      const wonBtn = document.getElementById('outcome-won-btn');
-      const lostBtn = document.getElementById('outcome-lost-btn');
-      const valueRow = document.getElementById('outcome-value-row');
-      const valueInput = document.getElementById('outcome-value-input');
-      wonBtn.classList.toggle('is-active', outcome === 'won');
-      lostBtn.classList.toggle('is-active', outcome === 'lost');
-      // Value only relevant for won jobs
-      valueRow.style.display = outcome === 'won' ? 'flex' : 'none';
-      valueInput.value = (jobValue !== null && jobValue !== undefined) ? jobValue : '';
-    }
-
-    async function saveOutcome(outcome, jobValue) {
-      if (!currentThreadLeadId) return;
-      try {
-        const body = { outcome };
-        if (jobValue !== undefined) body.jobValue = jobValue;
-        const r = await fetch(`/api/me/leads/${currentThreadLeadId}/outcome`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        }).then(x => x.json());
-        if (!r.ok) return false;
-        // Keep local cache in sync so re-opening reflects the change
-        const cached = leadsData.find(l => l.id === currentThreadLeadId);
-        if (cached) { cached.outcome = r.lead.outcome; cached.job_value = r.lead.job_value; }
-        loadStats();
-        return true;
-      } catch { return false; }
-    }
-
-    document.getElementById('outcome-won-btn').addEventListener('click', async () => {
-      const isActive = document.getElementById('outcome-won-btn').classList.contains('is-active');
-      const next = isActive ? null : 'won';   // tap again to clear
-      setOutcomeUI(next, document.getElementById('outcome-value-input').value || null);
-      await saveOutcome(next);
-    });
-    document.getElementById('outcome-lost-btn').addEventListener('click', async () => {
-      const isActive = document.getElementById('outcome-lost-btn').classList.contains('is-active');
-      const next = isActive ? null : 'lost';
-      setOutcomeUI(next, null);
-      await saveOutcome(next);
-    });
-    document.getElementById('outcome-value-save').addEventListener('click', async () => {
-      const btn = document.getElementById('outcome-value-save');
-      const val = document.getElementById('outcome-value-input').value;
-      btn.disabled = true; btn.textContent = 'Saving…';
-      const ok = await saveOutcome('won', val === '' ? null : Number(val));
-      btn.textContent = ok ? 'Saved ✓' : 'Try again';
-      setTimeout(() => { btn.disabled = false; btn.textContent = 'Save'; }, 1200);
-    });
-
-    // Mark as called back
-    document.getElementById('mark-called-btn').addEventListener('click', async () => {
-      if (!currentThreadLeadId) return;
-      const btn = document.getElementById('mark-called-btn');
-      const label = document.getElementById('mark-called-label');
-      btn.disabled = true;
-      label.textContent = 'Saving…';
-      try {
-        const r = await fetch(`/api/me/leads/${currentThreadLeadId}/mark-called`, { method: 'POST' });
-        const d = await r.json();
-        if (d.ok) {
-          label.textContent = 'Called back ✓';
-          btn.classList.add('thread-mark-called-btn--done');
-          // Refresh the current list so badge shows
-          const activeFilter = document.querySelector('.leads-filter-btn--active');
-          if (activeFilter) {
-            const days = activeFilter.dataset.days === 'all' ? 'all' : Number(activeFilter.dataset.days);
-            loadAllLeads(days);
-          } else {
-            loadLeads();
-          }
-        } else {
-          label.textContent = 'Failed — try again';
-          btn.disabled = false;
-        }
-      } catch (e) {
-        label.textContent = 'Failed — try again';
-        btn.disabled = false;
-      }
-    });
-  </script>
-
+    state.business = me.business;
+    $("biz").textContent = me.business.name;
+    document.title = `${me.business.name} · Cove`;
+  } catch { return; }
+  await poll();
+  loadSummary();
+  api("/api/me/settings").then((s) => { state.settings = s; renderHealth(); renderAlerts(); }).catch(() => renderHealth());
+  api("/api/me/flow").then(({ flow }) => { state.flow = flow; renderFlow(); }).catch(() => {});
+  setInterval(poll, 30_000);
+  setInterval(() => {
+    loadSummary();
+    api("/api/me/business").then(({ business }) => { state.business = business; renderHealth(); }).catch(() => {});
+  }, 5 * 60_000);
+  setInterval(render, 60_000); // keep "x min ago" fresh
+})();
+</script>
 </body>
 </html>

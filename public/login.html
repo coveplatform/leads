@@ -1,108 +1,82 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign in — Cove</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="icon" type="image/png" href="/favicon.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/dash.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#fafaf8" />
+<title>Sign in · Cove</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root { --bg: #fafaf8; --card: #fff; --ink: #18181b; --muted: #6b6b73; --line: #e7e5e0; --brand: #e8540a; --red: #dc2626; --red-soft: #fef2f2; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #111110; --card: #1c1c1a; --ink: #f4f4f5; --muted: #a1a1aa; --line: #2e2e2b; --red-soft: #2a1414; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font: 16px/1.45 "Plus Jakarta Sans", system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center; padding: 16px; }
+  main { width: 100%; max-width: 380px; }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.3rem; color: var(--ink); text-decoration: none; margin-bottom: 24px; }
+  form { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+  h1 { margin: 0 0 4px; font-size: 1.3rem; }
+  p { margin: 0 0 18px; color: var(--muted); font-size: .92rem; }
+  label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 4px; }
+  input[type=email], input[type=password] { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+  .remember { display: flex; align-items: center; gap: 8px; font-weight: 500; margin: 2px 0 18px; }
+  .remember input { width: 20px; height: 20px; accent-color: var(--brand); }
+  button { width: 100%; border: 0; border-radius: 10px; background: var(--brand); color: #fff; font: inherit; font-weight: 700; padding: 13px; cursor: pointer; }
+  button:disabled { opacity: .6; }
+  .error { display: none; background: var(--red-soft); color: var(--red); border-radius: 10px; padding: 10px 12px; font-size: .9rem; margin-bottom: 14px; }
+  .error.on { display: block; }
+  .foot { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 16px; }
+  .foot a { color: var(--muted); }
+</style>
 </head>
-<body class="auth-root">
-
-  <div class="auth-card">
-    <div class="auth-logo">
-      <a href="/" class="cove-logo">
-        <svg width="30" height="30" viewBox="0 0 28 28" fill="none">
-          <path d="M5 19.5 Q9 17 14 19.5 Q19 22 23 19.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" fill="none"/>
-          <path d="M5 14.5 Q9 12 14 14.5 Q19 17 23 14.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" fill="none" opacity="0.65"/>
-          <path d="M5 9.5 Q9 7 14 9.5 Q19 12 23 9.5" stroke="url(#lg)" stroke-width="2.3" stroke-linecap="round" fill="none" opacity="0.4"/>
-          <defs>
-            <linearGradient id="lg" x1="5" y1="9.5" x2="23" y2="9.5" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#e8540a"/>
-              <stop offset="1" stop-color="#ff7240"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <span>cove</span>
-      </a>
-    </div>
-
-    <!-- Sign in view -->
-    <div id="view-login">
-      <h1 class="auth-heading">Welcome back</h1>
-      <p class="auth-sub">Sign in to your Cove account.</p>
-
-      <div id="login-error" class="auth-error" role="alert"></div>
-
-      <div class="auth-form">
-        <div class="field">
-          <label for="login-email">Email</label>
-          <input type="email" id="login-email" placeholder="you@business.com.au" autocomplete="email" />
-        </div>
-        <div class="field">
-          <label for="login-password">Password</label>
-          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
-        </div>
-
-        <button class="btn btn--primary btn--full btn--lg" id="login-btn" type="button">Sign in</button>
-      </div>
-
-      <div class="auth-footer">
-        Forgot your password? Text Kris and he'll reset it for you.
-      </div>
-    </div>
-
-    <div class="auth-back-wrap">
-      <a href="/" class="auth-back">← Back to usecove.app</a>
-    </div>
-  </div>
-
-  <script>
-    const loginError = document.getElementById('login-error');
-
-    async function apiPost(url, body) {
-      const r = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+<body>
+<main>
+  <a class="logo" href="/">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M5 19.5 Q9 17 14 19.5 Q19 22 23 19.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round"/><path d="M5 14.5 Q9 12 14 14.5 Q19 17 23 14.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" opacity="0.6"/><path d="M5 9.5 Q9 7 14 9.5 Q19 12 23 9.5" stroke="#e8540a" stroke-width="2.3" stroke-linecap="round" opacity="0.35"/></svg>
+    cove
+  </a>
+  <form id="form" novalidate>
+    <h1>Sign in</h1>
+    <p>See who called and who to ring back.</p>
+    <div class="error" id="error" role="alert"></div>
+    <label for="email">Email</label>
+    <input type="email" id="email" autocomplete="email" required />
+    <label for="password">Password</label>
+    <input type="password" id="password" autocomplete="current-password" required />
+    <label class="remember"><input type="checkbox" id="remember" checked /> Stay signed in for 30 days</label>
+    <button type="submit" id="btn">Sign in</button>
+  </form>
+  <div class="foot">Forgot your password? Text Kris and he'll reset it.<br><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></div>
+</main>
+<script>
+  const form = document.getElementById("form");
+  const error = document.getElementById("error");
+  const btn = document.getElementById("btn");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    error.classList.remove("on");
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    if (!email || !password) { error.textContent = "Enter your email and password."; error.classList.add("on"); return; }
+    btn.disabled = true; btn.textContent = "Signing in…";
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, remember: document.getElementById("remember").checked }),
       });
-      return r.json();
-    }
-
-    document.getElementById('login-btn').addEventListener('click', async () => {
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
-      loginError.classList.remove('visible');
-
-      if (!email || !password) {
-        loginError.textContent = 'Please enter your email and password.';
-        loginError.classList.add('visible');
-        return;
-      }
-
-      const btn = document.getElementById('login-btn');
-      btn.disabled = true;
-      btn.textContent = 'Signing in…';
-
-      const data = await apiPost('/api/auth/login', { email, password }).catch(() => ({ ok: false }));
-
-      if (data.ok) {
-        location.href = '/dashboard';
-      } else {
-        loginError.textContent = data.error || 'Could not sign in.';
-        loginError.classList.add('visible');
-        btn.disabled = false;
-        btn.textContent = 'Sign in';
-      }
-    });
-
-    document.getElementById('login-password').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('login-btn').click();
-    });
-  </script>
+      const data = await res.json().catch(() => ({}));
+      if (data.ok) { location.href = "/dashboard"; return; }
+      error.textContent = data.error || "Couldn't sign in.";
+    } catch { error.textContent = "No connection — try again."; }
+    error.classList.add("on");
+    btn.disabled = false; btn.textContent = "Sign in";
+  });
+</script>
 </body>
 </html>

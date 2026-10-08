@@ -22,6 +22,7 @@ import {
 import { getIntegrationConfig, getNotificationConfig } from "../integrations.js";
 import { normalizePhone } from "../phone.js";
 import { getSettings, mergeSettings } from "../settings.js";
+import { getFlowConfig } from "../flow-engine.js";
 import { localParts, zonedDate, businessTimezone, localDayAfter } from "../time.js";
 import { forwardingCodes, dialLink } from "../services/forwarding.js";
 
@@ -220,6 +221,18 @@ router.get("/api/me/summary", async (req, res) => {
   } catch (err) {
     console.error("Summary error:", err);
     return res.status(500).json({ ok: false, error: "Could not load summary" });
+  }
+});
+
+// The flow in use (the business's own, or its industry template).
+router.get("/api/me/flow", async (req, res) => {
+  try {
+    const business = await ownBusiness(req, res);
+    if (!business) return;
+    return res.json({ ok: true, flow: getFlowConfig(business) });
+  } catch (err) {
+    console.error("Get flow error:", err);
+    return res.status(500).json({ ok: false, error: "Could not load flow" });
   }
 });
 
