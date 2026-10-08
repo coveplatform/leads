@@ -24,7 +24,7 @@ const router = express.Router();
 router.post("/api/auth/login", async (req, res) => {
   try {
     if (await rateLimited(req, res, "login", 900, 10)) return; // 10 / 15 min per IP
-    const { email, password } = req.body || {};
+    const { email, password, remember = true } = req.body || {};
     if (!email || !password) {
       return res.status(400).json({ ok: false, error: "Email and password are required" });
     }
@@ -34,7 +34,7 @@ router.post("/api/auth/login", async (req, res) => {
       return res.status(401).json({ ok: false, error: "Invalid email or password" });
     }
 
-    setAuthCookie(res, signToken(user.id));
+    setAuthCookie(res, signToken(user.id, { remember: !!remember }), { remember: !!remember });
     return res.json({ ok: true, user: { id: user.id, email: user.email, name: user.name } });
   } catch (err) {
     console.error("Login error:", err);

@@ -81,3 +81,23 @@ test("health and dial pages", async () => {
   assert.equal((await fetch(`${base}/dial/abc`)).status, 400);
   assert.match(await (await fetch(`${base}/dial/${encodeURIComponent("**61*+61400000000#")}`)).text(), /tel:/);
 });
+
+test("cron endpoints refuse anyone but the scheduler", async () => {
+  for (const path of ["/api/cron/dispatch", "/api/cron/health", "/api/cron/forwarding-check"]) {
+    assert.equal((await fetch(`${base}${path}`)).status, 401, path);
+    const wrong = await fetch(`${base}${path}`, { headers: { authorization: "Bearer nope" } });
+    assert.equal(wrong.status, 401, `${path} with a wrong secret`);
+  }
+});
+
+test("dial_first status: an answered call just hangs up", async () => {
+  const r = await post("/api/voice/status", { DialCallStatus: "completed", DialCallDuration: "60" }, "form");
+  assert.equal(r.status, 200);
+  assert.match(await r.text(), /<Response><Hangup\/><\/Response>/);
+});
+
+test("new owner endpoints require a session", async () => {
+  for (const [method, path] of [["GET", "/api/me/summary"], ["GET", "/api/me/settings"], ["PUT", "/api/me/settings"], ["POST", "/api/me/leads/x/booking"]]) {
+    assert.equal((await fetch(`${base}${path}`, { method })).status, 401, `${method} ${path}`);
+  }
+});

@@ -1,42 +1,23 @@
-/**
- * fix-webhooks.mjs
- * Updates all Twilio numbers on the account to point to the correct
- * production SMS + voice webhook URLs.
- * Run: node scripts/fix-webhooks.mjs
- */
-import dotenv from 'dotenv';
-dotenv.config();
-import twilio from 'twilio';
+// Points every Cove business's Twilio number back at BASE_URL's voice + SMS
+// webhooks. Run when the health check reports webhook problems.
+//   node scripts/fix-webhooks.mjs [--dry-run]
+import "dotenv/config";
+import twilio from "twilio";
+import { config } from "../src/config.js";
+import { getBusinessesOverview } from "../src/db.js";
+import { webhookUrls } from "../src/services/twilio-numbers.js";
 
-const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-const baseUrl = process.env.PRODUCTION_URL || 'https://leads-rho-six.vercel.app';
-const smsUrl   = `${baseUrl}/api/sms/inbound`;
-const voiceUrl = `${baseUrl}/api/voice/inbound`;
+const dryRun = process.argv.includes("--dry-run");
+const client = twilio(config.twilio.accountSid, config.twilio.authToken);
+const { smsUrl, voiceUrl } = webhookUrls();
+console.log(`SMS URL  : ${smsUrl}\nVoice URL: ${voiceUrl}\n`);
 
-console.log(`\n── Cove Webhook Fixer ──`);
-console.log(`Base URL : ${baseUrl}`);
-console.log(`SMS URL  : ${smsUrl}`);
-console.log(`Voice URL: ${voiceUrl}\n`);
-
-const numbers = await client.incomingPhoneNumbers.list({ limit: 50 });
-if (!numbers.length) { console.log('No numbers on account.'); process.exit(0); }
-
-for (const num of numbers) {
-  const needsFix = num.smsUrl !== smsUrl || num.voiceUrl !== voiceUrl;
-  if (!needsFix) {
-    console.log(`✅ ${num.phoneNumber} — already correct`);
-    continue;
+const ours = new Set((await getBusinessesOverview()).map((b) => b.twilio_from_number).filter(Boolean));
+for (const num of await client.incomingPhoneNumbers.list({ limit: 1000 })) {
+  if (!ours.has(num.phoneNumber)) { console.log(`–  ${num.phoneNumber} not a Cove business, skipped`); continue; }
+  if (num.smsUrl === smsUrl && num.voiceUrl === voiceUrl) { console.log(`✓  ${num.phoneNumber}`); continue; }
+  console.log(`🔧 ${num.phoneNumber}: ${num.voiceUrl || "(none)"} → ${voiceUrl}`);
+  if (!dryRun) {
+    await client.incomingPhoneNumbers(num.sid).update({ smsUrl, smsMethod: "POST", voiceUrl, voiceMethod: "POST" });
   }
-  console.log(`🔧 Updating ${num.phoneNumber}…`);
-  console.log(`   SMS  : ${num.smsUrl || '(none)'} → ${smsUrl}`);
-  console.log(`   Voice: ${num.voiceUrl || '(none)'} → ${voiceUrl}`);
-  await client.incomingPhoneNumbers(num.sid).update({
-    smsUrl,
-    smsMethod: 'POST',
-    voiceUrl,
-    voiceMethod: 'POST',
-  });
-  console.log(`   ✅ Done`);
 }
-
-console.log('\n✅ All numbers updated.');

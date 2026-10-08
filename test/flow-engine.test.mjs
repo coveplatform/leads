@@ -66,7 +66,8 @@ test("buildBookedAlert is a punchy owner SMS", () => {
   assert.ok(alert.includes("Urgent dental pain"));
   assert.ok(alert.includes("Tomorrow 8–10am"));
   assert.ok(!alert.includes("$"));
-  assert.ok(alert.includes("Confirm the time"));
+  assert.ok(alert.includes("Reply Y to confirm, N to decline"));
+  assert.ok(alert.includes("0400 000 000"), "phone shown the way owners write it");
 });
 
 test("summaries ignore legacy quote columns on old leads", () => {

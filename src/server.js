@@ -8,6 +8,8 @@ import webhookRoutes from "./routes/webhooks.js";
 import authRoutes from "./routes/auth.js";
 import ownerRoutes from "./routes/owner.js";
 import adminRoutes from "./routes/admin.js";
+import cronRoutes from "./routes/cron.js";
+import { log } from "./log.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, "..", "public");
@@ -50,6 +52,7 @@ app.use(webhookRoutes);
 app.use(authRoutes);
 app.use(ownerRoutes);
 app.use(adminRoutes);
+app.use(cronRoutes);
 
 // ─── Fallbacks ───
 
@@ -63,7 +66,7 @@ app.use((_req, res) => {
 });
 
 app.use((err, _req, res, _next) => {
-  console.error("Unhandled error:", err);
+  log.error("Unhandled error:", err);
   res.status(500).json({ ok: false, error: "Internal server error" });
 });
 

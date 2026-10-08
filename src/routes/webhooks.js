@@ -6,8 +6,8 @@ import express from "express";
 import { config } from "../config.js";
 import { validateTwilioSignature, rateLimited } from "../middleware.js";
 import { startLead } from "../services/leads.js";
-import { handleLeadReply } from "../services/conversation.js";
-import { isStopKeyword } from "../flow-engine.js";
+import { handleLeadReply, handleNonLeadText } from "../services/conversation.js";
+import { isOwnerPhone, handleOwnerReply } from "../services/owner-replies.js";
 import {
   getBusinessById,
   getBusinessByTwilioNumber,
@@ -18,9 +18,9 @@ import {
   saveMessage,
   createWebsiteInquiry,
 } from "../db.js";
-import { sendEmailViaResend } from "../integrations.js";
+import { alertKris } from "../integrations.js";
 import { normalizePhone } from "../phone.js";
-import { sendSms } from "../sms.js";
+import { withRequestId, log } from "../log.js";
 
 const router = express.Router();
 
@@ -28,121 +28,176 @@ const router = express.Router();
 // Signature validation needs the params exactly as sent, so Twilio routes parse
 // here, before the validator. JSON bodies are parsed app-wide in server.js.
 const formBody = express.urlencoded({ extended: false });
+const twilioHook = [formBody, withRequestId, validateTwilioSignature];
 
+const xml = (s) => String(s).replace(/[<>&"']/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&apos;" })[c]);
 const twiml = (inner) => `<?xml version="1.0" encoding="UTF-8"?><Response>${inner}</Response>`;
 const TEXTING_YOU = twiml(`<Say voice="alice">Thanks for calling. We'll send you a text message shortly.</Say><Hangup/>`);
 
-// ─── Inbound Voice (missed call → text-back) ───
-
-router.post("/api/voice/inbound", formBody, validateTwilioSignature, async (req, res) => {
-  // Always respond with TwiML — Twilio requires a valid XML response
-  res.set("Content-Type", "text/xml");
+// Twilio gives up on a webhook after 15 seconds. Do the work (it must finish
+// before responding: serverless freezes after res.send), but never take more
+// than 10 seconds to answer, and flag anything over 5.
+const DEADLINE_MS = 10_000;
+async function withinDeadline(label, work) {
+  const started = Date.now();
+  let timer;
+  const timeout = new Promise((resolve) => { timer = setTimeout(() => resolve("timeout"), DEADLINE_MS); });
   try {
-    const from = normalizePhone(String(req.body?.From || ""), config.defaultCountryCode);
-    const to = normalizePhone(String(req.body?.To || ""), config.defaultCountryCode);
-    const forwardedFromRaw = String(req.body?.ForwardedFrom || "");
-    const forwardedFrom = forwardedFromRaw ? normalizePhone(forwardedFromRaw, config.defaultCountryCode) : null;
+    const result = await Promise.race([work().catch((err) => { log.error(`[${label}] error:`, err); return "error"; }), timeout]);
+    if (result === "timeout") log.error(`[${label}] webhook_timeout after ${DEADLINE_MS}ms — answered anyway`);
+    return result;
+  } finally {
+    clearTimeout(timer);
+    const ms = Date.now() - started;
+    if (ms > 5000) log.warn(`[${label}] webhook_slow ${ms}ms`);
+  }
+}
 
-    console.log(`[voice/inbound] from=${from} to=${to} forwardedFrom=${forwardedFrom}`);
+function phoneParam(req, key) {
+  return normalizePhone(String(req.body?.[key] || ""), config.defaultCountryCode);
+}
 
-    if (!from || !to) {
-      console.log("[voice/inbound] invalid from/to, skipping");
-      return res.send(TEXTING_YOU);
-    }
+// ─── Inbound Voice (missed call → text-back) ───
+//
+// voice_mode (flow_config):
+//   hangup     (default) the owner's phone already rang out; text the caller now
+//   dial_first ring dial_to (default the owner's mobile) for 20s first; text
+//              the caller only if nobody answers. For businesses whose main
+//              line forwards everything to Cove. The Dial shows the Cove number
+//              as caller id, so if the dialled phone forwards back to Cove it's
+//              recognised and rejected instead of looping.
 
-    // Only active businesses resolve here; is_active is the single on/off
-    // switch and only Kris flips it. Billing never drops a tradie's calls.
+router.post("/api/voice/inbound", ...twilioHook, async (req, res) => {
+  res.set("Content-Type", "text/xml");
+  let response = TEXTING_YOU;
+
+  await withinDeadline("voice/inbound", async () => {
+    const from = phoneParam(req, "From");
+    const to = phoneParam(req, "To");
+    log.info(`[voice/inbound] from=${from} to=${to} forwardedFrom=${req.body?.ForwardedFrom || ""}`);
+    if (!from || !to) return;
+
+    // Only active businesses resolve; is_active is the one switch, and only Kris flips it.
     const business = await getBusinessByTwilioNumber(to);
-    if (!business) {
-      console.log(`[voice/inbound] no active business found for ${to}`);
-      return res.send(TEXTING_YOU);
-    }
+    if (!business) { log.info(`[voice/inbound] no active business for ${to}`); return; }
 
-    console.log(`[voice/inbound] business=${business.name} id=${business.id}`);
-
-    // Test call loopback: a call Cove placed from its own number to the owner
-    // that forwarded back here.
-    const isTestCall = forwardedFrom &&
-      from === normalizePhone(business.twilio_from_number, config.defaultCountryCode);
-    if (isTestCall) {
-      console.log(`[voice/inbound] test call loopback — skipping lead creation for business ${business.id}`);
-      return res.send(twiml("<Hangup/>"));
+    // Our own number calling in: a dial_first call forwarded back to us, or a
+    // test loop. Reject so the dialling leg sees "busy" and nothing is texted.
+    if (from === normalizePhone(business.twilio_from_number, config.defaultCountryCode)) {
+      log.info("[voice/inbound] loopback from own number — rejecting");
+      response = twiml(`<Reject reason="busy"/>`);
+      return;
     }
 
     // Forwarding heartbeat: any real forwarded call proves forwarding works now.
-    recordInboundCall(business.id).catch((err) =>
-      console.error("[voice/inbound] heartbeat update error:", err),
-    );
+    await recordInboundCall(business.id).catch((err) => log.error("[voice/inbound] heartbeat:", err.message));
 
-    // Do SMS work before responding — serverless kills background async after res.send()
-    try {
-      const { status } = await startLead({
-        business, phone: from, message: "Missed call", systemNote: "📞 Missed call",
-      });
-      console.log(`[voice/inbound] ${from}: ${status}`);
-    } catch (err) {
-      console.error("[voice/inbound] SMS flow error:", err);
+    const dialTo = normalizePhone(business.flow_config?.dial_to || business.owner_notify_phone || "", config.defaultCountryCode);
+    if (business.flow_config?.voice_mode === "dial_first" && dialTo && dialTo !== from && dialTo !== to) {
+      const action = `${config.publicBaseUrl}/api/voice/status`;
+      response = twiml(
+        `<Dial timeout="20" callerId="${xml(business.twilio_from_number)}" action="${xml(action)}" method="POST">` +
+        `<Number>${xml(dialTo)}</Number></Dial>`,
+      );
+      log.info(`[voice/inbound] dial_first → ${dialTo}`);
+      return;
     }
 
-    return res.send(TEXTING_YOU);
-  } catch (err) {
-    console.error("[voice/inbound] error:", err);
-    return res.send(TEXTING_YOU);
-  }
+    const { status } = await startLead({
+      business, phone: from, message: "Missed call", systemNote: "📞 Missed call", source: "missed_call",
+    });
+    log.info(`[voice/inbound] ${from}: ${status}`);
+  });
+
+  return res.send(response);
+});
+
+// dial_first: Twilio reports how the <Dial> went. Text the caller back only if
+// nobody picked up.
+router.post("/api/voice/status", ...twilioHook, async (req, res) => {
+  res.set("Content-Type", "text/xml");
+  const status = String(req.body?.DialCallStatus || "");
+  const duration = Number(req.body?.DialCallDuration || 0);
+  // A "completed" call of a few seconds is the dialled phone rejecting or
+  // bouncing the call, not a conversation.
+  const missed = ["no-answer", "busy", "failed", "canceled"].includes(status) || (status === "completed" && duration < 5);
+  log.info(`[voice/status] DialCallStatus=${status} duration=${duration} missed=${missed}`);
+  if (!missed) return res.send(twiml("<Hangup/>"));
+
+  await withinDeadline("voice/status", async () => {
+    const from = phoneParam(req, "From");
+    const to = phoneParam(req, "To");
+    if (!from || !to) return;
+    const business = await getBusinessByTwilioNumber(to);
+    if (!business) return;
+    const result = await startLead({
+      business, phone: from, message: "Missed call", systemNote: `📞 Missed call (${status})`, source: "missed_call",
+    });
+    log.info(`[voice/status] ${from}: ${result.status}`);
+  });
+  return res.send(twiml(`<Say voice="alice">Sorry we missed you. We'll text you now.</Say><Hangup/>`));
 });
 
 // ─── Inbound SMS ───
+//
+// Routing, in order:
+//   1. The owner texting their Cove number (no test flow running) → Y/N/new time
+//   2. An active conversation → the flow
+//   3. STOP, a reply to a reminder / rebook nudge, or a recent customer → handled
+//      without starting a new flow
+//   4. Anyone else → a new lead (cold inbound SMS)
 
-router.post("/api/sms/inbound", formBody, validateTwilioSignature, async (req, res) => {
-  // Tracked outside the try so the error handler can release it on failure.
-  let claimedSid = null;
+router.post("/api/sms/inbound", ...twilioHook, async (req, res) => {
+  const numMedia = Number(req.body?.NumMedia || 0);
+  let bodyRaw = String(req.body?.Body || "").trim();
+  // An MMS with no text reads as "sent a photo" rather than a blank reply.
+  if (numMedia > 0 && !bodyRaw) bodyRaw = "[photo]";
+
+  const from = phoneParam(req, "From");
+  const to = phoneParam(req, "To");
+  if (!from || !to) return res.status(400).send("Invalid Twilio payload");
+
+  // ── Idempotency ── Twilio delivers at-least-once and retries on slow/failed
+  // responses. Claim the MessageSid first so a retry is ignored instead of
+  // advancing the flow twice. Released on error so the retry can run.
+  const messageSid = req.body?.MessageSid || req.body?.SmsMessageSid || null;
+  let claimed = false;
   try {
-    const numMedia = Number(req.body?.NumMedia || 0);
-    let bodyRaw = String(req.body?.Body || "").trim();
-    // An MMS with no text reads as "sent a photo" rather than a blank reply.
-    if (numMedia > 0 && !bodyRaw) bodyRaw = "[photo]";
+    if (!(await claimMessageSid(messageSid))) return res.status(200).send("OK");
+    claimed = !!messageSid;
+  } catch { /* dedup unavailable — process normally */ }
 
-    const from = normalizePhone(String(req.body?.From || ""), config.defaultCountryCode);
-    const to = normalizePhone(String(req.body?.To || ""), config.defaultCountryCode);
-    if (!from || !to) return res.status(400).send("Invalid Twilio payload");
-
-    // ── Idempotency ── Twilio delivers at-least-once and retries on slow/failed
-    // responses. Claim the MessageSid up front so a retry is ignored instead of
-    // advancing the flow twice. Released in catch so genuine errors can still
-    // be retried. Fails open if the dedup store is unavailable.
-    const messageSid = req.body?.MessageSid || req.body?.SmsMessageSid || null;
-    try {
-      const fresh = await claimMessageSid(messageSid);
-      if (!fresh) return res.status(200).send("OK"); // duplicate — already handled
-      claimedSid = messageSid;
-    } catch { /* dedup unavailable — process normally */ }
-
+  const result = await withinDeadline("sms/inbound", async () => {
     const business = await getBusinessByTwilioNumber(to);
-    if (!business) return res.status(200).send("OK");
+    if (!business) return;
 
     const lead = await getLatestActiveLeadByBusinessAndPhone({ businessId: business.id, phone: from });
 
-    if (!lead) {
-      // Cold inbound SMS — someone texted directly with no active flow. Start one.
-      if (!isStopKeyword(bodyRaw)) {
-        await startLead({ business, phone: from, message: bodyRaw, inboundBody: bodyRaw });
-      }
-      return res.status(200).send("OK");
+    if (!lead && isOwnerPhone(business, from)) {
+      await handleOwnerReply(business, bodyRaw);
+      return;
     }
 
-    await saveMessage({ leadId: lead.id, direction: "inbound", body: bodyRaw });
-    await handleLeadReply({ business, lead, bodyRaw });
-    return res.status(200).send("OK");
-  } catch (error) {
-    console.error("/api/sms/inbound error", error);
-    if (claimedSid) { try { await releaseMessageSid(claimedSid); } catch { /* ignore */ } }
-    return res.status(200).send("OK");
+    if (lead) {
+      await saveMessage({ leadId: lead.id, direction: "inbound", body: bodyRaw });
+      await handleLeadReply({ business, lead, bodyRaw });
+      return;
+    }
+
+    if (await handleNonLeadText({ business, phone: from, bodyRaw })) return;
+
+    await startLead({ business, phone: from, message: bodyRaw, inboundBody: bodyRaw, source: "sms" });
+  });
+
+  if (result === "error" && claimed) {
+    try { await releaseMessageSid(messageSid); } catch { /* ignore */ }
   }
+  return res.status(200).send("OK");
 });
 
 // ─── Generic lead webhook (Zapier, Make, website forms) ───
 
-router.post("/api/webhook/generic/:businessId", formBody, async (req, res) => {
+router.post("/api/webhook/generic/:businessId", formBody, withRequestId, async (req, res) => {
   try {
     const business = await getBusinessById(req.params.businessId);
     if (!business) return res.status(404).json({ ok: false, error: "Business not found" });
@@ -168,20 +223,21 @@ router.post("/api/webhook/generic/:businessId", formBody, async (req, res) => {
       name: name || null,
       email: email || null,
       message: source ? `[${source}] ${message || ""}` : message || null,
+      source: "webhook",
     });
     if (status === "opted_out") {
       return res.status(403).json({ ok: false, error: "This number has opted out of SMS messages from this business" });
     }
     return res.json({ ok: true, leadId: lead.id });
   } catch (error) {
-    console.error("Generic webhook error:", error);
+    log.error("Generic webhook error:", error);
     return res.status(500).json({ ok: false, error: "Internal server error" });
   }
 });
 
 // ─── Public lead API ───
 
-router.post("/api/lead", formBody, async (req, res) => {
+router.post("/api/lead", formBody, withRequestId, async (req, res) => {
   try {
     const { businessId, name, phone, email, message } = req.body || {};
     if (!businessId || !phone) {
@@ -197,7 +253,7 @@ router.post("/api/lead", formBody, async (req, res) => {
     const normalizedPhone = normalizePhone(phone, config.defaultCountryCode);
     if (!normalizedPhone) return res.status(400).json({ ok: false, error: "Invalid phone format" });
 
-    const { status, lead } = await startLead({ business, phone: normalizedPhone, name, email, message });
+    const { status, lead } = await startLead({ business, phone: normalizedPhone, name, email, message, source: "api" });
     if (status === "opted_out") {
       return res.status(403).json({ ok: false, error: "This number has opted out of SMS messages from this business" });
     }
@@ -206,7 +262,7 @@ router.post("/api/lead", formBody, async (req, res) => {
     }
     return res.json({ ok: true, leadId: lead.id, step: lead.current_step, message: "Lead created and first SMS sent" });
   } catch (error) {
-    console.error("/api/lead error", error);
+    log.error("/api/lead error", error);
     return res.status(500).json({ ok: false, error: "Internal server error" });
   }
 });
@@ -238,21 +294,10 @@ router.post("/api/website-inquiry", async (req, res) => {
       message ? `\nMessage: ${message}` : null,
     ].filter(Boolean).join("\n");
 
-    await sendEmailViaResend({
-      to: config.adminAlert.email,
-      subject: `New enquiry from ${name} — ${businessName}`,
-      text: summary,
-    });
-
-    const alertTo = normalizePhone(config.adminAlert.to, config.defaultCountryCode);
-    if (alertTo && config.adminAlert.from && config.twilio.accountSid) {
-      await sendSms({ from: config.adminAlert.from, to: alertTo, body: `New Cove enquiry\n${summary}` })
-        .catch((err) => console.error("Inquiry SMS error:", err));
-    }
-
+    await alertKris(`New enquiry from ${name} — ${businessName}`, summary);
     return res.status(201).json({ ok: true, inquiryId: inquiry.id });
   } catch (error) {
-    console.error("/api/website-inquiry error", error);
+    log.error("/api/website-inquiry error", error);
     return res.status(500).json({ ok: false, error: "Internal server error" });
   }
 });

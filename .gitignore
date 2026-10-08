@@ -7,3 +7,7 @@ yarn-error.log*
 
 .vercel
 .env*.local
+
+# Client configs hold real phone numbers and emails
+clients/*
+!clients/example.json

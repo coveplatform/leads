@@ -1,7 +1,16 @@
 import { neon } from "@neondatabase/serverless";
 import { config } from "./config.js";
 
-const sql = neon(config.databaseUrl);
+// Created on first query, so importing this module never needs DATABASE_URL.
+let client = null;
+const sql = (strings, ...values) => (client ||= neon(config.databaseUrl))(strings, ...values);
+
+// True for "column/table doesn't exist" — the new code is live but migration
+// 012 hasn't been run yet. Paths a missed call depends on fall back on this.
+export function isMissingSchema(err) {
+  return err?.code === "42703" || err?.code === "42P01"
+    || /(column|relation) .* does not exist/i.test(err?.message || "");
+}
 
 // ─── Users ───
 // Owners log in with email + password. Accounts are created by the onboarding
@@ -59,16 +68,29 @@ export async function getBusinessByUserId(userId) {
 export async function getRecentLeadsByBusinessId(businessId, days = 7) {
   return days == null
     ? sql`
-        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value,
-               appointment_at, booking_status, created_at, finished_at
-        FROM leads WHERE business_id = ${businessId}
+        SELECT * FROM leads WHERE business_id = ${businessId}
         ORDER BY created_at DESC LIMIT 200`
     : sql`
-        SELECT id, name, phone, status, current_step, answers, message, outcome, job_value,
-               appointment_at, booking_status, created_at, finished_at
-        FROM leads WHERE business_id = ${businessId}
+        SELECT * FROM leads WHERE business_id = ${businessId}
           AND created_at > NOW() - ${days + ' days'}::interval
         ORDER BY created_at DESC LIMIT 200`;
+}
+
+// Leads created or changed since `since` (the dashboard's 30-second poll).
+export async function getLeadsChangedSince(businessId, since) {
+  return sql`
+    SELECT * FROM leads WHERE business_id = ${businessId}
+      AND (created_at > ${since}::timestamptz OR updated_at > ${since}::timestamptz)
+    ORDER BY created_at DESC LIMIT 200`;
+}
+
+// Search older leads by (part of) a phone number.
+export async function searchLeadsByPhone(businessId, digits) {
+  const pattern = `%${String(digits).replace(/\D/g, "")}%`;
+  return sql`
+    SELECT * FROM leads WHERE business_id = ${businessId}
+      AND regexp_replace(phone, '\\D', '', 'g') LIKE ${pattern}
+    ORDER BY created_at DESC LIMIT 50`;
 }
 
 export async function getBusinessById(id) {
@@ -105,24 +127,88 @@ export async function getBusinessByTwilioNumber(twilioTo) {
   return rows[0] || null;
 }
 
-export async function createLead({ businessId, name, phone, email, message }) {
-  const rows = await sql`
-    INSERT INTO leads (business_id, name, phone, email, message, status, current_step, answers)
-    VALUES (${businessId}, ${name || null}, ${phone}, ${email || null}, ${message || null}, 'active', 1, '{}')
-    RETURNING *
-  `;
-  return rows[0];
+// source: missed_call | sms | webhook | api | test | rebook
+export async function createLead({ businessId, name, phone, email, message, source = null }) {
+  try {
+    const rows = await sql`
+      INSERT INTO leads (business_id, name, phone, email, message, status, current_step, answers, source)
+      VALUES (${businessId}, ${name || null}, ${phone}, ${email || null}, ${message || null}, 'active', 1, '{}', ${source})
+      RETURNING *
+    `;
+    return rows[0];
+  } catch (err) {
+    if (!isMissingSchema(err)) throw err;
+    const rows = await sql`
+      INSERT INTO leads (business_id, name, phone, email, message, status, current_step, answers)
+      VALUES (${businessId}, ${name || null}, ${phone}, ${email || null}, ${message || null}, 'active', 1, '{}')
+      RETURNING *
+    `;
+    return rows[0];
+  }
 }
 
-// Returns true if this phone has ever sent STOP to this business.
-// Must be checked before sending any outbound SMS to a number.
+// True if this phone has sent STOP to this business (per sender, as the Spam
+// Act requires). Checked before every outbound SMS to a customer.
 export async function hasPhoneOptedOut(businessId, phone) {
+  try {
+    const rows = await sql`
+      SELECT 1 FROM opt_outs WHERE business_id = ${businessId} AND phone = ${phone}
+      UNION ALL
+      SELECT 1 FROM leads WHERE business_id = ${businessId} AND phone = ${phone} AND status = 'stopped'
+      LIMIT 1
+    `;
+    return rows.length > 0;
+  } catch (err) {
+    if (!isMissingSchema(err)) throw err;
+    const rows = await sql`
+      SELECT 1 FROM leads WHERE business_id = ${businessId} AND phone = ${phone} AND status = 'stopped' LIMIT 1
+    `;
+    return rows.length > 0;
+  }
+}
+
+export async function recordOptOut(businessId, phone) {
+  await sql`
+    INSERT INTO opt_outs (business_id, phone) VALUES (${businessId}, ${phone})
+    ON CONFLICT DO NOTHING
+  `;
+}
+
+export async function getOptOuts() {
+  return sql`
+    SELECT o.phone, o.created_at, b.name AS business_name
+    FROM opt_outs o JOIN businesses b ON b.id = o.business_id
+    ORDER BY o.created_at DESC`;
+}
+
+export async function getLeadById(leadId) {
+  const rows = await sql`SELECT * FROM leads WHERE id = ${leadId} LIMIT 1`;
+  return rows[0] || null;
+}
+
+// The customer's most recent lead at this business, any status.
+export async function getLatestLeadByBusinessAndPhone(businessId, phone) {
   const rows = await sql`
-    SELECT 1 FROM leads
-    WHERE business_id = ${businessId}
-      AND phone = ${phone}
-      AND status = 'stopped'
-    LIMIT 1
+    SELECT * FROM leads WHERE business_id = ${businessId} AND phone = ${phone}
+    ORDER BY created_at DESC LIMIT 1
+  `;
+  return rows[0] || null;
+}
+
+// Proposed bookings still waiting on the owner, newest first.
+export async function getPendingBookings(businessId, days = 14) {
+  return sql`
+    SELECT * FROM leads
+    WHERE business_id = ${businessId} AND booking_status = 'proposed'
+      AND created_at > NOW() - ${days + ' days'}::interval
+    ORDER BY created_at DESC
+  `;
+}
+
+export async function hasInboundSince(leadId, since) {
+  const rows = await sql`
+    SELECT 1 FROM messages WHERE lead_id = ${leadId} AND direction = 'inbound'
+      AND created_at > ${since}::timestamptz LIMIT 1
   `;
   return rows.length > 0;
 }
@@ -168,8 +254,16 @@ export async function setLeadBooking(leadId, {
   currentStep = null,
   lastInboundText = null,
   finishedAt = null,
+  bookingConfirmedAt = null,
 } = {}) {
   const answersJson = answers ? JSON.stringify(answers) : undefined;
+  if (bookingConfirmedAt) {
+    try {
+      await sql`UPDATE leads SET booking_confirmed_at = ${bookingConfirmedAt}::timestamptz WHERE id = ${leadId}`;
+    } catch (err) {
+      if (!isMissingSchema(err)) throw err;
+    }
+  }
   const rows = await sql`
     UPDATE leads SET
       appointment_at    = COALESCE(${appointmentAt}::timestamptz, appointment_at),
@@ -196,11 +290,31 @@ export async function createBusiness({
   flowConfig,
   isActive = true,
   userId = null,
+  operatingHours = null,
+  integrations = null,
+  avgJobValue = null,
 }) {
   const flowJson = flowConfig ? JSON.stringify(flowConfig) : null;
   const rows = await sql`
-    INSERT INTO businesses (name, twilio_from_number, owner_notify_phone, owner_notify_email, booking_link, is_active, industry, flow_config, user_id)
-    VALUES (${name}, ${twilioFromNumber || null}, ${ownerNotifyPhone || null}, ${ownerNotifyEmail || null}, ${bookingLink || null}, ${isActive}, ${industry || null}, ${flowJson}::jsonb, ${userId})
+    INSERT INTO businesses (name, twilio_from_number, owner_notify_phone, owner_notify_email, booking_link, is_active,
+                            industry, flow_config, user_id, operating_hours, integrations, avg_job_value)
+    VALUES (${name}, ${twilioFromNumber || null}, ${ownerNotifyPhone || null}, ${ownerNotifyEmail || null}, ${bookingLink || null}, ${isActive},
+            ${industry || null}, ${flowJson}::jsonb, ${userId},
+            ${operatingHours ? JSON.stringify(operatingHours) : null}::jsonb,
+            ${integrations ? JSON.stringify(integrations) : null}::jsonb, ${avgJobValue})
+    RETURNING *
+  `;
+  return rows[0];
+}
+
+// settings / review_link (migration 012). Kept apart from updateBusiness so the
+// older columns stay writable before the migration runs.
+export async function updateBusinessExtras(businessId, { settings, reviewLink } = {}) {
+  const rows = await sql`
+    UPDATE businesses SET
+      settings    = COALESCE(${settings ? JSON.stringify(settings) : null}::jsonb, settings),
+      review_link = COALESCE(${reviewLink ?? null}, review_link)
+    WHERE id = ${businessId}
     RETURNING *
   `;
   return rows[0];
@@ -244,19 +358,6 @@ export async function getAllBusinesses() {
     SELECT * FROM businesses
     WHERE is_active = true
     ORDER BY created_at DESC
-  `;
-  return rows;
-}
-
-export async function getAllLeadsWithBusiness() {
-  const rows = await sql`
-    SELECT 
-      l.*,
-      b.name as business_name,
-      b.twilio_from_number
-    FROM leads l
-    JOIN businesses b ON l.business_id = b.id
-    ORDER BY l.created_at DESC
   `;
   return rows;
 }
@@ -339,15 +440,6 @@ export async function updatePassword(userId, passwordHash) {
   `;
 }
 
-// ─── Business Activation ───
-
-export async function setBusinessActive(businessId, isActive) {
-  await sql`
-    UPDATE businesses SET is_active = ${isActive}
-    WHERE id = ${businessId}
-  `;
-}
-
 // ─── Twilio Provisioning ───
 
 export async function getBusinessNameById(businessId) {
@@ -384,21 +476,187 @@ export async function markLeadCalled(leadId, businessId) {
 }
 
 // outcome: 'won' | 'lost' | null (clears). jobValue: numeric or null (leaves unchanged).
+// outcome_at moves only when the outcome actually changes (invoice basis).
 export async function setLeadOutcome(leadId, businessId, outcome, jobValue) {
-  const rows = await sql`
-    UPDATE leads SET
-      outcome   = ${outcome},
-      job_value = COALESCE(${jobValue ?? null}, job_value),
-      updated_at = now()
-    WHERE id = ${leadId} AND business_id = ${businessId}
-    RETURNING id, outcome, job_value
-  `;
-  return rows[0] || null;
+  try {
+    const rows = await sql`
+      UPDATE leads SET
+        outcome_at = CASE WHEN outcome IS DISTINCT FROM ${outcome} THEN
+                       CASE WHEN ${outcome}::text IS NULL THEN NULL ELSE now() END
+                     ELSE outcome_at END,
+        outcome    = ${outcome},
+        job_value  = COALESCE(${jobValue ?? null}, job_value),
+        updated_at = now()
+      WHERE id = ${leadId} AND business_id = ${businessId}
+      RETURNING *
+    `;
+    return rows[0] || null;
+  } catch (err) {
+    if (!isMissingSchema(err)) throw err;
+    const rows = await sql`
+      UPDATE leads SET outcome = ${outcome}, job_value = COALESCE(${jobValue ?? null}, job_value), updated_at = now()
+      WHERE id = ${leadId} AND business_id = ${businessId}
+      RETURNING *
+    `;
+    return rows[0] || null;
+  }
 }
 
 export async function getLeadByIdAndBusiness(leadId, businessId) {
   const rows = await sql`
-    SELECT id FROM leads WHERE id = ${leadId} AND business_id = ${businessId} LIMIT 1
+    SELECT * FROM leads WHERE id = ${leadId} AND business_id = ${businessId} LIMIT 1
   `;
   return rows[0] || null;
 }
+
+// ─── Scheduled messages (migration 012) ───
+
+export async function insertScheduledMessage({ businessId, leadId, kind, sendAt, body }) {
+  const rows = await sql`
+    INSERT INTO scheduled_messages (business_id, lead_id, kind, send_at, body)
+    VALUES (${businessId}, ${leadId}, ${kind}, ${sendAt}::timestamptz, ${body})
+    RETURNING *
+  `;
+  return rows[0];
+}
+
+export async function cancelScheduledMessages(leadId, kinds) {
+  return sql`
+    UPDATE scheduled_messages SET cancelled_at = now()
+    WHERE lead_id = ${leadId} AND kind = ANY(${kinds})
+      AND sent_at IS NULL AND cancelled_at IS NULL
+    RETURNING id, kind
+  `;
+}
+
+export async function getPendingScheduled(leadId) {
+  return sql`
+    SELECT * FROM scheduled_messages
+    WHERE lead_id = ${leadId} AND sent_at IS NULL AND cancelled_at IS NULL
+    ORDER BY send_at
+  `;
+}
+
+// businessId narrows the run to one business (tests); null means all.
+export async function getDueScheduledMessages(now, limit = 100, businessId = null) {
+  return sql`
+    SELECT * FROM scheduled_messages
+    WHERE sent_at IS NULL AND cancelled_at IS NULL AND send_at <= ${now}::timestamptz
+      AND (${businessId}::uuid IS NULL OR business_id = ${businessId}::uuid)
+    ORDER BY send_at LIMIT ${limit}
+  `;
+}
+
+// Claim a due message by stamping sent_at; returns false if another run got it.
+export async function claimScheduledMessage(id) {
+  const rows = await sql`
+    UPDATE scheduled_messages SET sent_at = now(), attempts = attempts + 1
+    WHERE id = ${id} AND sent_at IS NULL AND cancelled_at IS NULL
+    RETURNING id
+  `;
+  return rows.length > 0;
+}
+
+// Undo a claim after a failed send; gives up (cancels) after 3 attempts.
+export async function releaseScheduledMessage(id, error) {
+  await sql`
+    UPDATE scheduled_messages SET
+      sent_at = NULL,
+      last_error = ${String(error).slice(0, 500)},
+      cancelled_at = CASE WHEN attempts >= 3 THEN now() ELSE NULL END
+    WHERE id = ${id}
+  `;
+}
+
+export async function cancelScheduledMessage(id, reason) {
+  await sql`
+    UPDATE scheduled_messages SET cancelled_at = now(), last_error = ${reason}
+    WHERE id = ${id} AND sent_at IS NULL
+  `;
+}
+
+// The latest follow-up of these kinds actually sent to this phone by this
+// business in the last `days` days, with its lead — for routing replies to it.
+export async function getLatestSentFollowup(businessId, phone, kinds, days) {
+  const rows = await sql`
+    SELECT s.*, l.phone FROM scheduled_messages s JOIN leads l ON l.id = s.lead_id
+    WHERE s.business_id = ${businessId} AND l.phone = ${phone}
+      AND s.kind = ANY(${kinds}) AND s.sent_at IS NOT NULL
+      AND s.sent_at > NOW() - ${days + ' days'}::interval
+    ORDER BY s.sent_at DESC LIMIT 1
+  `;
+  return rows[0] || null;
+}
+
+// ─── Admin / Kris's scripts ───
+
+// Every business (active or not) with this month's lead count.
+export async function getBusinessesOverview() {
+  return sql`
+    SELECT b.*,
+      (SELECT COUNT(*)::int FROM leads l WHERE l.business_id = b.id
+         AND l.created_at >= date_trunc('month', now())) AS leads_this_month,
+      (SELECT MAX(created_at) FROM leads l WHERE l.business_id = b.id) AS last_lead_at
+    FROM businesses b
+    ORDER BY b.is_active DESC, b.created_at DESC
+  `;
+}
+
+export async function getRecentLeadsAllBusinesses(limit = 200) {
+  return sql`
+    SELECT l.*, b.name AS business_name
+    FROM leads l JOIN businesses b ON b.id = l.business_id
+    ORDER BY l.created_at DESC LIMIT ${limit}
+  `;
+}
+
+export async function setForwardingAlerted(businessId) {
+  await sql`UPDATE businesses SET forwarding_alerted_at = now() WHERE id = ${businessId}`;
+}
+
+export async function deactivateBusiness(businessId, graceDays = 30) {
+  const rows = await sql`
+    UPDATE businesses SET is_active = false, deactivated_at = now(),
+      release_number_after = now() + ${graceDays + ' days'}::interval
+    WHERE id = ${businessId}
+    RETURNING *
+  `;
+  return rows[0] || null;
+}
+
+export async function reactivateBusiness(businessId) {
+  const rows = await sql`
+    UPDATE businesses SET is_active = true, deactivated_at = NULL, release_number_after = NULL
+    WHERE id = ${businessId}
+    RETURNING *
+  `;
+  return rows[0] || null;
+}
+
+export async function getNumbersDueForRelease() {
+  return sql`
+    SELECT * FROM businesses
+    WHERE is_active = false AND release_number_after IS NOT NULL
+      AND release_number_after <= now() AND twilio_from_number IS NOT NULL
+  `;
+}
+
+export async function clearTwilioNumber(businessId) {
+  await sql`UPDATE businesses SET twilio_from_number = NULL, release_number_after = NULL WHERE id = ${businessId}`;
+}
+
+export async function getAppliedMigrations() {
+  try {
+    return (await sql`SELECT name FROM schema_migrations`).map((r) => r.name);
+  } catch (err) {
+    if (isMissingSchema(err)) return [];
+    throw err;
+  }
+}
+
+export async function ping() {
+  await sql`SELECT 1`;
+}
+
+// Raw access for reporting scripts that need one-off queries.
+export { sql };

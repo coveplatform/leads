@@ -2,6 +2,8 @@
 // Replaces the hardcoded dental-only flow.js
 
 import { formatAppointment } from "./booking.js";
+import { formatPhoneDisplay } from "./phone.js";
+import { businessTimezone } from "./time.js";
 
 // Step kinds. Existing flows have no `type` and default to 'question'. A
 // 'booking' step is injected after triage when booking is on.
@@ -40,6 +42,7 @@ export const INDUSTRY_TEMPLATES = {
   },
   plumbing: {
     name: "Plumbing",
+    rebook: { months: 6, thing: "hot water system" },
     intro: "Hi {firstName}, sorry we missed your call — {businessName} here. One quick question so we can prioritise you:",
     completion: "Thanks {firstName}! {businessName} will call you back shortly.",
     completion_with_booking: "Thanks {firstName}! {businessName} will call you back shortly. Or book online: {bookingLink}",
@@ -79,6 +82,7 @@ export const INDUSTRY_TEMPLATES = {
   },
   hvac: {
     name: "HVAC / Air Conditioning",
+    rebook: { months: 12, thing: "air con" },
     intro: "Hi {firstName}, sorry we missed your call — {businessName} here. One quick question to get your comfort sorted:",
     completion: "Thanks! {businessName} will call you back shortly.",
     completion_with_booking: "Thanks! {businessName} will call you back shortly. Or book here: {bookingLink}",
@@ -176,6 +180,22 @@ export function getFlowConfig(business) {
   }
   const industry = business.industry || "dental";
   return INDUSTRY_TEMPLATES[industry] || INDUSTRY_TEMPLATES.dental;
+}
+
+// Rebook nudge settings: flow_config.rebook overrides the industry template's.
+// null when this business has none.
+export function getRebookConfig(business) {
+  const own = business?.flow_config?.rebook;
+  const rebook = own === undefined ? INDUSTRY_TEMPLATES[business?.industry]?.rebook : own;
+  if (!rebook || !Number.isFinite(Number(rebook.months)) || Number(rebook.months) < 1) return null;
+  return { months: Number(rebook.months), thing: rebook.thing || "system" };
+}
+
+// "A, B or C"
+export function optionList(step) {
+  const values = (step?.options || []).map((o) => o.value);
+  if (values.length <= 1) return values.join("");
+  return `${values.slice(0, -1).join(", ")} or ${values[values.length - 1]}`;
 }
 
 export function getFlowStep(flowConfig, stepNumber) {
@@ -319,7 +339,7 @@ export function buildSummary(lead, business, flowConfig) {
   }
 
   // Booked appointment, when present.
-  const apptLabel = formatAppointment(lead, business.operating_hours?.timezone);
+  const apptLabel = formatAppointment(lead, businessTimezone(business));
   if (apptLabel) {
     const statusNote = lead.booking_status === "confirmed" ? "confirmed" : "proposed — confirm with caller";
     lines.push(`📅 Booked: ${apptLabel} (${statusNote})`);
@@ -360,25 +380,17 @@ export function buildBookedAlert(lead, business, { appointmentLabel, flowConfig 
   }
   const lines = [
     `🔥 Booked lead — ${business.name || "your business"}`,
-    `${lead.name || "Unknown"} · ${lead.phone}`,
+    `${lead.name || "Unknown"} · ${formatPhoneDisplay(lead.phone)}`,
   ];
   if (descriptor) lines.push(descriptor);
   if (appointmentLabel) lines.push(`📅 ${appointmentLabel}`);
-  lines.push("→ Confirm the time with them.");
+  lines.push("Reply Y to confirm, N to decline, or a time to change.");
   return lines.join("\n");
 }
 
-export function buildUrgentAlert(lead, business, stepKey, answerLabel) {
-  return [
-    `URGENT LEAD — ${business.name || "Business"}`,
-    `Name: ${lead.name || "Unknown"}`,
-    `Phone: ${lead.phone}`,
-    `Reason: ${answerLabel}`,
-    lead.message ? `Message: ${lead.message}` : null,
-    "→ Call this lead NOW.",
-  ]
-    .filter(Boolean)
-    .join("\n");
+// The one-liner the owner gets the moment a call is missed.
+export function buildMissedCallAlert(lead) {
+  return `Missed call from ${formatPhoneDisplay(lead.phone)} — we've texted them. Details to follow if they reply.`;
 }
 
 export function buildExitSummary(lead, business, lastAttempt, reason) {
@@ -406,10 +418,3 @@ export function buildStoppedMessage(businessName) {
   return `No problem. You have been unsubscribed from ${businessName || "these"} messages.`;
 }
 
-export function getIndustryList() {
-  return Object.entries(INDUSTRY_TEMPLATES).map(([key, tmpl]) => ({
-    id: key,
-    name: tmpl.name,
-    stepCount: tmpl.steps.length,
-  }));
-}

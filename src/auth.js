@@ -14,20 +14,22 @@ export async function verifyPassword(password, hash) {
 
 // ─── JWT ───
 
-export function signToken(userId) {
-  return jwt.sign({ userId }, config.jwtSecret, { expiresIn: "30d" });
+// remember: "stay signed in" — a 30-day cookie that survives closing the
+// browser. Otherwise a browser-session cookie with a 12-hour token.
+export function signToken(userId, { remember = true } = {}) {
+  return jwt.sign({ userId }, config.jwtSecret, { expiresIn: remember ? "30d" : "12h" });
 }
 
 export function verifyToken(token) {
   return jwt.verify(token, config.jwtSecret);
 }
 
-export function setAuthCookie(res, token) {
+export function setAuthCookie(res, token, { remember = true } = {}) {
   res.cookie("cove_token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
+    ...(remember ? { maxAge: 30 * 24 * 60 * 60 * 1000 } : {}),
     path: "/",
   });
 }

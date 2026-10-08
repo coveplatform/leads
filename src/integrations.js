@@ -1,4 +1,14 @@
-// Integration utilities: after-hours, CRM webhooks, lead nudge/timeout
+// Getting word to people: owner alerts (SMS, email, outbound webhooks) and
+// alerts to Kris. Owner notification settings live in
+// businesses.integrations.notifications:
+//   { sms: { enabled, numbers }, email: { enabled, addresses },
+//     webhook: { enabled, urls }, urgent_only }
+
+import { config } from "./config.js";
+import { isOpenAt } from "./time.js";
+import { normalizePhone } from "./phone.js";
+import { sendSms } from "./sms.js";
+import { log } from "./log.js";
 
 // ─── Email via Resend ───
 export async function sendEmailViaResend({ to, subject, text, html }) {
@@ -18,89 +28,16 @@ export async function sendEmailViaResend({ to, subject, text, html }) {
       signal: AbortSignal.timeout(8000),
     });
   } catch (err) {
-    console.error("Resend email error:", err.message);
+    log.error("Resend email error:", err.message);
   }
 }
 
-// ─── After-Hours Detection ───
-
-export function isWithinOperatingHours(business) {
-  const hours = business.operating_hours;
-  if (!hours || !hours.enabled) return true;
-
-  const tz = hours.timezone || "Australia/Sydney";
-  const now = new Date();
-
-  let localHour, localDay;
-  try {
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: tz,
-      hour: "numeric",
-      hour12: false,
-      weekday: "short",
-    }).formatToParts(now);
-    localHour = Number(parts.find((p) => p.type === "hour")?.value || 0);
-    localDay = parts.find((p) => p.type === "weekday")?.value || "";
-  } catch {
-    return true;
-  }
-
-  const dayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-  const dayNum = dayMap[localDay] ?? new Date().getDay();
-
-  const closedDays = hours.closed_days || [];
-  if (closedDays.includes(dayNum)) return false;
-
-  const open = hours.open_hour ?? 8;
-  const close = hours.close_hour ?? 18;
-  return localHour >= open && localHour < close;
+export function isWithinOperatingHours(business, date = new Date()) {
+  return isOpenAt(business, date);
 }
-
-export function buildAfterHoursMessage(business) {
-  const hours = business.operating_hours || {};
-  const openHour = hours.open_hour ?? 8;
-  const ampm = openHour > 12 ? `${openHour - 12}pm` : `${openHour}am`;
-  return (
-    hours.after_hours_message ||
-    `Thanks for reaching out to ${business.name || "us"}! We're currently closed. We'll text you back at ${ampm} when we open. If this is urgent, please call us directly.`
-  );
-}
-
-// ─── Lead Nudge ───
-
-export function shouldNudge(lead, business) {
-  const integrations = business.integrations || {};
-  const nudgeMinutes = integrations.nudge_after_minutes || 0;
-  if (!nudgeMinutes || lead.status !== "active") return false;
-
-  const answers = lead.answers || {};
-  if (answers._nudge_sent) return false;
-
-  const lastActivity = lead.updated_at || lead.created_at;
-  if (!lastActivity) return false;
-
-  const elapsed = (Date.now() - new Date(lastActivity).getTime()) / 60000;
-  return elapsed >= nudgeMinutes;
-}
-
-export function buildNudgeMessage(business, lead, flowConfig) {
-  const integrations = business.integrations || {};
-  if (integrations.nudge_message) {
-    return integrations.nudge_message
-      .replace(/{businessName}/g, business.name || "us")
-      .replace(/{firstName}/g, (lead.name || "").split(" ")[0] || "there");
-  }
-
-  const step = flowConfig?.steps[(lead.current_step || 1) - 1];
-  const question = step?.question || "";
-  return `Hey, just checking in! We still have your enquiry open. Reply to continue:\n\n${question}`;
-}
-
-// ─── Notification Channel Dispatch ───
 
 export function getNotificationConfig(business) {
-  const integrations = business.integrations || {};
-  const nc = integrations.notifications || {};
+  const nc = business.integrations?.notifications || {};
   return {
     sms: {
       enabled: nc.sms?.enabled !== false,
@@ -114,32 +51,52 @@ export function getNotificationConfig(business) {
       enabled: !!nc.webhook?.enabled,
       urls: nc.webhook?.urls || [],
     },
+    urgentOnly: !!nc.urgent_only,
   };
 }
 
-export async function sendLeadNotifications({ business, lead, flowConfig, summary, sendSmsFn, normalizePhoneFn, defaultCountryCode }) {
+// SMS to every owner number, from the business's Cove number. Never throws.
+export async function sendOwnerSms(business, body) {
+  const nc = getNotificationConfig(business);
+  if (!nc.sms.enabled || !business.twilio_from_number) return false;
+  let sent = false;
+  for (const num of nc.sms.numbers) {
+    const to = normalizePhone(num, config.defaultCountryCode);
+    if (!to) continue;
+    try {
+      await sendSms({ from: business.twilio_from_number, to, body });
+      sent = true;
+    } catch (err) {
+      log.error(`[notify] owner SMS to ${to} failed:`, err.message);
+    }
+  }
+  return sent;
+}
+
+// Kris's phone + inbox, for things only Kris can fix. Never throws.
+export async function alertKris(subject, body) {
+  const to = normalizePhone(config.adminAlert.to, config.defaultCountryCode);
+  if (to && config.adminAlert.from && config.twilio.accountSid) {
+    try {
+      await sendSms({ from: config.adminAlert.from, to, body: `${subject}\n${body}` });
+    } catch (err) {
+      log.error("[notify] Kris SMS failed:", err.message);
+    }
+  }
+  await sendEmailViaResend({ to: config.adminAlert.email, subject: `Cove: ${subject}`, text: body });
+}
+
+// The end-of-conversation notification. With urgent_only set, the owner SMS
+// is skipped for leads that are neither urgent nor booked (email and webhooks
+// still go).
+export async function sendLeadNotifications({ business, lead, flowConfig, summary, urgent = false, booked = false }) {
   const nc = getNotificationConfig(business);
   const errors = [];
 
-  // SMS to all configured numbers
-  if (nc.sms.enabled && nc.sms.numbers.length > 0) {
-    for (const num of nc.sms.numbers) {
-      try {
-        const normalized = normalizePhoneFn(num, defaultCountryCode);
-        if (normalized) {
-          await sendSmsFn({
-            from: business.twilio_from_number,
-            to: normalized,
-            body: summary,
-          });
-        }
-      } catch (err) {
-        errors.push(`SMS to ${num}: ${err.message}`);
-      }
-    }
+  if (!nc.urgentOnly || urgent || booked) {
+    await sendOwnerSms(business, summary);
   }
 
-  // Webhooks to all configured URLs
   if (nc.webhook.enabled && nc.webhook.urls.length > 0) {
     const answers = lead.answers || {};
     const payload = {
@@ -158,7 +115,7 @@ export async function sendLeadNotifications({ business, lead, flowConfig, summar
       answers: {},
       raw_answers: answers,
       is_urgent: false,
-      // Booking (migration 009) — null when the lead didn't book in-conversation.
+      // Booking — null when the lead didn't book in-conversation.
       booking: lead.appointment_at
         ? {
             appointment_at: lead.appointment_at,
@@ -191,38 +148,22 @@ export async function sendLeadNotifications({ business, lead, flowConfig, summar
     }
   }
 
-  // Email via Resend
+  const subject = `New lead: ${lead.name || lead.phone} — ${business.name}`;
   if (nc.email.enabled && nc.email.addresses.length > 0) {
-    const subject = `New lead: ${lead.name || lead.phone} — ${business.name}`;
-    await sendEmailViaResend({ to: nc.email.addresses, subject, text: summary }).catch(e =>
-      errors.push(`Email: ${e.message}`)
-    );
+    await sendEmailViaResend({ to: nc.email.addresses, subject, text: summary });
   }
-
   // Always email owner_notify_email if set and Resend is configured
   if (business.owner_notify_email && process.env.RESEND_API_KEY) {
     const alreadySent = nc.email.enabled && nc.email.addresses.includes(business.owner_notify_email);
-    if (!alreadySent) {
-      const subject = `New lead: ${lead.name || lead.phone} — ${business.name}`;
-      await sendEmailViaResend({ to: business.owner_notify_email, subject, text: summary }).catch(e =>
-        errors.push(`Email owner: ${e.message}`)
-      );
-    }
+    if (!alreadySent) await sendEmailViaResend({ to: business.owner_notify_email, subject, text: summary });
   }
 
-  if (errors.length > 0) {
-    console.error("[Notification] Some channels failed:", errors);
-  }
+  if (errors.length > 0) log.error("[notify] Some channels failed:", errors);
 }
-
-// ─── Integration Config Defaults ───
 
 export const INTEGRATION_DEFAULTS = {
   completion_webhook_url: null,
   webhook_secret: null,
-  nudge_after_minutes: 0,
-  nudge_message: null,
-  push_to: null,
 };
 
 export function getIntegrationConfig(business) {

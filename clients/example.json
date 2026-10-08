@@ -1,0 +1,27 @@
+{
+  "business": {
+    "name": "Dave's Plumbing",
+    "industry": "plumbing",
+    "owner_name": "Dave",
+    "owner_phone": "+61412345678",
+    "owner_email": "dave@example.com",
+    "business_phone": "+61733334444",
+    "timezone": "Australia/Brisbane",
+    "operating_hours": {
+      "mon": ["07:00", "17:00"], "tue": ["07:00", "17:00"], "wed": ["07:00", "17:00"],
+      "thu": ["07:00", "17:00"], "fri": ["07:00", "16:00"], "sat": null, "sun": null
+    },
+    "avg_job_value": 450,
+    "review_link": "https://g.page/r/your-google-review-link"
+  },
+  "flow": {
+    "template": "plumbing",
+    "booking": true,
+    "voice_mode": "hangup",
+    "overrides": {}
+  },
+  "notifications": { "sms": true, "email": false, "urgent_only": false, "missed_call_alert": true },
+  "followups": { "reminder": true, "review_request": true, "rebook_nudge": false, "unanswered_nudge": true },
+  "twilio": { "area_code": "07", "existing_number": null },
+  "login": { "email": "dave@example.com", "temp_password": "generate" }
+}

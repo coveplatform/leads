@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "e2e": "SMS_DRY_RUN=1 node scripts/test-inbound-e2e.mjs",
+    "e2e:local": "node --import ./test/support/neon-pg-register.mjs scripts/migrate.mjs && SMS_DRY_RUN=1 node --import ./test/support/neon-pg-register.mjs scripts/test-inbound-e2e.mjs"
   },
   "engines": {
     "node": ">=18"
@@ -19,6 +21,10 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.3",
+    "libphonenumber-js": "^1.13.14",
     "twilio": "^5.10.4"
+  },
+  "devDependencies": {
+    "pg": "^8.23.1"
   }
 }

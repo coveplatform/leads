@@ -2,10 +2,15 @@
   "version": 2,
   "functions": {
     "api/index.js": {
-      "includeFiles": "public/**"
+      "includeFiles": "{public,migrations}/**"
     }
   },
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/index.js" }
+  ],
+  "crons": [
+    { "path": "/api/cron/dispatch", "schedule": "*/5 * * * *" },
+    { "path": "/api/cron/health", "schedule": "7 * * * *" },
+    { "path": "/api/cron/forwarding-check", "schedule": "0 23 * * *" }
   ]
 }
