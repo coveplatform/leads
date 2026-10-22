@@ -149,3 +149,8 @@ After every deploy, run the five-minute live check in [docs/smoke-test.md](docs/
 
 Push to `main`; Vercel deploys it. Each Cove number's voice webhook points at
 `/api/voice/inbound` and SMS webhook at `/api/sms/inbound` on `BASE_URL`.
+
+## DIG Crates prototype
+
+`dig-crates/` is a separate Next.js project: a white-label record-browsing widget prototype built
+from the supplied blueprint, with its own `package.json`, tests and docs. See `dig-crates/README.md`.

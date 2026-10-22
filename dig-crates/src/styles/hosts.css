@@ -1,0 +1,75 @@
+/*
+ * Simulated retailer websites. Each host has its own look, deliberately unrelated to the DIG
+ * token system, to show that DIG is themed by configuration and not by inheriting host CSS.
+ */
+.host { min-height: 100vh; }
+.host .host-wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+.host header.host-nav { position: sticky; top: 0; z-index: 20; }
+.host .host-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; }
+.host .host-nav nav { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.host .host-nav nav a, .host .host-nav nav button { font: inherit; }
+.host .host-hero { padding: 64px 0 40px; }
+.host .host-hero h1 { margin: 0 0 12px; }
+.host .host-hero p { max-width: 560px; margin: 0 0 24px; }
+.host .host-cta { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; cursor: pointer; font-weight: 700; font-size: 1rem; text-decoration: none; border: 0; }
+.host .host-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; padding: 24px 0 48px; }
+.host .host-product { display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; }
+.host .host-product img, .host .host-product .ph { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.host .host-product .ph { display: flex; align-items: center; justify-content: center; font-size: 0.75rem; }
+.host .host-section { padding: 32px 0; }
+.host .host-footer { padding: 32px 0 48px; font-size: 0.85rem; }
+.host .host-note { font-size: 0.85rem; opacity: 0.85; }
+.host .host-embed-frame { width: 100%; height: 650px; border: 0; display: block; }
+.host .host-embed-box { position: relative; width: 100%; min-height: 650px; }
+.host .host-embed-box[data-dig-inline] { min-height: 560px; }
+.host pre { overflow: auto; padding: 12px 14px; font-size: 0.8rem; border-radius: 8px; }
+.host .host-cols { display: grid; gap: 24px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .host .host-cols { grid-template-columns: 2fr 1fr; } }
+
+/* Basement Wax: dark, tight, modern. */
+.host-basement-wax { background: #141516; color: #ece8e1; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+.host-basement-wax .host-nav { background: #0d0d0e; border-bottom: 1px solid #2a2b2d; }
+.host-basement-wax .host-brand { font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: #ece8e1; text-decoration: none; }
+.host-basement-wax .host-nav nav a { color: #b8b3ab; text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.host-basement-wax .host-nav nav a:hover { color: #fff; }
+.host-basement-wax .host-hero h1 { font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -0.03em; font-weight: 800; }
+.host-basement-wax .host-hero p { color: #b8b3ab; }
+.host-basement-wax .host-cta { background: #d29a68; color: #1b1612; border-radius: 6px; }
+.host-basement-wax .host-cta:hover { background: #e4ad7c; }
+.host-basement-wax .host-product img, .host-basement-wax .host-product .ph { border-radius: 3px; background: #26272a; }
+.host-basement-wax .host-product .price { color: #d29a68; }
+.host-basement-wax h2 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.14em; color: #b8b3ab; }
+.host-basement-wax .host-footer { border-top: 1px solid #2a2b2d; color: #8a867f; }
+.host-basement-wax pre { background: #0d0d0e; color: #d8d3cb; }
+
+/* Sunday Records: warm ivory, forest green, editorial serif. */
+.host-sunday-records { background: #f7f2e8; color: #22372a; font-family: Georgia, "Times New Roman", serif; }
+.host-sunday-records .host-nav { background: #f7f2e8; border-bottom: 1px solid #d9d0bd; }
+.host-sunday-records .host-brand { font-style: italic; font-size: 1.5rem; color: #22372a; text-decoration: none; }
+.host-sunday-records .host-nav nav a { color: #35634d; text-decoration: none; border-bottom: 1px solid transparent; }
+.host-sunday-records .host-nav nav a:hover { border-bottom-color: #35634d; }
+.host-sunday-records .host-hero { text-align: center; }
+.host-sunday-records .host-hero h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 400; font-style: italic; }
+.host-sunday-records .host-hero p { margin-left: auto; margin-right: auto; color: #59685c; font-size: 1.1rem; }
+.host-sunday-records .host-cta { background: #35634d; color: #fff; border-radius: 3px; font-family: inherit; }
+.host-sunday-records .host-cta:hover { background: #285a43; }
+.host-sunday-records .host-product img, .host-sunday-records .host-product .ph { border: 1px solid #d9d0bd; background: #eee5d5; }
+.host-sunday-records h2 { font-weight: 400; font-style: italic; font-size: 1.6rem; text-align: center; }
+.host-sunday-records .host-footer { border-top: 3px double #d9d0bd; color: #59685c; text-align: center; }
+.host-sunday-records pre { background: #22372a; color: #f7f2e8; }
+
+/* Signal Records: cool grey, cobalt, big bold cards. */
+.host-signal-records { background: #eef1f7; color: #172549; font-family: "Arial Black", Arial, sans-serif; }
+.host-signal-records .host-nav { background: #345fc4; color: #fff; }
+.host-signal-records .host-brand { color: #fff; text-decoration: none; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.host-signal-records .host-nav nav a { color: #fff; text-decoration: none; font-family: Arial, sans-serif; font-weight: 700; padding: 6px 12px; border-radius: 999px; }
+.host-signal-records .host-nav nav a:hover { background: rgba(255,255,255,0.18); }
+.host-signal-records .host-hero h1 { font-size: clamp(2.6rem, 8vw, 5.5rem); text-transform: uppercase; line-height: 0.95; letter-spacing: -0.02em; }
+.host-signal-records .host-hero p, .host-signal-records .host-product, .host-signal-records .host-note, .host-signal-records .host-footer, .host-signal-records .host-section p { font-family: Arial, sans-serif; }
+.host-signal-records .host-cta { background: #172549; color: #fff; border-radius: 999px; font-family: Arial, sans-serif; }
+.host-signal-records .host-cta:hover { background: #345fc4; }
+.host-signal-records .host-product { background: #fff; padding: 10px; border-radius: 18px; box-shadow: 0 10px 28px rgba(10,20,60,0.12); }
+.host-signal-records .host-product img, .host-signal-records .host-product .ph { border-radius: 12px; background: #dce5f4; }
+.host-signal-records h2 { font-size: 1.8rem; text-transform: uppercase; }
+.host-signal-records .host-footer { color: #576687; }
+.host-signal-records pre { background: #172549; color: #e2e8f0; font-family: ui-monospace, monospace; }

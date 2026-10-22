@@ -1,0 +1,436 @@
+/*
+ * DIG design tokens. Everything under .dig-root reads from scoped CSS custom properties
+ * that are set inline from validated store theme tokens. Nothing here targets the host page.
+ */
+
+.dig-root {
+  --dig-bg: #1d1e20;
+  --dig-surface: #282a2d;
+  --dig-surface-raised: #333539;
+  --dig-fg: #f0ede8;
+  --dig-fg-muted: #b4b0aa;
+  --dig-accent: #d29a68;
+  --dig-accent-fg: #201b17;
+  --dig-border: #4b4b4a;
+  --dig-focus: #ffcb90;
+  --dig-font-display: system-ui, sans-serif;
+  --dig-font-body: system-ui, sans-serif;
+  --dig-radius-button: 8px;
+  --dig-radius-card: 10px;
+  --dig-radius-cover: 3px;
+  --dig-shadow: none;
+  --dig-shadow-strong: none;
+  --dig-safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  background: var(--dig-bg);
+  color: var(--dig-fg);
+  font-family: var(--dig-font-body);
+  font-size: 16px;
+  line-height: 1.45;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: contain;
+}
+
+/* In overlay mode the host launcher draws its own fallback Close button top-right; keep clear of it. */
+.dig-root[data-presentation="overlay"] .dig-header,
+.dig-root[data-presentation="overlay"] .dig-dialog-head { padding-right: max(12px, calc(env(safe-area-inset-right, 0px) + 60px)); }
+
+.dig-root[data-presentation="inline"] {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 520px;
+}
+
+.dig-root * { box-sizing: border-box; }
+.dig-root img { display: block; max-width: 100%; }
+.dig-root button { font: inherit; color: inherit; }
+.dig-root :focus-visible { outline: 3px solid var(--dig-focus); outline-offset: 2px; }
+
+.dig-display { font-family: var(--dig-font-display); letter-spacing: -0.01em; line-height: 1.1; }
+.dig-muted { color: var(--dig-fg-muted); }
+.dig-surface { background: var(--dig-surface); }
+.dig-card {
+  background: var(--dig-surface);
+  border: 1px solid var(--dig-border);
+  border-radius: var(--dig-radius-card);
+  box-shadow: var(--dig-shadow);
+}
+.dig-card-raised { background: var(--dig-surface-raised); }
+
+/* Buttons: 44px minimum hit area for critical controls. */
+.dig-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--dig-radius-button);
+  border: 1px solid var(--dig-border);
+  background: var(--dig-surface-raised);
+  color: var(--dig-fg);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 120ms ease, transform 120ms ease, border-color 120ms ease;
+}
+.dig-btn:hover { border-color: var(--dig-fg-muted); }
+.dig-btn:active { transform: translateY(1px); }
+.dig-btn:disabled, .dig-btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; transform: none; }
+.dig-btn-primary { background: var(--dig-accent); color: var(--dig-accent-fg); border-color: transparent; }
+.dig-btn-primary:hover { filter: brightness(1.06); border-color: transparent; }
+.dig-btn-ghost { background: transparent; border-color: transparent; }
+.dig-btn-ghost:hover { background: var(--dig-surface-raised); border-color: transparent; }
+.dig-btn-outline { background: transparent; }
+.dig-btn-sm { min-height: 36px; padding: 0 12px; font-size: 0.85rem; }
+.dig-btn-icon { width: 44px; min-width: 44px; padding: 0; }
+.dig-btn-block { width: 100%; }
+.dig-btn[aria-pressed="true"] { background: var(--dig-accent); color: var(--dig-accent-fg); border-color: transparent; }
+
+.dig-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: var(--dig-surface-raised);
+  border: 1px solid var(--dig-border);
+  color: var(--dig-fg);
+  white-space: nowrap;
+}
+.dig-badge-accent { background: var(--dig-accent); color: var(--dig-accent-fg); border-color: transparent; }
+.dig-badge-count {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--dig-accent);
+  color: var(--dig-accent-fg);
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dig-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 6px 0 12px;
+  border-radius: 999px;
+  background: var(--dig-surface-raised);
+  border: 1px solid var(--dig-border);
+  font-size: 0.85rem;
+}
+.dig-chip button {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.dig-chip button:hover { background: var(--dig-border); }
+
+.dig-input,
+.dig-select {
+  min-height: 44px;
+  width: 100%;
+  padding: 0 14px;
+  border-radius: var(--dig-radius-button);
+  border: 1px solid var(--dig-border);
+  background: var(--dig-surface);
+  color: var(--dig-fg);
+  font: inherit;
+}
+.dig-input::placeholder { color: var(--dig-fg-muted); opacity: 1; }
+.dig-select { appearance: auto; }
+.dig-checkbox { display: flex; align-items: center; gap: 10px; min-height: 36px; cursor: pointer; }
+.dig-checkbox input { width: 18px; height: 18px; accent-color: var(--dig-accent); }
+.dig-range { width: 100%; accent-color: var(--dig-accent); min-height: 32px; }
+
+/* Covers reserve a 1:1 box so nothing shifts while images load. */
+.dig-cover {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  border-radius: var(--dig-radius-cover);
+  overflow: hidden;
+  background: var(--dig-surface-raised);
+  box-shadow: var(--dig-shadow);
+}
+.dig-cover img { width: 100%; height: 100%; object-fit: cover; }
+.dig-cover-hero { box-shadow: var(--dig-shadow-strong); }
+.dig-cover-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  text-align: center;
+  background:
+    repeating-linear-gradient(135deg, transparent 0 14px, rgba(127, 127, 127, 0.08) 14px 16px),
+    var(--dig-surface-raised);
+  color: var(--dig-fg-muted);
+}
+.dig-cover-fallback strong { font-family: var(--dig-font-display); font-size: clamp(1.2rem, 6cqw, 2.4rem); color: var(--dig-fg); }
+.dig-cover-fallback span { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.dig-cover-sold::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Header treatments differ per theme preset. */
+.dig-header {
+  flex: none;
+  background: var(--dig-surface);
+  border-bottom: 1px solid var(--dig-border);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 60px;
+  z-index: 5;
+}
+.dig-header-brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.dig-header-brand img { height: 32px; width: auto; max-width: 180px; }
+.dig-header-name { font-family: var(--dig-font-display); font-weight: 700; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dig-header-editorial .dig-header { border-bottom: 3px double var(--dig-border); background: var(--dig-bg); }
+.dig-header-editorial .dig-header-name { font-size: 1.3rem; font-weight: 400; letter-spacing: 0.02em; font-style: italic; }
+.dig-header-bold .dig-header { background: var(--dig-fg); color: var(--dig-bg); border-bottom: 0; }
+.dig-header-bold .dig-header .dig-btn { color: var(--dig-bg); border-color: color-mix(in srgb, var(--dig-bg) 30%, transparent); background: transparent; }
+.dig-header-bold .dig-header .dig-btn-primary { background: var(--dig-accent); color: var(--dig-accent-fg); }
+.dig-header-bold .dig-header-name { font-size: 1.35rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.dig-header-bold .dig-header img { filter: none; }
+
+.dig-main { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+.dig-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+
+.dig-toolbar {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--dig-border);
+  background: var(--dig-bg);
+}
+.dig-tabs { display: inline-flex; background: var(--dig-surface); border: 1px solid var(--dig-border); border-radius: var(--dig-radius-button); padding: 3px; gap: 2px; }
+.dig-tabs button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  border-radius: calc(var(--dig-radius-button) - 2px);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dig-tabs button[aria-selected="true"] { background: var(--dig-accent); color: var(--dig-accent-fg); }
+
+/* Crate tiles on the landing screen */
+.dig-crate-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: transform 150ms ease, border-color 150ms ease;
+}
+.dig-crate-tile:hover { transform: translateY(-2px); border-color: var(--dig-accent); }
+.dig-montage { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; border-radius: var(--dig-radius-cover); overflow: hidden; }
+.dig-montage .dig-cover { border-radius: 0; box-shadow: none; }
+
+/* Native dialogs as drawers (desktop) and bottom sheets (mobile). */
+.dig-dialog {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+  position: fixed;
+  overflow: visible;
+}
+.dig-dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+.dig-dialog-panel {
+  position: absolute;
+  background: var(--dig-bg);
+  color: var(--dig-fg);
+  box-shadow: var(--dig-shadow-strong, 0 20px 60px rgba(0,0,0,0.4));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--dig-font-body);
+}
+.dig-dialog-drawer .dig-dialog-panel, .dig-dialog-wide .dig-dialog-panel { top: 0; right: 0; bottom: 0; width: min(480px, 100%); border-left: 1px solid var(--dig-border); }
+.dig-dialog-wide .dig-dialog-panel { width: min(760px, 100%); }
+.dig-dialog-center .dig-dialog-panel {
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px);
+  border-radius: var(--dig-radius-card); border: 1px solid var(--dig-border);
+}
+.dig-dialog-head { flex: none; display: flex; align-items: center; gap: 8px; padding: 12px 12px 12px 16px; border-bottom: 1px solid var(--dig-border); }
+.dig-dialog-head h2 { margin: 0; font-size: 1.1rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dig-dialog-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: touch; }
+.dig-dialog-foot { flex: none; border-top: 1px solid var(--dig-border); padding: 12px 16px calc(12px + var(--dig-safe-bottom)); display: flex; gap: 8px; flex-wrap: wrap; background: var(--dig-surface); }
+@media (max-width: 640px) {
+  .dig-dialog-drawer .dig-dialog-panel, .dig-dialog-wide .dig-dialog-panel {
+    top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-height: 92dvh; height: auto;
+    border-left: 0; border-top: 1px solid var(--dig-border);
+    border-radius: var(--dig-radius-card) var(--dig-radius-card) 0 0;
+  }
+  .dig-dialog-drawer .dig-dialog-panel { height: 92dvh; }
+}
+
+/* Crate mode layout */
+.dig-crate-layout { display: grid; gap: 16px; padding: 16px 12px 24px; max-width: 1180px; margin: 0 auto; width: 100%; }
+@media (min-width: 900px) {
+  .dig-crate-layout { grid-template-columns: minmax(0, 7fr) minmax(300px, 5fr); align-items: start; padding: 24px; }
+}
+.dig-hero-stage { display: grid; grid-template-columns: 1fr; gap: 10px; align-items: center; }
+@media (min-width: 900px) { .dig-hero-stage { grid-template-columns: 56px minmax(0, 1fr) 56px; } }
+.dig-hero-cover { width: 100%; max-width: 640px; margin: 0 auto; }
+.dig-hero-cover .dig-cover { touch-action: pan-y; }
+.dig-peek { display: none; }
+@media (min-width: 900px) { .dig-peek { display: flex; flex-direction: column; align-items: center; gap: 8px; } .dig-peek .dig-cover { width: 56px; opacity: 0.7; box-shadow: none; } }
+.dig-rail { display: flex; flex-direction: column; gap: 14px; }
+.dig-meta { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 0.92rem; margin: 0; }
+.dig-meta dt { color: var(--dig-fg-muted); }
+.dig-meta dd { margin: 0; overflow-wrap: anywhere; }
+.dig-price { font-family: var(--dig-font-display); font-size: 1.6rem; font-weight: 700; }
+.dig-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dig-actions .span-2 { grid-column: span 2; }
+.dig-mobile-bar {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 10px 12px calc(10px + var(--dig-safe-bottom));
+  background: color-mix(in srgb, var(--dig-bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--dig-border);
+  z-index: 3;
+}
+@media (min-width: 900px) { .dig-mobile-bar { display: none; } }
+.dig-end-card { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; background: color-mix(in srgb, var(--dig-bg) 82%, transparent); backdrop-filter: blur(6px); border-radius: var(--dig-radius-cover); }
+.dig-end-card .dig-card { padding: 20px; max-width: 360px; width: 100%; display: flex; flex-direction: column; gap: 10px; text-align: center; }
+
+/* Wall mode */
+.dig-wall { position: relative; padding: 12px; }
+.dig-wall-row { position: absolute; left: 12px; right: 12px; display: grid; gap: 12px; }
+.dig-tile { display: flex; flex-direction: column; gap: 6px; text-align: left; background: transparent; border: 0; padding: 0; cursor: pointer; border-radius: var(--dig-radius-cover); min-width: 0; }
+.dig-tile .dig-cover { transition: transform 150ms ease; }
+.dig-tile:hover .dig-cover { transform: scale(1.02); }
+.dig-tile[aria-current="true"] .dig-cover { outline: 3px solid var(--dig-accent); outline-offset: 2px; }
+.dig-tile-caption { font-size: 0.82rem; line-height: 1.3; min-width: 0; }
+.dig-tile-caption .t { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dig-tile-caption .a { color: var(--dig-fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dig-tile-flags { position: absolute; top: 6px; left: 6px; right: 6px; display: flex; justify-content: space-between; gap: 4px; pointer-events: none; }
+
+/* Listening mode */
+.dig-listen { display: grid; gap: 16px; padding: 16px 12px 24px; max-width: 1180px; margin: 0 auto; width: 100%; }
+@media (min-width: 900px) { .dig-listen { grid-template-columns: minmax(280px, 5fr) minmax(0, 7fr); padding: 24px; align-items: start; } .dig-listen-now { position: sticky; top: 0; } }
+.dig-listen-now { display: flex; flex-direction: column; gap: 12px; }
+.dig-listen-now .dig-cover { max-width: 360px; }
+.dig-queue { display: flex; flex-direction: column; gap: 6px; }
+.dig-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 8px;
+  border-radius: var(--dig-radius-card);
+  border: 1px solid transparent;
+  background: var(--dig-surface);
+  min-height: 72px;
+}
+.dig-row[aria-current="true"] { border-color: var(--dig-accent); }
+.dig-row .dig-cover { width: 56px; box-shadow: none; }
+.dig-row-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dig-row-text .t { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dig-row-text .a { color: var(--dig-fg-muted); font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dig-row-actions { display: flex; gap: 6px; align-items: center; }
+
+/* Player */
+.dig-player { display: flex; flex-direction: column; gap: 8px; padding: 12px; }
+.dig-player-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dig-player-time { font-variant-numeric: tabular-nums; font-size: 0.85rem; color: var(--dig-fg-muted); min-width: 80px; }
+.dig-player-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dig-fg-muted); display: flex; align-items: center; gap: 6px; }
+.dig-player-unavailable { display: flex; align-items: center; gap: 8px; color: var(--dig-fg-muted); font-size: 0.92rem; padding: 12px; border: 1px dashed var(--dig-border); border-radius: var(--dig-radius-button); }
+
+/* Notices and empty states */
+.dig-toast {
+  position: absolute;
+  left: 50%;
+  bottom: calc(16px + var(--dig-safe-bottom));
+  transform: translateX(-50%);
+  background: var(--dig-fg);
+  color: var(--dig-bg);
+  padding: 10px 12px 10px 16px;
+  border-radius: var(--dig-radius-button);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(520px, calc(100% - 32px));
+  z-index: 8;
+  box-shadow: var(--dig-shadow-strong);
+  font-size: 0.92rem;
+}
+.dig-toast button { background: transparent; border: 0; color: inherit; cursor: pointer; min-width: 36px; min-height: 36px; border-radius: 999px; font-weight: 700; }
+.dig-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 48px 20px; text-align: center; color: var(--dig-fg-muted); }
+.dig-empty h3 { color: var(--dig-fg); margin: 0; }
+.dig-reasons { display: flex; flex-wrap: wrap; gap: 4px; }
+.dig-reasons .dig-badge { text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 0.72rem; }
+.dig-trail { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 0.85rem; color: var(--dig-fg-muted); }
+.dig-trail .sep { opacity: 0.6; }
+.dig-skeleton { background: linear-gradient(90deg, var(--dig-surface) 25%, var(--dig-surface-raised) 50%, var(--dig-surface) 75%); background-size: 200% 100%; animation: dig-shimmer 1.2s infinite; border-radius: var(--dig-radius-cover); }
+@keyframes dig-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.dig-footnote { flex: none; font-size: 0.72rem; color: var(--dig-fg-muted); padding: 6px 12px calc(6px + var(--dig-safe-bottom)); border-top: 1px solid var(--dig-border); display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; }
+.dig-warning { border: 1px solid var(--dig-accent); background: color-mix(in srgb, var(--dig-accent) 12%, var(--dig-surface)); border-radius: var(--dig-radius-card); padding: 12px 14px; font-size: 0.92rem; }
+.dig-kbd { font-family: ui-monospace, monospace; font-size: 0.78rem; border: 1px solid var(--dig-border); border-radius: 4px; padding: 0 5px; }
+
+.dig-fade { animation: dig-fade 180ms ease; }
+@keyframes dig-fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .dig-root *, .dig-root *::before, .dig-root *::after { animation: none !important; transition: none !important; }
+  .dig-root { scroll-behavior: auto; }
+}
