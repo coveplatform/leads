@@ -1,0 +1,11 @@
+{
+  "name": "DIG",
+  "short_name": "DIG",
+  "description": "A user-steered music rabbit-hole.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f1eee8",
+  "theme_color": "#171717",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }],
+  "share_target": { "action": "/imports", "method": "GET", "params": { "title": "title", "text": "text", "url": "url" } }
+}

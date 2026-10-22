@@ -1,5 +1,9 @@
 # Cove
 
+> **Also in this repo:** [`dig/`](dig/README.md) — DIG, a separate mobile-first music
+> rabbit-hole discovery app (Phase 1 MVP). It has its own `package.json`; run it with
+> `cd dig && npm install && npm run dev`. CI for it lives in `.github/workflows/dig-ci.yml`.
+
 Missed-call recovery and SMS booking for Australian trades. A customer rings the
 business, the call forwards to the business's Cove (Twilio) number, Cove texts
 the caller one qualifying question, offers a time window, and the owner
